@@ -65,7 +65,7 @@ export function useCustomerVoice() {
   );
 
   const say = useCallback(
-    async (text: string, options?: { voice?: string; instructions?: string }) => {
+    async (text: string, options?: { voice?: string | undefined; instructions?: string | undefined }) => {
       if (!text.trim()) return;
       stop();
 
