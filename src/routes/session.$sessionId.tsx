@@ -184,6 +184,8 @@ function Scorecard() {
               </>
             )}
 
+            <ShareSessionPanel sessionId={sessionId} />
+
             <Card className="mt-4">
               <CardHeader>
                 <h2 className="text-base font-semibold leading-none">Transcript</h2>
