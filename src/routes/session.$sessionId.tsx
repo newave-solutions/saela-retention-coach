@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ShareSessionPanel } from "@/components/ShareSessionPanel";
 
 export const Route = createFileRoute("/session/$sessionId")({
   head: () => ({
@@ -182,6 +183,8 @@ function Scorecard() {
                 </Card>
               </>
             )}
+
+            <ShareSessionPanel sessionId={sessionId} />
 
             <Card className="mt-4">
               <CardHeader>
