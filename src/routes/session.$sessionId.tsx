@@ -135,7 +135,7 @@ function Scorecard() {
             {data.scores && (
               <Card className="mt-4">
                 <CardHeader>
-                  <CardTitle className="text-base">Category scores</CardTitle>
+                  <CardTitle asChild><h2 className="text-base">Category scores</h2></CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(Object.keys(SCORE_LABELS) as (keyof ScoreBreakdown)[]).map((key) => (
@@ -155,9 +155,11 @@ function Scorecard() {
               <>
                 <Card className="mt-4 border-accent/30 bg-accent/5">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Eye className="h-4 w-4 text-accent" />
-                      What was really going on
+                    <CardTitle asChild>
+                      <h2 className="flex items-center gap-2 text-base">
+                        <Eye className="h-4 w-4 text-accent" />
+                        What was really going on
+                      </h2>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm leading-relaxed text-foreground/90">
@@ -167,7 +169,7 @@ function Scorecard() {
 
                 <Card className="mt-4">
                   <CardHeader>
-                    <CardTitle className="text-base">Coaching</CardTitle>
+                    <CardTitle asChild><h2 className="text-base">Coaching</h2></CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
@@ -185,7 +187,7 @@ function Scorecard() {
 
             <Card className="mt-4">
               <CardHeader>
-                <CardTitle className="text-base">Transcript</CardTitle>
+                <CardTitle asChild><h2 className="text-base">Transcript</h2></CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {(data.transcript ?? []).map((turn, index) => (
