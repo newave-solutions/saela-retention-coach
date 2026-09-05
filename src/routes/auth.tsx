@@ -27,12 +27,23 @@ export const Route = createFileRoute("/auth")({
       },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s["next"] === "string" && s["next"].startsWith("/") ? s["next"] : undefined,
+  }),
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const { session, loading } = useAuth();
+  const afterAuth = () => {
+    if (next) {
+      window.location.href = next;
+      return;
+    }
+    void navigate({ to: "/" });
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
