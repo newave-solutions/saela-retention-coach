@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "sdk_version": "2.0.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://xfqisjocaxmrnvhjpnrq.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "retention-coach-ai",
+      "version": "0.1.0",
+      "title": "Retention Coach AI"
+    },
+    "tools": [
+      {
+        "name": "list_sessions",
+        "title": "List retention calls",
+        "description": "List the signed-in agent's recent retention roleplay calls with outcome, score and scenario summary.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "How many calls to return (default 10, max 50).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "outcome": {
+              "description": "Only return calls with this outcome.",
+              "type": "string",
+              "enum": [
+                "saved",
+                "partial",
+                "cancelled"
+              ]
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_session",
+        "title": "Get call scorecard",
+        "description": "Get one retention call in full: scenario, outcome, category scores, hidden motive, coaching and transcript.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "The id of the call, from list_sessions."
+            },
+            "includeTranscript": {
+              "description": "Include the full transcript (default true).",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "sessionId"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "performance_summary",
+        "title": "Retention performance summary",
+        "description": "Summarize the signed-in agent's retention practice: save rate, average score, average category scores and the most common cancellation reasons.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "lastDays": {
+              "description": "Only include calls from the last N days.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

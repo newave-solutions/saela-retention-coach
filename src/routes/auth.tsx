@@ -27,19 +27,29 @@ export const Route = createFileRoute("/auth")({
       },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { next?: string } =>
+    typeof s["next"] === "string" && s["next"].startsWith("/") ? { next: s["next"] } : {},
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const { session, loading } = useAuth();
+  const afterAuth = () => {
+    if (next) {
+      window.location.href = next;
+      return;
+    }
+    void navigate({ to: "/" });
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) void navigate({ to: "/" });
+    if (!loading && session) afterAuth();
   }, [loading, session, navigate]);
 
   async function signIn(e: React.FormEvent) {
@@ -51,7 +61,7 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    void navigate({ to: "/" });
+    afterAuth();
   }
 
   async function signUp(e: React.FormEvent) {
@@ -61,7 +71,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: next ? window.location.origin + next : window.location.origin,
         data: { display_name: name },
       },
     });
@@ -71,12 +81,12 @@ function AuthPage() {
       return;
     }
     toast.success("You're on the floor. Take your first call.");
-    void navigate({ to: "/" });
+    afterAuth();
   }
 
   async function google() {
     try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      await lovable.auth.signInWithOAuth("google", { redirect_uri: next ? window.location.origin + next : window.location.origin });
     } catch {
       toast.error("Google sign-in didn't go through. Try email instead.");
     }
