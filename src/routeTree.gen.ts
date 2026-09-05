@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ApiSpeechRouteImport } from './routes/api/speech'
 import { Route as CallSessionIdRouteImport } from './routes/call.$sessionId'
 import { Route as CallNewRouteImport } from './routes/call.new'
 import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionId'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSpeechRoute = ApiSpeechRouteImport.update({
+  id: '/api/speech',
+  path: '/api/speech',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallSessionIdRoute = CallSessionIdRouteImport.update({
@@ -44,6 +50,7 @@ const SessionSessionIdRoute = SessionSessionIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/api/speech': typeof ApiSpeechRoute
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/api/speech': typeof ApiSpeechRoute
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/api/speech': typeof ApiSpeechRoute
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
@@ -66,13 +75,25 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/call/$sessionId' | '/call/new' | '/session/$sessionId'
+    | '/'
+    | '/auth'
+    | '/api/speech'
+    | '/call/$sessionId'
+    | '/call/new'
+    | '/session/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/call/$sessionId' | '/call/new' | '/session/$sessionId'
+  to:
+    | '/'
+    | '/auth'
+    | '/api/speech'
+    | '/call/$sessionId'
+    | '/call/new'
+    | '/session/$sessionId'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/api/speech'
     | '/call/$sessionId'
     | '/call/new'
     | '/session/$sessionId'
@@ -81,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ApiSpeechRoute: typeof ApiSpeechRoute
   CallSessionIdRoute: typeof CallSessionIdRoute
   CallNewRoute: typeof CallNewRoute
   SessionSessionIdRoute: typeof SessionSessionIdRoute
@@ -100,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/speech': {
+      id: '/api/speech'
+      path: '/api/speech'
+      fullPath: '/api/speech'
+      preLoaderRoute: typeof ApiSpeechRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/call/$sessionId': {
@@ -129,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ApiSpeechRoute: ApiSpeechRoute,
   CallSessionIdRoute: CallSessionIdRoute,
   CallNewRoute: CallNewRoute,
   SessionSessionIdRoute: SessionSessionIdRoute,
