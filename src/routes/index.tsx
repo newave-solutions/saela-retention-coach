@@ -41,7 +41,7 @@ type SessionRow = {
 
 function outcomeTone(outcome: string | null) {
   if (outcome === "saved") return "bg-success/15 text-success ring-1 ring-success/30";
-  if (outcome === "partial") return "bg-warning/15 text-warning ring-1 ring-warning/30";
+  if (outcome === "partial") return "bg-accent/20 text-accent-foreground ring-1 ring-accent/40";
   return "bg-destructive/15 text-destructive ring-1 ring-destructive/30";
 }
 
@@ -86,45 +86,53 @@ function Dashboard() {
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-primary/30">
-              <Headphones className="h-5 w-5" />
+      <header className="brand-surface">
+        <div className="mx-auto max-w-5xl px-4 py-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                <Headphones className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="font-display text-xl font-semibold leading-tight">
+                  SaveLine — Retention Call Simulator
+                </h1>
+                <p className="text-xs opacity-80">Saela Pest Control · customer experience training</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-semibold leading-tight">
-                SaveLine — Retention Call Simulator
-              </h1>
-              <p className="text-xs text-muted-foreground">Retention call simulator</p>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-white/10"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                void navigate({ to: "/auth" });
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              void navigate({ to: "/auth" });
-            }}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </Button>
+
+          <p className="mt-6 max-w-xl text-sm leading-relaxed opacity-90">
+            Every call is graded the Saela way: protect the home first, tell the truth about the
+            treatment, honor the agreement, and earn the save with service — not a discount.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <StatCard label="Calls graded" value={String(graded.length)} />
+            <StatCard label="Save rate" value={`${saveRate}%`} />
+            <StatCard label="Average score" value={graded.length ? String(avgScore) : "—"} />
+          </div>
         </div>
       </header>
 
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <section className="grid gap-4 sm:grid-cols-3">
-          <StatCard label="Calls graded" value={String(graded.length)} />
-          <StatCard label="Save rate" value={`${saveRate}%`} />
-          <StatCard label="Average score" value={graded.length ? String(avgScore) : "—"} />
-        </section>
-
-        <section className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Card className="border-primary/30 bg-primary/5">
+        <section className="grid gap-4 sm:grid-cols-2">
+          <Card className="card-soft border-border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <PhoneOutgoing className="h-4 w-4 text-primary" />
+                <PhoneOutgoing className="h-4 w-4 text-accent" />
                 Take a live call
               </CardTitle>
               <CardDescription>
@@ -140,10 +148,10 @@ function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-soft">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <SlidersHorizontal className="h-4 w-4 text-accent" />
+                <SlidersHorizontal className="h-4 w-4 text-ring" />
                 Build a scenario
               </CardTitle>
               <CardDescription>
@@ -169,20 +177,20 @@ function Dashboard() {
           </div>
 
           {!sessions?.length ? (
-            <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            <p className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center text-sm text-muted-foreground">
               No calls yet. Your first one shows up here with a full scorecard.
             </p>
           ) : (
-            <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+            <ul className="card-soft divide-y divide-border overflow-hidden rounded-xl border border-border">
               {sessions.map((s) => (
                 <li key={s.id}>
                   <Link
                     to="/session/$sessionId"
                     params={{ sessionId: s.id }}
-                    className="flex flex-wrap items-center justify-between gap-3 bg-card px-4 py-3 transition-colors hover:bg-secondary"
+                    className="flex flex-wrap items-center justify-between gap-3 bg-card px-4 py-3.5 transition-colors hover:bg-secondary"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
+                      <p className="truncate text-sm font-semibold">
                         {s.scenario?.customerName ?? "Customer"} ·{" "}
                         {s.scenario?.reasonLabel ?? "Cancellation"}
                       </p>
@@ -221,8 +229,8 @@ function Dashboard() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
+    <div className="rounded-xl bg-white/10 p-4 ring-1 ring-white/15 backdrop-blur-sm">
+      <p className="text-[11px] uppercase tracking-widest opacity-75">{label}</p>
       <p className="mt-1 font-display text-3xl font-semibold">{value}</p>
     </div>
   );
