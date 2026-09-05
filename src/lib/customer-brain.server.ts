@@ -1,0 +1,257 @@
+// Server-only. Adaptive customer replies and post-call grading via Lovable AI.
+import type {
+  Coaching,
+  CustomerResult,
+  FullScenario,
+  Outcome,
+  ScoreBreakdown,
+  TranscriptTurn,
+} from "./scenarios";
+
+const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const TURN_MODEL = "google/gemini-3.7-flash";
+const GRADE_MODEL = "google/gemini-3.1-pro-preview";
+
+export class GatewayError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.name = "GatewayError";
+  }
+}
+
+const DIFFICULTY_RULES: Record<string, string> = {
+  standard:
+    "You give ground when the agent shows genuine effort. You may hint at the real motive after two or three good probing questions.",
+  hard: "You never volunteer the real motive. You deflect the first two generic offers. Scripted empathy makes you shorter and colder. You only soften when the agent names something specific and true about your experience.",
+  brutal:
+    "You are close to done. You interrupt. You give the agent roughly six exchanges before hanging up unless they land the real driver. Discounts insult you. Only a precise, specific acknowledgement plus a fitting remedy keeps you on the line.",
+};
+
+const PERSONALITY_RULES: Record<string, string> = {
+  guarded: "Short answers. One or two sentences. You do not elaborate unless asked directly.",
+  irritated: "Clipped, sharp. You sigh. You cut off long-winded pitches.",
+  polite_firm: "Warm tone, immovable position. You thank them and repeat your request.",
+  fast_talker: "You run sentences together and jump ahead of the agent's point.",
+  distracted: "You are doing something else. You ask them to repeat things. Short attention span.",
+};
+
+function systemPrompt(scenario: FullScenario) {
+  return `You are role-playing a real pest control customer on a live phone call, calling to CANCEL your service. You are NOT an assistant. Never break character, never mention AI, never narrate stage directions.
+
+CUSTOMER
+Name: ${scenario.customerName}
+Account: ${scenario.accountSummary}
+Stated reason (what you say out loud): ${scenario.statedReason}
+HIDDEN real motive (never state it unprompted; the agent must earn it): ${scenario.hiddenMotive}
+Emotional driver: ${scenario.emotionalDriver}
+
+BEHAVIOR
+${DIFFICULTY_RULES[scenario.difficulty] ?? DIFFICULTY_RULES["hard"]}
+${PERSONALITY_RULES[scenario.personality] ?? PERSONALITY_RULES["guarded"]}
+
+SAVE CONDITIONS — you only become negotiable once these are genuinely met:
+${scenario.saveConditions.map((c) => `- ${c}`).join("\n")}
+
+DEAL BREAKERS — these make you colder and reduce save likelihood:
+${scenario.dealBreakers.map((c) => `- ${c}`).join("\n")}
+
+RESOLUTIONS you would actually accept once heard:
+${scenario.acceptableResolutions.map((c) => `- ${c}`).join("\n")}
+
+RULES
+- Speak like a real person on the phone: contractions, filler, interruptions, 1-3 sentences typical. Never write paragraphs.
+- Never list your own save conditions or coach the agent.
+- Only set motiveUncovered true when the agent has actually named the real driver, not merely guessed near it.
+- Only set callShouldEnd true when you would truly hang up: you are satisfied and staying (endReason "saved"), you accept a downgrade/pause (endReason "partial"), or you are done and cancelling (endReason "cancelled").
+- If the agent says goodbye or confirms the cancellation, end the call.
+
+Respond with ONLY strict JSON, no markdown fence:
+{"reply":string,"mood":"hostile"|"cold"|"neutral"|"warming"|"open","motiveUncovered":boolean,"saveLikelihood":number,"callShouldEnd":boolean,"endReason":"saved"|"partial"|"cancelled"|null}`;
+}
+
+async function callGateway(body: Record<string, unknown>): Promise<string> {
+  const key = process.env["LOVABLE_API_KEY"];
+  if (!key) throw new GatewayError(401, "AI is not configured for this project.");
+
+  const response = await fetch(GATEWAY, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = text;
+    try {
+      const parsed = JSON.parse(text) as { error?: { message?: string }; message?: string };
+      message = parsed.error?.message ?? parsed.message ?? text;
+    } catch {
+      /* keep raw text */
+    }
+    if (response.status === 402) {
+      throw new GatewayError(402, message || "AI credits are exhausted for this workspace.");
+    }
+    if (response.status === 429) {
+      throw new GatewayError(429, "Too many calls at once — wait a moment and try again.");
+    }
+    throw new GatewayError(response.status, message || "The customer line dropped.");
+  }
+
+  const data = (await response.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
+  return data.choices?.[0]?.message?.content ?? "";
+}
+
+function parseJson<T>(raw: string): T | null {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/, "")
+    .trim();
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start === -1 || end <= start) return null;
+    try {
+      return JSON.parse(cleaned.slice(start, end + 1)) as T;
+    } catch {
+      return null;
+    }
+  }
+}
+
+function clamp(value: unknown, fallback: number): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+export async function nextCustomerTurn(
+  scenario: FullScenario,
+  transcript: TranscriptTurn[],
+): Promise<CustomerResult> {
+  const raw = await callGateway({
+    model: TURN_MODEL,
+    messages: [
+      { role: "system", content: systemPrompt(scenario) },
+      ...transcript.map((turn) => ({
+        role: turn.speaker === "agent" ? "user" : "assistant",
+        content: turn.text,
+      })),
+    ],
+    temperature: 0.9,
+  });
+
+  const parsed = parseJson<Partial<CustomerResult>>(raw);
+  if (!parsed || typeof parsed.reply !== "string" || !parsed.reply.trim()) {
+    return {
+      reply: "Sorry — can you say that again? I didn't catch it.",
+      mood: "neutral",
+      motiveUncovered: false,
+      saveLikelihood: 20,
+      callShouldEnd: false,
+      endReason: null,
+    };
+  }
+
+  const endReason =
+    parsed.endReason === "saved" || parsed.endReason === "partial"
+      ? parsed.endReason
+      : parsed.endReason === "cancelled"
+        ? "cancelled"
+        : null;
+
+  return {
+    reply: parsed.reply.trim(),
+    mood: (parsed.mood ?? "neutral") as CustomerResult["mood"],
+    motiveUncovered: Boolean(parsed.motiveUncovered),
+    saveLikelihood: clamp(parsed.saveLikelihood, 20),
+    callShouldEnd: Boolean(parsed.callShouldEnd) || endReason !== null,
+    endReason: (Boolean(parsed.callShouldEnd) && endReason === null ? "cancelled" : endReason) as
+      | Outcome
+      | null,
+  };
+}
+
+export type GradeResult = {
+  outcome: Outcome;
+  overallScore: number;
+  scores: ScoreBreakdown;
+  coaching: Coaching;
+};
+
+export async function gradeCall(
+  scenario: FullScenario,
+  transcript: TranscriptTurn[],
+  endedOutcome: Outcome | null,
+): Promise<GradeResult> {
+  const dialogue = transcript
+    .map((t) => `${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
+    .join("\n");
+
+  const prompt = `Grade this retention call for a pest control customer experience agent. Be a demanding but fair coach — a generic, discount-first call should score in the 30s-50s.
+
+HIDDEN MOTIVE the agent had to uncover: ${scenario.hiddenMotive}
+Save conditions: ${scenario.saveConditions.join(" | ")}
+Deal breakers: ${scenario.dealBreakers.join(" | ")}
+${endedOutcome ? `The customer ended the call as: ${endedOutcome}.` : "The agent ended the call."}
+
+TRANSCRIPT
+${dialogue || "(no conversation took place)"}
+
+Score each 0-100. Return ONLY strict JSON:
+{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"discovery":number,"empathy":number,"objectionHandling":number,"offerFit":number,"control":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
+didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call.`;
+
+  const raw = await callGateway({
+    model: GRADE_MODEL,
+    messages: [
+      { role: "system", content: "You are a retention coach. You return strict JSON only." },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.3,
+  });
+
+  const parsed = parseJson<{
+    outcome?: string;
+    overallScore?: number;
+    scores?: Partial<ScoreBreakdown>;
+    coaching?: Partial<Coaching>;
+  }>(raw);
+
+  const scores: ScoreBreakdown = {
+    discovery: clamp(parsed?.scores?.discovery, 0),
+    empathy: clamp(parsed?.scores?.empathy, 0),
+    objectionHandling: clamp(parsed?.scores?.objectionHandling, 0),
+    offerFit: clamp(parsed?.scores?.offerFit, 0),
+    control: clamp(parsed?.scores?.control, 0),
+  };
+
+  const average = Math.round(
+    (scores.discovery + scores.empathy + scores.objectionHandling + scores.offerFit + scores.control) /
+      5,
+  );
+
+  const outcome: Outcome =
+    parsed?.outcome === "saved" || parsed?.outcome === "partial" || parsed?.outcome === "cancelled"
+      ? parsed.outcome
+      : (endedOutcome ?? "cancelled");
+
+  return {
+    outcome,
+    overallScore: clamp(parsed?.overallScore, average),
+    scores,
+    coaching: {
+      summary: parsed?.coaching?.summary ?? "The call ended before enough happened to grade deeply.",
+      didWell: parsed?.coaching?.didWell ?? [],
+      missed: parsed?.coaching?.missed ?? [],
+      nextTime: parsed?.coaching?.nextTime ?? [],
+      hiddenMotive: scenario.hiddenMotive,
+    },
+  };
+}
