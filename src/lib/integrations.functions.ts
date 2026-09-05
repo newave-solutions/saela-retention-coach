@@ -114,8 +114,8 @@ export const postSessionToTeams = createServerFn({ method: "POST" })
       session.scores
         ? `<p><b>Breakdown:</b> discovery ${session.scores.discovery ?? 0}, empathy ${
             session.scores.empathy ?? 0
-          }, objection handling ${session.scores.objectionHandling ?? 0}, offer ${
-            session.scores.offer ?? 0
+          }, objection handling ${session.scores.objectionHandling ?? 0}, offer fit ${
+            session.scores.offerFit ?? 0
           }, control ${session.scores.control ?? 0}</p>`
         : "",
       c?.hiddenMotive ? `<p><b>Real reason:</b> ${escapeHtml(c.hiddenMotive)}</p>` : "",
