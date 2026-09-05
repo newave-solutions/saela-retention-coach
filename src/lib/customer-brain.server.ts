@@ -206,12 +206,20 @@ ${dialogue || "(no conversation took place)"}
 
 Score each 0-100. Return ONLY strict JSON:
 {"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"discovery":number,"empathy":number,"objectionHandling":number,"offerFit":number,"control":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
-didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call.`;
+didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call.
+
+Coach in the voice of Saela Pest Control's service standards: protect the customer's home and family first, tell the truth about what treatment can and cannot do, honor the agreement as written, never pressure or bait with a discount before the real problem is understood, and re-earn trust with responsiveness (a re-service, a named technician, a firm date) rather than price. Reward integrity and problem-solving; penalize discount-first saves, over-promising, and anything that misleads the customer.`;
 
   const raw = await callGateway({
     model: GRADE_MODEL,
     messages: [
-      { role: "system", content: "You are a retention coach. You return strict JSON only." },
+      {
+        role: "system",
+        content:
+          "You are a retention coach for Saela Pest Control. You return strict JSON only.",
+      },
+      { role: "user", content: prompt },
+
       { role: "user", content: prompt },
     ],
     temperature: 0.3,

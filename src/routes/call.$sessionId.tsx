@@ -189,18 +189,18 @@ function LiveCall() {
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border">
+      <header className="brand-surface">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div>
             <h1 className="text-base font-semibold leading-tight">
               {scenario?.customerName ?? "Connecting..."}
             </h1>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs opacity-80">
               {scenario?.accountSummary ?? "Pulling up the account"}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono">
+            <Badge variant="outline" className="border-white/30 bg-white/10 font-mono text-inherit">
               {mmss}
             </Badge>
             <Button variant="destructive" size="sm" onClick={() => finish(null)} disabled={ending}>
@@ -212,12 +212,12 @@ function LiveCall() {
       </header>
 
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-5">
-        <div className="mb-4 flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+        <div className="card-soft mb-4 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
           <div className="relative flex h-14 w-14 items-center justify-center">
             <span
-              className={`absolute inset-0 rounded-full bg-primary/40 ${voice.speaking || recognition.listening ? "call-pulse" : "opacity-20"}`}
+              className={`absolute inset-0 rounded-full bg-accent/50 ${voice.speaking || recognition.listening ? "call-pulse" : "opacity-20"}`}
             />
-            <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-primary/20 text-primary ring-1 ring-primary/40">
+            <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-accent/20 text-accent ring-1 ring-accent/40">
               {voice.speaking ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </span>
           </div>
@@ -241,7 +241,7 @@ function LiveCall() {
 
         <div
           ref={scrollRef}
-          className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-border bg-card/50 p-4"
+          className="card-soft flex-1 space-y-3 overflow-y-auto rounded-xl border border-border bg-card p-4"
           style={{ maxHeight: "52vh" }}
         >
           {turns.map((turn, index) => (
@@ -252,11 +252,11 @@ function LiveCall() {
               <div
                 className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
                   turn.speaker === "agent"
-                    ? "bg-primary/15 text-foreground ring-1 ring-primary/25"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-foreground"
                 }`}
               >
-                <p className="mb-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
                   {turn.speaker === "agent" ? "You" : (scenario?.customerName ?? "Customer")}
                 </p>
                 {turn.text}

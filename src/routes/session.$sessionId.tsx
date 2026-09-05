@@ -16,7 +16,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ShareSessionPanel } from "@/components/ShareSessionPanel";
 
 export const Route = createFileRoute("/session/$sessionId")({
   head: () => ({
@@ -55,9 +54,9 @@ type Row = {
 };
 
 function toneFor(outcome: Outcome | null) {
-  if (outcome === "saved") return "text-success";
-  if (outcome === "partial") return "text-warning";
-  return "text-destructive";
+  if (outcome === "saved") return "text-success-foreground";
+  if (outcome === "partial") return "text-accent";
+  return "text-destructive-foreground";
 }
 
 function Scorecard() {
@@ -100,30 +99,30 @@ function Scorecard() {
           <p className="text-sm text-muted-foreground">Pulling up the call...</p>
         ) : (
           <>
-            <section className="rounded-lg border border-border bg-card p-6">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground">
+            <section className="brand-surface card-soft rounded-xl p-6">
+              <p className="text-xs uppercase tracking-widest opacity-75">
                 {data.scenario?.reasonLabel ?? "Cancellation call"}
               </p>
               <h1 className="mt-1 text-2xl font-semibold">
                 {data.scenario?.customerName ?? "Customer"}
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm opacity-80">
                 {data.scenario?.accountSummary} · {data.scenario?.personalityLabel}
               </p>
 
               <div className="mt-5 flex flex-wrap items-end gap-8">
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Outcome</p>
+                  <p className="text-xs uppercase tracking-widest opacity-75">Outcome</p>
                   <p className={`font-display text-2xl font-semibold ${toneFor(data.outcome)}`}>
                     {data.outcome ? OUTCOME_LABELS[data.outcome] : "Not graded"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Score</p>
+                  <p className="text-xs uppercase tracking-widest opacity-75">Score</p>
                   <p className="font-display text-2xl font-semibold">{data.overall_score ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Length</p>
+                  <p className="text-xs uppercase tracking-widest opacity-75">Length</p>
                   <p className="font-display text-2xl font-semibold">
                     {data.duration_seconds
                       ? `${Math.max(1, Math.round(data.duration_seconds / 60))}m`
@@ -134,7 +133,7 @@ function Scorecard() {
             </section>
 
             {data.scores && (
-              <Card className="mt-4">
+              <Card className="card-soft mt-4">
                 <CardHeader>
                   <h2 className="text-base font-semibold leading-none">Category scores</h2>
                 </CardHeader>
@@ -154,7 +153,7 @@ function Scorecard() {
 
             {data.coaching && (
               <>
-                <Card className="mt-4 border-accent/30 bg-accent/5">
+                <Card className="card-soft mt-4 border-accent/40 bg-accent/10">
                   <CardHeader>
                     <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
                         <Eye className="h-4 w-4 text-accent" />
@@ -166,27 +165,30 @@ function Scorecard() {
                   </CardContent>
                 </Card>
 
-                <Card className="mt-4">
+                <Card className="card-soft mt-4">
                   <CardHeader>
                     <h2 className="text-base font-semibold leading-none">Coaching</h2>
                   </CardHeader>
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
+                    <p className="rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
+                      Graded against Saela Pest Control service standards: protect the home first,
+                      be straight about the treatment, honor the agreement, and win the save with
+                      responsiveness rather than price.
+                    </p>
                     <CoachList title="Did well" items={data.coaching.didWell} tone="text-success" />
-                    <CoachList title="Missed" items={data.coaching.missed} tone="text-warning" />
+                    <CoachList title="Missed" items={data.coaching.missed} tone="text-destructive" />
                     <CoachList
                       title="Next time"
                       items={data.coaching.nextTime}
-                      tone="text-accent"
+                      tone="text-ring"
                     />
                   </CardContent>
                 </Card>
               </>
             )}
 
-            <ShareSessionPanel sessionId={sessionId} />
-
-            <Card className="mt-4">
+            <Card className="card-soft mt-4">
               <CardHeader>
                 <h2 className="text-base font-semibold leading-none">Transcript</h2>
               </CardHeader>
