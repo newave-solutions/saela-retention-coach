@@ -9,7 +9,7 @@ const VOICES = ["ash", "ballad", "coral", "sage", "verse", "alloy", "echo", "shi
 export function voiceForScenario(scenario: Pick<PublicScenario, "customerName">): string {
   let hash = 0;
   for (const char of scenario.customerName) hash = (hash * 31 + char.charCodeAt(0)) % 100000;
-  return VOICES[hash % VOICES.length];
+  return VOICES[hash % VOICES.length] ?? "ash";
 }
 
 const PERSONALITY_DIRECTION: Record<Personality, string> = {
