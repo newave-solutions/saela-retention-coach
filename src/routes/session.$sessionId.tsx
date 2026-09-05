@@ -14,7 +14,7 @@ import {
   type TranscriptTurn,
 } from "@/lib/scenarios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/session/$sessionId")({
@@ -135,7 +135,7 @@ function Scorecard() {
             {data.scores && (
               <Card className="mt-4">
                 <CardHeader>
-                  <CardTitle asChild><h2 className="text-base">Category scores</h2></CardTitle>
+                  <h2 className="text-base font-semibold leading-none">Category scores</h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(Object.keys(SCORE_LABELS) as (keyof ScoreBreakdown)[]).map((key) => (
@@ -155,12 +155,10 @@ function Scorecard() {
               <>
                 <Card className="mt-4 border-accent/30 bg-accent/5">
                   <CardHeader>
-                    <CardTitle asChild>
-                      <h2 className="flex items-center gap-2 text-base">
+                    <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
                         <Eye className="h-4 w-4 text-accent" />
                         What was really going on
                       </h2>
-                    </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm leading-relaxed text-foreground/90">
                     {data.coaching.hiddenMotive}
@@ -169,7 +167,7 @@ function Scorecard() {
 
                 <Card className="mt-4">
                   <CardHeader>
-                    <CardTitle asChild><h2 className="text-base">Coaching</h2></CardTitle>
+                    <h2 className="text-base font-semibold leading-none">Coaching</h2>
                   </CardHeader>
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
@@ -187,7 +185,7 @@ function Scorecard() {
 
             <Card className="mt-4">
               <CardHeader>
-                <CardTitle asChild><h2 className="text-base">Transcript</h2></CardTitle>
+                <h2 className="text-base font-semibold leading-none">Transcript</h2>
               </CardHeader>
               <CardContent className="space-y-3">
                 {(data.transcript ?? []).map((turn, index) => (
