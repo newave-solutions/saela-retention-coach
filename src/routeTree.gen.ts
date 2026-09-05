@@ -17,6 +17,7 @@ import { Route as ApiSpeechRouteImport } from './routes/api/speech'
 import { Route as CallSessionIdRouteImport } from './routes/call.$sessionId'
 import { Route as CallNewRouteImport } from './routes/call.new'
 import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionId'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +60,11 @@ const SessionSessionIdRoute = SessionSessionIdRouteImport.update({
   path: '/session/$sessionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/call/$sessionId'
     | '/call/new'
     | '/session/$sessionId'
+    | '/.lovable/oauth/consent'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/call/$sessionId'
     | '/call/new'
     | '/session/$sessionId'
+    | '/.lovable/oauth/consent'
   id:
     | '__root__'
     | '/'
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/call/$sessionId'
     | '/call/new'
     | '/session/$sessionId'
+    | '/.lovable/oauth/consent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,6 +145,7 @@ export interface RootRouteChildren {
   CallSessionIdRoute: typeof CallSessionIdRoute
   CallNewRoute: typeof CallNewRoute
   SessionSessionIdRoute: typeof SessionSessionIdRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SessionSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -206,6 +226,7 @@ const rootRouteChildren: RootRouteChildren = {
   CallSessionIdRoute: CallSessionIdRoute,
   CallNewRoute: CallNewRoute,
   SessionSessionIdRoute: SessionSessionIdRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
