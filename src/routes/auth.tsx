@@ -101,7 +101,7 @@ function AuthPage() {
           </div>
           <div>
             <h1 className="text-xl font-semibold">SaveLine — Retention Call Simulator</h1>
-            <p className="text-sm text-muted-foreground">Retention call simulator</p>
+            <p className="text-sm text-muted-foreground">Saela Pest Control retention training</p>
           </div>
         </div>
 
