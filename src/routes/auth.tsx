@@ -90,7 +90,7 @@ function AuthPage() {
             <Headphones className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">SaveLine</h1>
+            <h1 className="text-xl font-semibold">SaveLine — Retention Call Simulator</h1>
             <p className="text-sm text-muted-foreground">Retention call simulator</p>
           </div>
         </div>

@@ -96,6 +96,10 @@ function NewCall() {
           Back to dashboard
         </Link>
 
+        <h1 className="mb-4 font-display text-2xl font-semibold">
+          Start a Retention Training Call
+        </h1>
+
         <Card>
           <CardHeader>
             <CardTitle>{quick ? "Next call in the queue" : "Build the scenario"}</CardTitle>
