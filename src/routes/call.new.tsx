@@ -96,11 +96,12 @@ function NewCall() {
           Back to dashboard
         </Link>
 
-        <h1 className="mb-4 font-display text-2xl font-semibold">
-          Start a Retention Training Call
-        </h1>
+        <h1 className="font-display text-2xl font-semibold">Start a Retention Training Call</h1>
+        <p className="mb-5 mt-1 text-sm text-muted-foreground">
+          Saela Pest Control retention practice — real cancellation calls, real hidden motives.
+        </p>
 
-        <Card>
+        <Card className="card-soft">
           <CardHeader>
             <CardTitle>{quick ? "Next call in the queue" : "Build the scenario"}</CardTitle>
             <CardDescription>
