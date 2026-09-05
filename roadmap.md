@@ -11,4 +11,4 @@
 - [x] Call setup route
 - [x] Live call console (voice in/out + transcript)
 - [x] Scorecard review route
-- [ ] Double-check code logic end to end (typecheck + smoke test) — requested by user
+- [x] Double-check code logic end to end (typecheck clean, sign-in page renders, AI customer + grading verified live)
