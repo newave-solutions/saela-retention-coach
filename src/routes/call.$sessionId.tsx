@@ -9,6 +9,7 @@ import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
 import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
+import { directionFor, voiceForScenario, type Mood } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,11 @@ function LiveCall() {
   const [micOn, setMicOn] = useState(false);
 
   const busyRef = useRef(false);
+  const scenarioRef = useRef<PublicScenario | null>(null);
+  scenarioRef.current = scenario;
+  const micOnRef = useRef(false);
+  micOnRef.current = micOn;
+  const recognitionRef = useRef<{ start: () => void; stop: () => void } | null>(null);
   const endedRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,6 +82,17 @@ function LiveCall() {
     [hangUp, navigate, sessionId, voice],
   );
 
+  const speakAs = useCallback(
+    async (text: string, mood: Mood) => {
+      const current = scenarioRef.current;
+      await voice.say(text, {
+        voice: current ? voiceForScenario(current) : undefined,
+        instructions: current ? directionFor(current, mood) : undefined,
+      });
+    },
+    [voice],
+  );
+
   const speak = useCallback(
     async (text: string) => {
       if (!busyRef.current && !endedRef.current) {
@@ -86,7 +103,9 @@ function LiveCall() {
         const result = await send({ data: { sessionId, text } });
         setTurns(result.transcript);
         setThinking(false);
-        await voice.say(result.reply);
+        if (micOnRef.current) recognitionRef.current?.stop();
+        await speakAs(result.reply, result.mood as Mood);
+        if (micOnRef.current && !endedRef.current) recognitionRef.current?.start();
         if (result.callShouldEnd) await finish(result.endReason);
       } catch (error) {
         setThinking(false);
@@ -95,7 +114,7 @@ function LiveCall() {
         busyRef.current = false;
       }
     },
-    [finish, send, sessionId, voice],
+    [finish, send, sessionId, speakAs],
   );
 
   const onUtterance = useCallback(
@@ -107,6 +126,7 @@ function LiveCall() {
   );
 
   const recognition = useSpeechRecognition({ onUtterance });
+  recognitionRef.current = recognition;
 
   useEffect(() => {
     if (!user) return;
@@ -120,9 +140,10 @@ function LiveCall() {
           return;
         }
         setScenario(data.scenario);
+        scenarioRef.current = data.scenario;
         setTurns(data.transcript);
         const opening = data.transcript[0];
-        if (opening) void voice.say(opening.text);
+        if (opening) void speakAs(opening.text, "cold");
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Couldn't load this call.");
       }
