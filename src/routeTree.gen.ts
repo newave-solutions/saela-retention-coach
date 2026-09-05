@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CallSessionIdRouteImport } from './routes/call.$sessionId'
 import { Route as CallNewRouteImport } from './routes/call.new'
+import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +25,65 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CallSessionIdRoute = CallSessionIdRouteImport.update({
+  id: '/call/$sessionId',
+  path: '/call/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CallNewRoute = CallNewRouteImport.update({
   id: '/call/new',
   path: '/call/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SessionSessionIdRoute = SessionSessionIdRouteImport.update({
+  id: '/session/$sessionId',
+  path: '/session/$sessionId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
+  '/session/$sessionId': typeof SessionSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
+  '/session/$sessionId': typeof SessionSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
+  '/session/$sessionId': typeof SessionSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/call/new'
+  fullPaths:
+    '/' | '/auth' | '/call/$sessionId' | '/call/new' | '/session/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/call/new'
-  id: '__root__' | '/' | '/auth' | '/call/new'
+  to: '/' | '/auth' | '/call/$sessionId' | '/call/new' | '/session/$sessionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/call/$sessionId'
+    | '/call/new'
+    | '/session/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CallSessionIdRoute: typeof CallSessionIdRoute
   CallNewRoute: typeof CallNewRoute
+  SessionSessionIdRoute: typeof SessionSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +102,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/call/$sessionId': {
+      id: '/call/$sessionId'
+      path: '/call/$sessionId'
+      fullPath: '/call/$sessionId'
+      preLoaderRoute: typeof CallSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/call/new': {
       id: '/call/new'
       path: '/call/new'
       fullPath: '/call/new'
       preLoaderRoute: typeof CallNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/session/$sessionId': {
+      id: '/session/$sessionId'
+      path: '/session/$sessionId'
+      fullPath: '/session/$sessionId'
+      preLoaderRoute: typeof SessionSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +129,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CallSessionIdRoute: CallSessionIdRoute,
   CallNewRoute: CallNewRoute,
+  SessionSessionIdRoute: SessionSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
