@@ -82,7 +82,7 @@ const SEEDS: Record<CancelReason, Seed[]> = {
       acceptableResolutions: [
         "Priority service flag + guaranteed callback window in writing",
         "Assigned consistent technician",
-        "Price match only AFTER the responsiveness issue is addressed",
+        "A switchover price only AFTER the responsiveness issue is addressed and the competitor's offer has been verified",
       ],
       openings: [
         "Yeah, hi — I need to cancel my service. I got a better price from someone else.",
@@ -109,7 +109,7 @@ const SEEDS: Record<CancelReason, Seed[]> = {
       acceptableResolutions: [
         "Full-property walkthrough on next visit with a service report",
         "Right-size the plan to what they actually need, with the scope written out",
-        "A modest loyalty credit paired with a service-quality fix",
+        "Meeting in the middle on the increase, or year-in-full at 5% off, once the value gap is fixed",
       ],
       openings: [
         "Hi, I need to cancel. Honestly it's just too expensive right now.",
@@ -124,8 +124,8 @@ const SEEDS: Record<CancelReason, Seed[]> = {
         "Nobody ever explained the treatment cycle. They assumed one visit ends it, so normal die-off activity reads as total failure. Underneath is embarrassment — they think their home is being judged as dirty.",
       emotionalDriver: "Embarrassment and the fear that nothing will ever work.",
       saveConditions: [
-        "Agent asks what they're seeing, where, and when — specifics not sympathy noise",
-        "Agent explains the treatment cycle in plain language without being condescending",
+        "Agent asks where exactly the activity is and whether a re-service has been used before",
+        "Agent explains the treatment cycle — 28-day follow-up, then 10-12 week maintenance — in plain language without being condescending",
         "Agent removes the blame from the customer explicitly",
       ],
       dealBreakers: [
@@ -134,7 +134,7 @@ const SEEDS: Record<CancelReason, Seed[]> = {
         "Offering money off instead of a re-treatment",
       ],
       acceptableResolutions: [
-        "Free re-service with a senior technician and a follow-up inspection",
+        "A stand-alone spot re-service on the exact area, with a named technician and a firm date",
         "Written treatment timeline with what to expect week by week",
         "Escalation to a service manager with a direct number",
       ],
