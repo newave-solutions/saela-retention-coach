@@ -7,12 +7,16 @@ import { ArrowLeft, PhoneCall } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { startCall } from "@/lib/training.functions";
 import {
+  AUTHORITY_LIMITS,
+  AUTHORITY_ROLES,
+  AUTHORITY_ROLE_LABELS,
   CANCEL_REASONS,
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   PERSONALITIES,
   PERSONALITY_LABELS,
   REASON_LABELS,
+  type AuthorityRole,
   type CancelReason,
   type Difficulty,
   type Personality,
@@ -62,6 +66,7 @@ function NewCall() {
   const [reason, setReason] = useState<string>(ANY);
   const [difficulty, setDifficulty] = useState<Difficulty>("hard");
   const [personality, setPersonality] = useState<string>(ANY);
+  const [role, setRole] = useState<AuthorityRole>("ces");
   const [dialing, setDialing] = useState(false);
 
   useEffect(() => {
@@ -76,6 +81,7 @@ function NewCall() {
           reason: quick || reason === ANY ? null : (reason as CancelReason),
           difficulty: quick ? "hard" : difficulty,
           personality: quick || personality === ANY ? null : (personality as Personality),
+          authorityRole: role,
         },
       });
       void navigate({ to: "/call/$sessionId", params: { sessionId: session.sessionId } });
@@ -84,6 +90,8 @@ function NewCall() {
       toast.error(error instanceof Error ? error.message : "Could not connect the call.");
     }
   }
+
+  const limits = AUTHORITY_LIMITS[role];
 
   return (
     <main className="min-h-screen bg-background px-4 py-10">
