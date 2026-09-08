@@ -4,11 +4,19 @@ import {
   PERSONALITIES,
   PERSONALITY_LABELS,
   REASON_LABELS,
+  type AuthorityRole,
   type CancelReason,
   type Difficulty,
   type FullScenario,
   type Personality,
 } from "./scenarios";
+
+/** Applies to every scenario — the company's value-first sequence. */
+const PLAYBOOK_DEAL_BREAKERS = [
+  "Leading with money before three genuine non-financial attempts",
+  "Naming a price before asking the customer what their price point is",
+  "Promising anything outside the treatment's real boundaries (crawlspaces under 3 feet, rodent exclusion without a Protection Program, results the cycle can't deliver)",
+];
 
 type Seed = {
   statedReason: string;
