@@ -20,13 +20,13 @@ import { Progress } from "@/components/ui/progress";
 export const Route = createFileRoute("/session/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Call scorecard — SaveLine" },
+      { title: "Call scorecard — Retention Practice" },
       {
         name: "description",
         content:
           "Your retention call scorecard: outcome, category scores, the hidden motive, and coaching for next time.",
       },
-      { property: "og:title", content: "Call scorecard — SaveLine" },
+      { property: "og:title", content: "Call scorecard — Retention Practice" },
       {
         property: "og:description",
         content: "Outcome, scores, the hidden motive, and coaching from your retention call.",

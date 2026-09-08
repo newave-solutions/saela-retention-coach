@@ -15,12 +15,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Agent sign in — SaveLine" },
+      { title: "Agent sign in — Retention Practice" },
       {
         name: "description",
         content: "Sign in to run retention roleplay calls and track your save rate over time.",
       },
-      { property: "og:title", content: "Agent sign in — SaveLine" },
+      { property: "og:title", content: "Agent sign in — Retention Practice" },
       {
         property: "og:description",
         content: "Sign in to run retention roleplay calls and track your save rate over time.",
@@ -67,7 +67,7 @@ function AuthPage() {
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -80,14 +80,29 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
+    if (!data.session) {
+      toast.success("Check your email to confirm your account, then sign in.");
+      return;
+    }
     toast.success("You're on the floor. Take your first call.");
     afterAuth();
   }
 
   async function google() {
+    setBusy(true);
     try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: next ? window.location.origin + next : window.location.origin });
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setBusy(false);
+        toast.error("Google sign-in didn't go through. Try email instead.");
+        return;
+      }
+      if (result.redirected) return;
+      afterAuth();
     } catch {
+      setBusy(false);
       toast.error("Google sign-in didn't go through. Try email instead.");
     }
   }
@@ -100,7 +115,7 @@ function AuthPage() {
             <Headphones className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">SaveLine — Retention Call Simulator</h1>
+            <h1 className="text-xl font-semibold">Retention Practice — Saela Retention Training</h1>
             <p className="text-sm text-muted-foreground">Saela Pest Control retention training</p>
           </div>
         </div>
@@ -187,7 +202,7 @@ function AuthPage() {
               <span className="h-px flex-1 bg-border" />
             </div>
 
-            <Button variant="outline" className="w-full" onClick={google}>
+            <Button variant="outline" className="w-full" onClick={google} disabled={busy}>
               Continue with Google
             </Button>
           </CardContent>

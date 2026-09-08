@@ -11,7 +11,7 @@ export default defineMcp({
   title: "Retention Coach AI",
   version: "0.1.0",
   instructions:
-    "Tools for SaveLine retention call training. Use `list_sessions` to find the signed-in agent's practice calls, `get_session` for a full scorecard with coaching and transcript, and `performance_summary` for save rate and category trends.",
+    "Tools for Retention Practice retention call training. Use `list_sessions` to find the signed-in agent's practice calls, `get_session` for a full scorecard with coaching and transcript, and `performance_summary` for save rate and category trends.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
