@@ -6,6 +6,7 @@ import { ArrowLeft, Eye, PhoneCall } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  LEGACY_SCORE_LABELS,
   OUTCOME_LABELS,
   SCORE_LABELS,
   type Coaching,
