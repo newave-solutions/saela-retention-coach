@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { ArrowLeft, Eye, PhoneCall } from "lucide-react";
+import { ArrowLeft, Eye, PhoneCall, ShieldCheck } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  LEGACY_SCORE_LABELS,
   OUTCOME_LABELS,
   SCORE_LABELS,
   type Coaching,
@@ -135,16 +136,24 @@ function Scorecard() {
             {data.scores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
-                  <h2 className="text-base font-semibold leading-none">Category scores</h2>
+                  <h2 className="text-base font-semibold leading-none">
+                    GEOC scores
+                  </h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {(Object.keys(SCORE_LABELS) as (keyof ScoreBreakdown)[]).map((key) => (
+                  {Object.keys(data.scores).map((key) => (
                     <div key={key}>
                       <div className="mb-1 flex items-center justify-between text-sm">
-                        <span>{SCORE_LABELS[key]}</span>
-                        <span className="text-muted-foreground">{data.scores?.[key] ?? 0}</span>
+                        <span>
+                          {SCORE_LABELS[key as keyof ScoreBreakdown] ??
+                            LEGACY_SCORE_LABELS[key] ??
+                            key}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {data.scores?.[key as keyof ScoreBreakdown] ?? 0}
+                        </span>
                       </div>
-                      <Progress value={data.scores?.[key] ?? 0} />
+                      <Progress value={data.scores?.[key as keyof ScoreBreakdown] ?? 0} />
                     </div>
                   ))}
                 </CardContent>
@@ -165,6 +174,49 @@ function Scorecard() {
                   </CardContent>
                 </Card>
 
+                <Card
+                  className={`card-soft mt-4 ${
+                    data.coaching.authorityBreaches?.length ? "border-destructive/40" : ""
+                  }`}
+                >
+                  <CardHeader>
+                    <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                      <ShieldCheck className="h-4 w-4 text-accent" />
+                      Playbook check
+                    </h2>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <p>
+                      <span className="text-muted-foreground">
+                        Attempts before you offered money:{" "}
+                      </span>
+                      <span className="font-semibold">
+                        {data.coaching.attemptsBeforeOffer ?? 0} of 3
+                      </span>
+                    </p>
+                    {data.coaching.authorityBreaches?.length ? (
+                      <div>
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-destructive">
+                          Offered beyond your authority
+                        </p>
+                        <ul className="list-disc space-y-1 pl-5 text-foreground/90">
+                          {data.coaching.authorityBreaches.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <p className="text-success">Everything you offered was within your limits.</p>
+                    )}
+                    {data.coaching.escalationWarranted && (
+                      <p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
+                        This one should have been flagged pending cancel for a manager rather than
+                        conceded further.
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
                 <Card className="card-soft mt-4">
                   <CardHeader>
                     <h2 className="text-base font-semibold leading-none">Coaching</h2>
@@ -172,9 +224,9 @@ function Scorecard() {
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
                     <p className="rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
-                      Graded against Saela Pest Control service standards: protect the home first,
-                      be straight about the treatment, honor the agreement, and win the save with
-                      responsiveness rather than price.
+                      Graded on gratitude, empathy, ownership and clarity against Saela Pest Control
+                      service standards: protect the home first, be straight about the treatment,
+                      honor the agreement, and make three real attempts before price ever comes up.
                     </p>
                     <CoachList title="Did well" items={data.coaching.didWell} tone="text-success" />
                     <CoachList title="Missed" items={data.coaching.missed} tone="text-destructive" />
@@ -187,6 +239,7 @@ function Scorecard() {
                 </Card>
               </>
             )}
+
 
             <Card className="card-soft mt-4">
               <CardHeader>

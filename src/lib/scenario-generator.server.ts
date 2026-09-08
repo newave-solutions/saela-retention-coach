@@ -4,11 +4,19 @@ import {
   PERSONALITIES,
   PERSONALITY_LABELS,
   REASON_LABELS,
+  type AuthorityRole,
   type CancelReason,
   type Difficulty,
   type FullScenario,
   type Personality,
 } from "./scenarios";
+
+/** Applies to every scenario — the company's value-first sequence. */
+const PLAYBOOK_DEAL_BREAKERS = [
+  "Leading with money before three genuine non-financial attempts",
+  "Naming a price before asking the customer what their price point is",
+  "Promising anything outside the treatment's real boundaries (crawlspaces under 3 feet, rodent exclusion without a Protection Program, results the cycle can't deliver)",
+];
 
 type Seed = {
   statedReason: string;
@@ -74,7 +82,7 @@ const SEEDS: Record<CancelReason, Seed[]> = {
       acceptableResolutions: [
         "Priority service flag + guaranteed callback window in writing",
         "Assigned consistent technician",
-        "Price match only AFTER the responsiveness issue is addressed",
+        "A switchover price only AFTER the responsiveness issue is addressed and the competitor's offer has been verified",
       ],
       openings: [
         "Yeah, hi — I need to cancel my service. I got a better price from someone else.",
@@ -101,7 +109,7 @@ const SEEDS: Record<CancelReason, Seed[]> = {
       acceptableResolutions: [
         "Full-property walkthrough on next visit with a service report",
         "Right-size the plan to what they actually need, with the scope written out",
-        "A modest loyalty credit paired with a service-quality fix",
+        "Meeting in the middle on the increase, or year-in-full at 5% off, once the value gap is fixed",
       ],
       openings: [
         "Hi, I need to cancel. Honestly it's just too expensive right now.",
@@ -116,8 +124,8 @@ const SEEDS: Record<CancelReason, Seed[]> = {
         "Nobody ever explained the treatment cycle. They assumed one visit ends it, so normal die-off activity reads as total failure. Underneath is embarrassment — they think their home is being judged as dirty.",
       emotionalDriver: "Embarrassment and the fear that nothing will ever work.",
       saveConditions: [
-        "Agent asks what they're seeing, where, and when — specifics not sympathy noise",
-        "Agent explains the treatment cycle in plain language without being condescending",
+        "Agent asks where exactly the activity is and whether a re-service has been used before",
+        "Agent explains the treatment cycle — 28-day follow-up, then 10-12 week maintenance — in plain language without being condescending",
         "Agent removes the blame from the customer explicitly",
       ],
       dealBreakers: [
@@ -126,7 +134,7 @@ const SEEDS: Record<CancelReason, Seed[]> = {
         "Offering money off instead of a re-treatment",
       ],
       acceptableResolutions: [
-        "Free re-service with a senior technician and a follow-up inspection",
+        "A stand-alone spot re-service on the exact area, with a named technician and a firm date",
         "Written treatment timeline with what to expect week by week",
         "Escalation to a service manager with a direct number",
       ],
@@ -227,6 +235,7 @@ export function generateScenario(input: {
   reason: CancelReason | null;
   difficulty: Difficulty;
   personality: Personality | null;
+  authorityRole?: AuthorityRole | null;
 }): FullScenario {
   const reason = input.reason ?? pick(CANCEL_REASONS);
   const seed = pick(SEEDS[reason]);
@@ -242,12 +251,13 @@ export function generateScenario(input: {
     difficulty: input.difficulty,
     personality,
     personalityLabel: PERSONALITY_LABELS[personality],
+    authorityRole: input.authorityRole ?? "ces",
     openingLine: pick(seed.openings),
     statedReason: seed.statedReason,
     hiddenMotive: seed.hiddenMotive,
     emotionalDriver: seed.emotionalDriver,
     saveConditions: seed.saveConditions,
-    dealBreakers: seed.dealBreakers,
+    dealBreakers: seed.dealBreakers.concat(PLAYBOOK_DEAL_BREAKERS),
     acceptableResolutions: seed.acceptableResolutions,
   };
 }
@@ -262,6 +272,7 @@ export function toPublicScenario(scenario: FullScenario) {
     difficulty: scenario.difficulty,
     personality: scenario.personality,
     personalityLabel: scenario.personalityLabel,
+    authorityRole: scenario.authorityRole ?? "ces",
     openingLine: scenario.openingLine,
   };
 }
