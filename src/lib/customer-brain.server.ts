@@ -1,4 +1,5 @@
 // Server-only. Adaptive customer replies and post-call grading via Lovable AI.
+import { limitsFor } from "./scenarios";
 import type {
   Coaching,
   CustomerResult,
