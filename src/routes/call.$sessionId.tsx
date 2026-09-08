@@ -8,23 +8,22 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
-import { limitsFor, type PublicScenario, type TranscriptTurn } from "@/lib/scenarios";
+import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
 import { settingsFor, shapeLine, voiceForScenario, type Mood } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/call/$sessionId")({
-  staticData: { sitemap: false },
   head: () => ({
     meta: [
-      { title: "Live call — Retention Practice" },
+      { title: "Live call — SaveLine" },
       {
         name: "description",
         content:
           "You're on a live retention call. Uncover why the customer really wants to cancel before they hang up.",
       },
-      { property: "og:title", content: "Live call — Retention Practice" },
+      { property: "og:title", content: "Live call — SaveLine" },
       {
         property: "og:description",
         content: "A live retention roleplay call with an adaptive customer.",
@@ -234,29 +233,11 @@ function LiveCall() {
           </Button>
         </div>
 
-        <div className="card-soft mb-3 rounded-xl border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
-          <p className="mb-1 font-semibold text-foreground">
-            Your authority — {limitsFor(scenario?.authorityRole).label}
-          </p>
-          <div className="grid gap-x-6 gap-y-0.5 sm:grid-cols-2">
-            <span>Price floor: {limitsFor(scenario?.authorityRole).priceFloor}</span>
-            <span>Discount: {limitsFor(scenario?.authorityRole).discount}</span>
-            <span>Scheduling: {limitsFor(scenario?.authorityRole).scheduling}</span>
-            <span>Contract: {limitsFor(scenario?.authorityRole).contract}</span>
-            <span>Switchover: {limitsFor(scenario?.authorityRole).switchover}</span>
-            <span>Rescission: {limitsFor(scenario?.authorityRole).rescission}</span>
-          </div>
-          <p className="mt-1.5">
-            Gratitude, empathy, ownership, clarity — three real attempts before money.
-          </p>
-        </div>
-
         {!recognition.supported && (
           <p className="mb-3 rounded-md border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
             This browser can't hear you. Type your side of the call below instead.
           </p>
         )}
-
 
         <div
           ref={scrollRef}

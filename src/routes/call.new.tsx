@@ -7,16 +7,12 @@ import { ArrowLeft, PhoneCall } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { startCall } from "@/lib/training.functions";
 import {
-  AUTHORITY_LIMITS,
-  AUTHORITY_ROLES,
-  AUTHORITY_ROLE_LABELS,
   CANCEL_REASONS,
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   PERSONALITIES,
   PERSONALITY_LABELS,
   REASON_LABELS,
-  type AuthorityRole,
   type CancelReason,
   type Difficulty,
   type Personality,
@@ -36,19 +32,18 @@ type CallSearch = { quick: boolean };
 const ANY = "any";
 
 export const Route = createFileRoute("/call/new")({
-  staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): CallSearch => ({
     quick: search["quick"] !== false && search["quick"] !== "false",
   }),
   head: () => ({
     meta: [
-      { title: "Start a call — Retention Practice" },
+      { title: "Start a call — SaveLine" },
       {
         name: "description",
         content:
           "Pick a cancellation reason, difficulty, and customer personality, then take the call live.",
       },
-      { property: "og:title", content: "Start a call — Retention Practice" },
+      { property: "og:title", content: "Start a call — SaveLine" },
       {
         property: "og:description",
         content: "Pick a cancellation scenario and take the retention call live.",
@@ -67,7 +62,6 @@ function NewCall() {
   const [reason, setReason] = useState<string>(ANY);
   const [difficulty, setDifficulty] = useState<Difficulty>("hard");
   const [personality, setPersonality] = useState<string>(ANY);
-  const [role, setRole] = useState<AuthorityRole>("ces");
   const [dialing, setDialing] = useState(false);
 
   useEffect(() => {
@@ -82,7 +76,6 @@ function NewCall() {
           reason: quick || reason === ANY ? null : (reason as CancelReason),
           difficulty: quick ? "hard" : difficulty,
           personality: quick || personality === ANY ? null : (personality as Personality),
-          authorityRole: role,
         },
       });
       void navigate({ to: "/call/$sessionId", params: { sessionId: session.sessionId } });
@@ -91,8 +84,6 @@ function NewCall() {
       toast.error(error instanceof Error ? error.message : "Could not connect the call.");
     }
   }
-
-  const limits = AUTHORITY_LIMITS[role];
 
   return (
     <main className="min-h-screen bg-background px-4 py-10">
@@ -174,42 +165,10 @@ function NewCall() {
               </>
             )}
 
-            <Field label="Take the call as">
-              <Select value={role} onValueChange={(value) => setRole(value as AuthorityRole)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {AUTHORITY_ROLES.map((value) => (
-                    <SelectItem key={value} value={value}>
-                      {AUTHORITY_ROLE_LABELS[value]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <div className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
-              <p className="mb-1 font-semibold text-foreground">What you can offer on this call</p>
-              <ul className="space-y-0.5">
-                <li>Price floor: {limits.priceFloor}</li>
-                <li>Discount: {limits.discount}</li>
-                <li>Scheduling: {limits.scheduling}</li>
-                <li>Contract: {limits.contract}</li>
-                <li>Switchover: {limits.switchover}</li>
-                <li>Rescission: {limits.rescission}</li>
-              </ul>
-              <p className="mt-2">
-                Three real attempts before any money. Anything past these limits is flagged on your
-                scorecard.
-              </p>
-            </div>
-
             <div className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
               Headphones on. The call uses your microphone — speak naturally and pause when you want
               the customer to answer. You can also type if you'd rather.
             </div>
-
 
             <Button className="w-full" onClick={dial} disabled={dialing}>
               <PhoneCall className="mr-2 h-4 w-4" />

@@ -74,18 +74,17 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Retention Practice — Saela Retention Training" },
+      { title: "SaveLine — Retention Call Simulator" },
       {
         name: "description",
         content:
           "Live voice roleplay for pest control retention agents: uncover the caller's hidden motive and earn the save.",
       },
-      { property: "og:title", content: "Retention Practice — Saela Retention Training" },
+      { property: "og:title", content: "SaveLine — Retention Call Simulator" },
       {
         property: "og:description",
         content: "Live voice roleplay for pest control retention agents.",

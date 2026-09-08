@@ -12,5 +12,3 @@ Allow: /
 
 User-agent: *
 Allow: /
-
-Sitemap: https://saela-retention-coach.lovable.app/sitemap.xml

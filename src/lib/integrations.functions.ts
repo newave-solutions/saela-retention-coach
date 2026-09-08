@@ -112,11 +112,11 @@ export const postSessionToTeams = createServerFn({ method: "POST" })
         session.outcome,
       )} · <b>Score:</b> ${session.overall_score ?? "—"}/100</p>`,
       session.scores
-        ? `<p><b>Breakdown:</b> gratitude ${session.scores.gratitude ?? 0}, empathy ${
+        ? `<p><b>Breakdown:</b> discovery ${session.scores.discovery ?? 0}, empathy ${
             session.scores.empathy ?? 0
-          }, ownership ${session.scores.ownership ?? 0}, clarity ${
-            session.scores.clarity ?? 0
-          }, discovery ${session.scores.discovery ?? 0}</p>`
+          }, objection handling ${session.scores.objectionHandling ?? 0}, offer fit ${
+            session.scores.offerFit ?? 0
+          }, control ${session.scores.control ?? 0}</p>`
         : "",
       c?.hiddenMotive ? `<p><b>Real reason:</b> ${escapeHtml(c.hiddenMotive)}</p>` : "",
       c?.summary ? `<p>${escapeHtml(c.summary)}</p>` : "",
@@ -180,7 +180,7 @@ export const createLinearFollowUps = createServerFn({ method: "POST" })
     if (!actions.length) throw new Error("This call has no coaching actions to turn into issues.");
 
     const description = [
-      `From a Retention Practice retention roleplay with **${customer}**.`,
+      `From a SaveLine retention roleplay with **${customer}**.`,
       `Reason: ${session.scenario?.reasonLabel ?? "—"} · Outcome: ${outcomeLabel(session.outcome)} · Score: ${
         session.overall_score ?? "—"
       }/100`,

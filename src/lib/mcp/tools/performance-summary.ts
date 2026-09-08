@@ -29,7 +29,7 @@ export default defineTool({
     const rows = (data ?? []) as any[];
     const avg = (values: number[]) =>
       values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : null;
-    const keys = ["gratitude", "empathy", "ownership", "clarity", "discovery"] as const;
+    const keys = ["discovery", "empathy", "objectionHandling", "offerFit", "control"] as const;
     const categoryAverages: Record<string, number | null> = {};
     for (const key of keys) {
       categoryAverages[key] = avg(

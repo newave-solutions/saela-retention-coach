@@ -18,7 +18,6 @@ function oauthApi(): OAuthApi {
 }
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
-  staticData: { sitemap: false },
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
     authorization_id: typeof s["authorization_id"] === "string" ? s["authorization_id"] : "",
@@ -80,7 +79,7 @@ function Consent() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Connect {clientName} to your Retention Practice account</CardTitle>
+          <CardTitle>Connect {clientName} to your SaveLine account</CardTitle>
           <CardDescription>
             {clientName} will be able to read your practice calls, scorecards and coaching as you.
           </CardDescription>

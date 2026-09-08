@@ -1,5 +1,4 @@
 // Server-only. Adaptive customer replies and post-call grading via Lovable AI.
-import { limitsFor } from "./scenarios";
 import type {
   Coaching,
   CustomerResult,
@@ -38,23 +37,7 @@ const PERSONALITY_RULES: Record<string, string> = {
   distracted: "You are doing something else. You ask them to repeat things. Short attention span.",
 };
 
-const TRIGGER_RULES: Record<string, string> = {
-  persistent_activity:
-    "You only soften after the agent asks a real diagnostic question — where the activity is, when you see it, whether you have used a re-service before — and then offers a stand-alone spot re-service. Money off instead of action makes you angrier.",
-  competitor_switch:
-    "If the agent offers to match a price without first asking what the other company actually promised and verifying it, you get suspicious and colder.",
-  affordability:
-    "You respond well to being asked what your price point is, to meeting in the middle on an increase, or to a year-in-full option. A blind discount before anyone understands your situation feels cheap.",
-  poor_experience:
-    "You want the story heard and owned before any remedy. Any remedy offered before a real apology bounces off.",
-  agreement_dispute:
-    "You want the gap between what you were told and what you signed acknowledged out loud. Policy language ends the call.",
-  product_concerns:
-    "You want specifics and options — labels, re-entry times, exterior-only — not reassurance and never a discount.",
-};
-
 function systemPrompt(scenario: FullScenario) {
-  const limits = limitsFor(scenario.authorityRole);
   return `You are role-playing a real pest control customer on a live phone call, calling to CANCEL your service. You are NOT an assistant. Never break character, never mention AI, never narrate stage directions.
 
 CUSTOMER
@@ -67,21 +50,6 @@ Emotional driver: ${scenario.emotionalDriver}
 BEHAVIOR
 ${DIFFICULTY_RULES[scenario.difficulty] ?? DIFFICULTY_RULES["hard"]}
 ${PERSONALITY_RULES[scenario.personality] ?? PERSONALITY_RULES["guarded"]}
-${TRIGGER_RULES[scenario.reason] ?? ""}
-
-SEQUENCE YOU REACT TO (the company's 3-attempt rule)
-- Money is the LAST resort. If the agent offers a discount, credit, free service, or price match before the real driver has been named, you get noticeably colder and shorter, and you say something like "so your answer is money?".
-- You only become negotiable after the agent has made at least three distinct, genuine non-financial attempts — listening, owning the failure, diagnosing, offering a concrete service remedy.
-- Repeated or stacked discounts insult you; each extra one lowers saveLikelihood.
-
-WHAT THIS AGENT CAN ACTUALLY OFFER (${limits.label})
-- Price floor: ${limits.priceFloor}
-- Discount ceiling: ${limits.discount}
-- Scheduling: ${limits.scheduling}
-- Contract: ${limits.contract}
-- Switchover: ${limits.switchover}
-- Rescission / pre-initial: ${limits.rescission}
-If they offer something beyond those limits, accept it in the moment as a customer would — do not police it, do not mention limits. It gets flagged after the call.
 
 SAVE CONDITIONS — you only become negotiable once these are genuinely met:
 ${scenario.saveConditions.map((c) => `- ${c}`).join("\n")}
@@ -226,51 +194,32 @@ export async function gradeCall(
     .map((t) => `${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
     .join("\n");
 
-  const limits = limitsFor(scenario.authorityRole);
-
-  const prompt = `Grade this retention call for a Saela Pest Control customer experience agent against the company's GEOC standard. Be a demanding but fair coach — a generic, discount-first call should score in the 30s-50s.
+  const prompt = `Grade this retention call for a pest control customer experience agent. Be a demanding but fair coach — a generic, discount-first call should score in the 30s-50s.
 
 HIDDEN MOTIVE the agent had to uncover: ${scenario.hiddenMotive}
 Save conditions: ${scenario.saveConditions.join(" | ")}
 Deal breakers: ${scenario.dealBreakers.join(" | ")}
 ${endedOutcome ? `The customer ended the call as: ${endedOutcome}.` : "The agent ended the call."}
 
-THE AGENT'S AUTHORITY (${limits.label})
-- Price floor: ${limits.priceFloor}
-- Discount ceiling: ${limits.discount}
-- Scheduling: ${limits.scheduling}
-- Contract: ${limits.contract}
-- Switchover: ${limits.switchover}
-- Rescission / pre-initial: ${limits.rescission}
-
 TRANSCRIPT
 ${dialogue || "(no conversation took place)"}
 
-SCORING (0-100 each)
-- gratitude: sincere appreciation for the customer's tenure, early and genuine.
-- empathy: validating the customer's perspective without defensiveness or scripted lines.
-- ownership: this is graded hardest. Total accountability. Blaming the branch, billing, the technician, "the system", or the customer loses heavy points even on a saved call.
-- clarity: the resolution is stated in specific terms — what happens, who does it, when.
-- discovery: real diagnostic questions that reach the root cause before any offer.
-
-ALSO REPORT
-- attemptsBeforeOffer: how many distinct non-financial retention attempts the agent made before the first money offer (discount, credit, free service, price match). 0 if money came first. The mandate is at least 3.
-- authorityBreaches: anything offered outside the limits above — below the price floor, over the discount ceiling, scheduling outside the current month, changing frequency AND length together, an unverified competitor match, or free-service authority the role does not have. Empty array if clean. Quote what was offered.
-- escalationWarranted: true if the agent exhausted their authority and should have flagged the account pending cancel for a manager instead of conceding further.
-
-Return ONLY strict JSON:
-{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"gratitude":number,"empathy":number,"ownership":number,"clarity":number,"discovery":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[],"attemptsBeforeOffer":number,"authorityBreaches":string[],"escalationWarranted":boolean}}
+Score each 0-100. Return ONLY strict JSON:
+{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"discovery":number,"empathy":number,"objectionHandling":number,"offerFit":number,"control":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
 didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call.
 
-Coach in the voice of Saela's service standards: protect the customer's home and family first, tell the truth about what treatment can and cannot do, honor the agreement as written, exhaust three genuine non-financial attempts before touching price, and re-earn trust with responsiveness (a stand-alone re-service, a named technician, a firm date) rather than money. Penalize discount-first saves, over-promising, unauthorized concessions, and anything that misleads the customer — even when the call ended as saved.`;
+Coach in the voice of Saela Pest Control's service standards: protect the customer's home and family first, tell the truth about what treatment can and cannot do, honor the agreement as written, never pressure or bait with a discount before the real problem is understood, and re-earn trust with responsiveness (a re-service, a named technician, a firm date) rather than price. Reward integrity and problem-solving; penalize discount-first saves, over-promising, and anything that misleads the customer.`;
 
   const raw = await callGateway({
     model: GRADE_MODEL,
     messages: [
       {
         role: "system",
-        content: "You are a retention coach for Saela Pest Control. You return strict JSON only.",
+        content:
+          "You are a retention coach for Saela Pest Control. You return strict JSON only.",
       },
+      { role: "user", content: prompt },
+
       { role: "user", content: prompt },
     ],
     temperature: 0.3,
@@ -284,15 +233,16 @@ Coach in the voice of Saela's service standards: protect the customer's home and
   }>(raw);
 
   const scores: ScoreBreakdown = {
-    gratitude: clamp(parsed?.scores?.gratitude, 0),
-    empathy: clamp(parsed?.scores?.empathy, 0),
-    ownership: clamp(parsed?.scores?.ownership, 0),
-    clarity: clamp(parsed?.scores?.clarity, 0),
     discovery: clamp(parsed?.scores?.discovery, 0),
+    empathy: clamp(parsed?.scores?.empathy, 0),
+    objectionHandling: clamp(parsed?.scores?.objectionHandling, 0),
+    offerFit: clamp(parsed?.scores?.offerFit, 0),
+    control: clamp(parsed?.scores?.control, 0),
   };
 
   const average = Math.round(
-    (scores.gratitude + scores.empathy + scores.ownership + scores.clarity + scores.discovery) / 5,
+    (scores.discovery + scores.empathy + scores.objectionHandling + scores.offerFit + scores.control) /
+      5,
   );
 
   const outcome: Outcome =
@@ -300,18 +250,9 @@ Coach in the voice of Saela's service standards: protect the customer's home and
       ? parsed.outcome
       : (endedOutcome ?? "cancelled");
 
-  const breaches = Array.isArray(parsed?.coaching?.authorityBreaches)
-    ? parsed.coaching.authorityBreaches.filter((b): b is string => typeof b === "string")
-    : [];
-
-  const attempts = Number(parsed?.coaching?.attemptsBeforeOffer);
-
-  // An unauthorized concession cannot be a clean top score, however the call ended.
-  const overall = clamp(parsed?.overallScore, average);
-
   return {
     outcome,
-    overallScore: breaches.length ? Math.min(overall, 69) : overall,
+    overallScore: clamp(parsed?.overallScore, average),
     scores,
     coaching: {
       summary: parsed?.coaching?.summary ?? "The call ended before enough happened to grade deeply.",
@@ -319,9 +260,6 @@ Coach in the voice of Saela's service standards: protect the customer's home and
       missed: parsed?.coaching?.missed ?? [],
       nextTime: parsed?.coaching?.nextTime ?? [],
       hiddenMotive: scenario.hiddenMotive,
-      attemptsBeforeOffer: Number.isFinite(attempts) ? Math.max(0, Math.round(attempts)) : 0,
-      authorityBreaches: breaches,
-      escalationWarranted: Boolean(parsed?.coaching?.escalationWarranted),
     },
   };
 }

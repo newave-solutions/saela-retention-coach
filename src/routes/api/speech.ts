@@ -12,7 +12,6 @@ const num = (value: unknown, fallback: number, min: number, max: number) =>
   typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
 
 export const Route = createFileRoute("/api/speech")({
-  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {
