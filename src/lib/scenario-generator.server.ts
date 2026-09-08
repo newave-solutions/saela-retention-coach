@@ -227,6 +227,7 @@ export function generateScenario(input: {
   reason: CancelReason | null;
   difficulty: Difficulty;
   personality: Personality | null;
+  authorityRole?: AuthorityRole | null;
 }): FullScenario {
   const reason = input.reason ?? pick(CANCEL_REASONS);
   const seed = pick(SEEDS[reason]);
@@ -242,12 +243,13 @@ export function generateScenario(input: {
     difficulty: input.difficulty,
     personality,
     personalityLabel: PERSONALITY_LABELS[personality],
+    authorityRole: input.authorityRole ?? "ces",
     openingLine: pick(seed.openings),
     statedReason: seed.statedReason,
     hiddenMotive: seed.hiddenMotive,
     emotionalDriver: seed.emotionalDriver,
     saveConditions: seed.saveConditions,
-    dealBreakers: seed.dealBreakers,
+    dealBreakers: seed.dealBreakers.concat(PLAYBOOK_DEAL_BREAKERS),
     acceptableResolutions: seed.acceptableResolutions,
   };
 }
@@ -262,6 +264,7 @@ export function toPublicScenario(scenario: FullScenario) {
     difficulty: scenario.difficulty,
     personality: scenario.personality,
     personalityLabel: scenario.personalityLabel,
+    authorityRole: scenario.authorityRole ?? "ces",
     openingLine: scenario.openingLine,
   };
 }
