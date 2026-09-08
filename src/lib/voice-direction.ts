@@ -11,20 +11,24 @@ export type VoiceSettings = {
   speed: number;
 };
 
-/** Curated ElevenLabs voices that read as ordinary residential customers. */
+/** Curated ElevenLabs voices that read as ordinary American residential customers. */
 export const ELEVENLABS_VOICES = [
   "CwhRBWXzGAHq8TQ4Fs17", // Roger
   "EXAVITQu4vr4xnSDxMaL", // Sarah
   "FGY2WhTYpPnrIDTdsKH5", // Laura
   "IKne3meq5aSn9XLyUdCD", // Charlie
   "JBFqnCBsd6RMkjVDRZzb", // George
-  "N2lVS1w4EtoT3dr4eOWO", // Callum
+  "SAz9YHcvj6GT2YYXdXww", // River
+  "TX3LPaxmHKxFdv7VOQHJ", // Liam
   "Xb7hH8MSUJpSbSDYk0k2", // Alice
-  "XrExE9yKIg1WjnnlVkGX", // Matilda
   "bIHbv24MWmeRgasZH58o", // Will
+  "cgSgspJ2msm6clMCkdW9", // Jessica
   "cjVigY5qzO86Huf0OWal", // Eric
+  "iP95p4xoKVk53GoZ742B", // Chris
   "nPczCjzI2devNBz1zQrb", // Brian
+  "onwK4e9ZLuTAKqWW03F9", // Daniel
   "pFZP5JQG7iQjIQuC4Bku", // Lily
+  "pqHfZKP75CvOlQylNhV4", // Bill
 ] as const;
 
 /** Stable voice for a given customer, so they sound like the same person all call. */
@@ -42,6 +46,11 @@ const PERSONALITY_DELTA: Record<Personality, Delta> = {
   polite_firm: { stability: 0.2, style: 0.0, speed: 0.0 },
   fast_talker: { stability: -0.15, style: 0.15, speed: 0.14 },
   distracted: { stability: 0.05, style: -0.05, speed: -0.06 },
+  steamroller: { stability: -0.22, style: 0.25, speed: 0.12 },
+  detonator: { stability: -0.3, style: 0.35, speed: 0.1 },
+  drive_by: { stability: 0.0, style: 0.05, speed: 0.12 },
+  stonewaller: { stability: 0.25, style: -0.2, speed: -0.08 },
+  bargain_hunter: { stability: -0.05, style: 0.12, speed: 0.06 },
 };
 
 const DIFFICULTY_DELTA: Record<Difficulty, Delta> = {
