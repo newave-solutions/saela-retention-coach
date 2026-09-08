@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { labelForDifficulty } from "@/lib/scenarios";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Retention Practice — Agent Training Dashboard" },

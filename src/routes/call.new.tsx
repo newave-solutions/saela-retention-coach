@@ -36,6 +36,7 @@ type CallSearch = { quick: boolean };
 const ANY = "any";
 
 export const Route = createFileRoute("/call/new")({
+  staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): CallSearch => ({
     quick: search["quick"] !== false && search["quick"] !== "false",
   }),
