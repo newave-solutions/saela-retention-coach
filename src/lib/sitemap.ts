@@ -6,9 +6,10 @@ import type { AnyRoute, AnyRouter, ParsedLocation } from "@tanstack/react-router
 
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
-    // Required so every new route makes an explicit sitemap decision.
-    // Fix missing staticData on the route; don't make this optional.
-    sitemap: boolean | "exclude-subtree";
+    // Optional because MCP-generated routes (mcp.ts, oauth-protected-resource.ts)
+    // are recreated by the Vite plugin and cannot carry a staticData decision.
+    // Routes without a decision are treated as excluded from the sitemap.
+    sitemap?: boolean | "exclude-subtree";
   }
 }
 
