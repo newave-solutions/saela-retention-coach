@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Json } from "@/integrations/supabase/types";
 import type {
+  AuthorityRole,
   CancelReason,
   Difficulty,
   FullScenario,
@@ -15,6 +16,7 @@ type StartInput = {
   reason: CancelReason | null;
   difficulty: Difficulty;
   personality: Personality | null;
+  authorityRole?: AuthorityRole | null;
 };
 
 export const startCall = createServerFn({ method: "POST" })
@@ -26,6 +28,7 @@ export const startCall = createServerFn({ method: "POST" })
       reason: data.reason,
       difficulty: data.difficulty,
       personality: data.personality,
+      authorityRole: data.authorityRole ?? "ces",
     });
 
     const opening: TranscriptTurn = {
