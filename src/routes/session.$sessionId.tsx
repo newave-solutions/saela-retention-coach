@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/session/$sessionId")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Call scorecard — Retention Practice" },

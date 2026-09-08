@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/call/$sessionId")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Live call — Retention Practice" },
