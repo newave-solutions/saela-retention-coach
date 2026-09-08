@@ -13,13 +13,13 @@ import { labelForDifficulty } from "@/lib/scenarios";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SaveLine — Retention Call Training Dashboard" },
+      { title: "Retention Practice — Agent Training Dashboard" },
       {
         name: "description",
         content:
           "Run realistic pest control cancellation roleplays, uncover the caller's hidden motive, and track your save rate.",
       },
-      { property: "og:title", content: "SaveLine — Retention Call Training Dashboard" },
+      { property: "og:title", content: "Retention Practice — Agent Training Dashboard" },
       {
         property: "og:description",
         content: "Run realistic pest control cancellation roleplays and track your save rate.",
@@ -95,7 +95,7 @@ function Dashboard() {
               </div>
               <div>
                 <h1 className="font-display text-xl font-semibold leading-tight">
-                  SaveLine — Retention Call Simulator
+                  Retention Practice — Saela Retention Training
                 </h1>
                 <p className="text-xs opacity-80">Saela Pest Control · customer experience training</p>
               </div>

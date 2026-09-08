@@ -15,12 +15,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Agent sign in — SaveLine" },
+      { title: "Agent sign in — Retention Practice" },
       {
         name: "description",
         content: "Sign in to run retention roleplay calls and track your save rate over time.",
       },
-      { property: "og:title", content: "Agent sign in — SaveLine" },
+      { property: "og:title", content: "Agent sign in — Retention Practice" },
       {
         property: "og:description",
         content: "Sign in to run retention roleplay calls and track your save rate over time.",
@@ -100,7 +100,7 @@ function AuthPage() {
             <Headphones className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">SaveLine — Retention Call Simulator</h1>
+            <h1 className="text-xl font-semibold">Retention Practice — Saela Retention Training</h1>
             <p className="text-sm text-muted-foreground">Saela Pest Control retention training</p>
           </div>
         </div>

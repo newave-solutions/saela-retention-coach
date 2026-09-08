@@ -17,13 +17,13 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/call/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Live call — SaveLine" },
+      { title: "Live call — Retention Practice" },
       {
         name: "description",
         content:
           "You're on a live retention call. Uncover why the customer really wants to cancel before they hang up.",
       },
-      { property: "og:title", content: "Live call — SaveLine" },
+      { property: "og:title", content: "Live call — Retention Practice" },
       {
         property: "og:description",
         content: "A live retention roleplay call with an adaptive customer.",

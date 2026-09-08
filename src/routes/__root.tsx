@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SaveLine — Retention Call Simulator" },
+      { title: "Retention Practice — Saela Retention Training" },
       {
         name: "description",
         content:
           "Live voice roleplay for pest control retention agents: uncover the caller's hidden motive and earn the save.",
       },
-      { property: "og:title", content: "SaveLine — Retention Call Simulator" },
+      { property: "og:title", content: "Retention Practice — Saela Retention Training" },
       {
         property: "og:description",
         content: "Live voice roleplay for pest control retention agents.",
