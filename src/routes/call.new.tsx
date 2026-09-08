@@ -173,10 +173,42 @@ function NewCall() {
               </>
             )}
 
+            <Field label="Take the call as">
+              <Select value={role} onValueChange={(value) => setRole(value as AuthorityRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AUTHORITY_ROLES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {AUTHORITY_ROLE_LABELS[value]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <div className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
+              <p className="mb-1 font-semibold text-foreground">What you can offer on this call</p>
+              <ul className="space-y-0.5">
+                <li>Price floor: {limits.priceFloor}</li>
+                <li>Discount: {limits.discount}</li>
+                <li>Scheduling: {limits.scheduling}</li>
+                <li>Contract: {limits.contract}</li>
+                <li>Switchover: {limits.switchover}</li>
+                <li>Rescission: {limits.rescission}</li>
+              </ul>
+              <p className="mt-2">
+                Three real attempts before any money. Anything past these limits is flagged on your
+                scorecard.
+              </p>
+            </div>
+
             <div className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
               Headphones on. The call uses your microphone — speak naturally and pause when you want
               the customer to answer. You can also type if you'd rather.
             </div>
+
 
             <Button className="w-full" onClick={dial} disabled={dialing}>
               <PhoneCall className="mr-2 h-4 w-4" />
