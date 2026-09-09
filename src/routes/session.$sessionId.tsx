@@ -132,19 +132,23 @@ function Scorecard() {
               </div>
             </section>
 
-            {data.scores && (
+            {normalizeScores(data.scores) && (
               <Card className="card-soft mt-4">
                 <CardHeader>
-                  <h2 className="text-base font-semibold leading-none">Category scores</h2>
+                  <h2 className="text-base font-semibold leading-none">
+                    The Saela Way — GEOC scores
+                  </h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(Object.keys(SCORE_LABELS) as (keyof ScoreBreakdown)[]).map((key) => (
                     <div key={key}>
                       <div className="mb-1 flex items-center justify-between text-sm">
                         <span>{SCORE_LABELS[key]}</span>
-                        <span className="text-muted-foreground">{data.scores?.[key] ?? 0}</span>
+                        <span className="text-muted-foreground">
+                          {normalizeScores(data.scores)?.[key] ?? 0}
+                        </span>
                       </div>
-                      <Progress value={data.scores?.[key] ?? 0} />
+                      <Progress value={normalizeScores(data.scores)?.[key] ?? 0} />
                     </div>
                   ))}
                 </CardContent>
