@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   OUTCOME_LABELS,
   SCORE_LABELS,
+  normalizeScores,
   type Coaching,
   type Outcome,
   type ScoreBreakdown,
@@ -20,13 +21,13 @@ import { Progress } from "@/components/ui/progress";
 export const Route = createFileRoute("/session/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Call scorecard — SaveLine" },
+      { title: "Call scorecard — Saela Way" },
       {
         name: "description",
         content:
           "Your retention call scorecard: outcome, category scores, the hidden motive, and coaching for next time.",
       },
-      { property: "og:title", content: "Call scorecard — SaveLine" },
+      { property: "og:title", content: "Call scorecard — Saela Way" },
       {
         property: "og:description",
         content: "Outcome, scores, the hidden motive, and coaching from your retention call.",
@@ -132,19 +133,23 @@ function Scorecard() {
               </div>
             </section>
 
-            {data.scores && (
+            {normalizeScores(data.scores) && (
               <Card className="card-soft mt-4">
                 <CardHeader>
-                  <h2 className="text-base font-semibold leading-none">Category scores</h2>
+                  <h2 className="text-base font-semibold leading-none">
+                    The Saela Way — GEOC scores
+                  </h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(Object.keys(SCORE_LABELS) as (keyof ScoreBreakdown)[]).map((key) => (
                     <div key={key}>
                       <div className="mb-1 flex items-center justify-between text-sm">
                         <span>{SCORE_LABELS[key]}</span>
-                        <span className="text-muted-foreground">{data.scores?.[key] ?? 0}</span>
+                        <span className="text-muted-foreground">
+                          {normalizeScores(data.scores)?.[key] ?? 0}
+                        </span>
                       </div>
-                      <Progress value={data.scores?.[key] ?? 0} />
+                      <Progress value={normalizeScores(data.scores)?.[key] ?? 0} />
                     </div>
                   ))}
                 </CardContent>
@@ -172,9 +177,10 @@ function Scorecard() {
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
                     <p className="rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
-                      Graded against Saela Pest Control service standards: protect the home first,
-                      be straight about the treatment, honor the agreement, and win the save with
-                      responsiveness rather than price.
+                      Graded on the Saela Way (GEOC): gratitude for their business, empathy that
+                      validates the concern, personal ownership of the resolution, and clarity on
+                      the fix — plus asking their price point and meeting in the middle instead of
+                      leading with a discount.
                     </p>
                     <CoachList title="Did well" items={data.coaching.didWell} tone="text-success" />
                     <CoachList title="Missed" items={data.coaching.missed} tone="text-destructive" />

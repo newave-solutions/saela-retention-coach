@@ -23,10 +23,10 @@ export class GatewayError extends Error {
 
 const DIFFICULTY_RULES: Record<string, string> = {
   standard:
-    "You give ground when the agent shows genuine effort. You may hint at the real motive after two or three good probing questions.",
-  hard: "You never volunteer the real motive. You deflect the first two generic offers. Scripted empathy makes you shorter and colder. You only soften when the agent names something specific and true about your experience.",
+    "You are firm. Generic apologies and stock lines do nothing for you. You give ground only when the agent shows real, specific effort, and you may hint at the real motive after three or four good probing questions.",
+  hard: "You never volunteer the real motive. You deflect the first three generic offers. Scripted empathy makes you shorter and colder. You only soften when the agent names something specific and true about your experience, thanks you like they mean it, and owns the failure personally. You give roughly eight exchanges before you start closing the call down.",
   brutal:
-    "You are close to done. You interrupt. You give the agent roughly six exchanges before hanging up unless they land the real driver. Discounts insult you. Only a precise, specific acknowledgement plus a fitting remedy keeps you on the line.",
+    "You are done. You interrupt. You give the agent about five or six exchanges before you hang up unless they land the real driver. Discounts insult you. Only a precise, specific acknowledgement plus a fitting remedy keeps you on the line, and even then you push once more before you agree to anything.",
 };
 
 const PERSONALITY_RULES: Record<string, string> = {
@@ -35,10 +35,20 @@ const PERSONALITY_RULES: Record<string, string> = {
   polite_firm: "Warm tone, immovable position. You thank them and repeat your request.",
   fast_talker: "You run sentences together and jump ahead of the agent's point.",
   distracted: "You are doing something else. You ask them to repeat things. Short attention span.",
+  steamroller:
+    "You talk over the agent constantly. You start replies with 'No—', 'Nope—', 'Let me finish—'. You rarely let a question land before answering a different one.",
+  detonator:
+    "You are furious from the first second. Raised voice, short blasts, sarcasm. You may use mild profanity ('damn', 'hell', occasionally 'bullshit') when pushed — never slurs, never personal abuse of the agent. You only drop the volume if the agent owns the failure outright.",
+  drive_by:
+    "You are in a hurry and you have decided. You state your demand, answer at most a couple of questions in five words or less, and you hang up early unless the agent gives you something concrete and specific fast.",
+  stonewaller:
+    "One-word answers. 'Yep.' 'No.' 'Doesn't matter.' You make the agent work for every inch and you do not fill silence.",
+  bargain_hunter:
+    "Every topic becomes price within one sentence. You ask what they can do on the bill, then ask again. Value talk bores you until the agent asks you what your price point actually is.",
 };
 
 function systemPrompt(scenario: FullScenario) {
-  return `You are role-playing a real pest control customer on a live phone call, calling to CANCEL your service. You are NOT an assistant. Never break character, never mention AI, never narrate stage directions.
+  return `You are role-playing a real pest control customer in the United States on a live phone call, calling to CANCEL your service. You are NOT an assistant. Never break character, never mention AI, never narrate stage directions. You speak like an ordinary American homeowner.
 
 CUSTOMER
 Name: ${scenario.customerName}
@@ -60,12 +70,20 @@ ${scenario.dealBreakers.map((c) => `- ${c}`).join("\n")}
 RESOLUTIONS you would actually accept once heard:
 ${scenario.acceptableResolutions.map((c) => `- ${c}`).join("\n")}
 
+WHAT ACTUALLY MOVES YOU (the agent is trained on the Saela Way — GEOC)
+- Genuine gratitude for your years with them, not a throwaway "thanks for calling".
+- Empathy that names your specific frustration back to you in your own terms.
+- Ownership: "I'll handle this myself" with a name, a date, a callback. Passing you to another department cools you fast.
+- Clarity: they confirm the real problem accurately and state the fix in exact terms.
+- Asking what your price point is, then building around your number — instead of throwing a random discount at you.
+
 RULES
 - Speak like a real person on the phone: contractions, filler, interruptions, 1-3 sentences typical. Never write paragraphs.
 - Never list your own save conditions or coach the agent.
 - Only set motiveUncovered true when the agent has actually named the real driver, not merely guessed near it.
 - Only set callShouldEnd true when you would truly hang up: you are satisfied and staying (endReason "saved"), you accept a downgrade/pause (endReason "partial"), or you are done and cancelling (endReason "cancelled").
 - If the agent says goodbye or confirms the cancellation, end the call.
+- Be hard to save. Most calls like this end in cancellation. Saving you requires real work, not politeness.
 
 Respond with ONLY strict JSON, no markdown fence:
 {"reply":string,"mood":"hostile"|"cold"|"neutral"|"warming"|"open","motiveUncovered":boolean,"saveLikelihood":number,"callShouldEnd":boolean,"endReason":"saved"|"partial"|"cancelled"|null}`;
@@ -144,7 +162,7 @@ export async function nextCustomerTurn(
         content: turn.text,
       })),
     ],
-    temperature: 0.9,
+    temperature: 1,
   });
 
   const parsed = parseJson<Partial<CustomerResult>>(raw);
@@ -194,7 +212,7 @@ export async function gradeCall(
     .map((t) => `${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
     .join("\n");
 
-  const prompt = `Grade this retention call for a pest control customer experience agent. Be a demanding but fair coach — a generic, discount-first call should score in the 30s-50s.
+  const prompt = `Grade this retention call for a Saela Pest Control customer experience agent. Be a demanding coach — a generic, discount-first call belongs in the 20s-40s, and a genuinely excellent call is rare.
 
 HIDDEN MOTIVE the agent had to uncover: ${scenario.hiddenMotive}
 Save conditions: ${scenario.saveConditions.join(" | ")}
@@ -204,11 +222,18 @@ ${endedOutcome ? `The customer ended the call as: ${endedOutcome}.` : "The agent
 TRANSCRIPT
 ${dialogue || "(no conversation took place)"}
 
-Score each 0-100. Return ONLY strict JSON:
-{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"discovery":number,"empathy":number,"objectionHandling":number,"offerFit":number,"control":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
-didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call.
+THE SAELA WAY — GEOC is the standard you grade against:
+- Gratitude: sincerely thanked the customer and acknowledged their business and tenure.
+- Empathy: directly acknowledged and validated the frustration in the customer's own terms, no "sorry you feel that way".
+- Ownership: took personal responsibility for resolving it — a named owner, a date, a follow-up — instead of passing it off or hiding behind policy.
+- Clarity: confirmed the real problem thoroughly and accurately, and stated the resolution in specific, unambiguous terms.
+- Negotiation & control: asked the customer directly what their price point is and built the offer around their number, used meet-in-the-middle rather than a random discount, made at least three genuine retention attempts before conceding money, and kept control of the call without steamrolling the customer.
 
-Coach in the voice of Saela Pest Control's service standards: protect the customer's home and family first, tell the truth about what treatment can and cannot do, honor the agreement as written, never pressure or bait with a discount before the real problem is understood, and re-earn trust with responsiveness (a re-service, a named technician, a firm date) rather than price. Reward integrity and problem-solving; penalize discount-first saves, over-promising, and anything that misleads the customer.`;
+Penalize: leading with a discount, scripted empathy, arguing, blaming the customer, over-promising, and letting the customer drive the whole call. Reward: gratitude that lands, specific ownership, accurate problem confirmation, and a customized offer built off the customer's stated number.
+
+Score each 0-100. Return ONLY strict JSON:
+{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"gratitude":number,"empathy":number,"ownership":number,"clarity":number,"negotiation":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
+didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call and naming the GEOC element involved.`;
 
   const raw = await callGateway({
     model: GRADE_MODEL,
@@ -216,10 +241,8 @@ Coach in the voice of Saela Pest Control's service standards: protect the custom
       {
         role: "system",
         content:
-          "You are a retention coach for Saela Pest Control. You return strict JSON only.",
+          "You are a retention coach for Saela Pest Control who grades strictly against the GEOC framework (Gratitude, Empathy, Ownership, Clarity). You return strict JSON only.",
       },
-      { role: "user", content: prompt },
-
       { role: "user", content: prompt },
     ],
     temperature: 0.3,
@@ -233,16 +256,15 @@ Coach in the voice of Saela Pest Control's service standards: protect the custom
   }>(raw);
 
   const scores: ScoreBreakdown = {
-    discovery: clamp(parsed?.scores?.discovery, 0),
+    gratitude: clamp(parsed?.scores?.gratitude, 0),
     empathy: clamp(parsed?.scores?.empathy, 0),
-    objectionHandling: clamp(parsed?.scores?.objectionHandling, 0),
-    offerFit: clamp(parsed?.scores?.offerFit, 0),
-    control: clamp(parsed?.scores?.control, 0),
+    ownership: clamp(parsed?.scores?.ownership, 0),
+    clarity: clamp(parsed?.scores?.clarity, 0),
+    negotiation: clamp(parsed?.scores?.negotiation, 0),
   };
 
   const average = Math.round(
-    (scores.discovery + scores.empathy + scores.objectionHandling + scores.offerFit + scores.control) /
-      5,
+    (scores.gratitude + scores.empathy + scores.ownership + scores.clarity + scores.negotiation) / 5,
   );
 
   const outcome: Outcome =

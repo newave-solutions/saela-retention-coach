@@ -1,4 +1,4 @@
-// Shared, client-safe scenario model for the retention simulator.
+// Shared, client-safe scenario model for the Saela Way retention simulator.
 
 export const CANCEL_REASONS = [
   "competitor_switch",
@@ -23,9 +23,9 @@ export const DIFFICULTIES = ["standard", "hard", "brutal"] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  standard: "Standard — firm but reachable",
-  hard: "Hard — guarded, deflects generic offers",
-  brutal: "Brutal — one shot, low patience",
+  standard: "Standard — firm, deflects the easy stuff",
+  hard: "Hard — guarded, punishes scripted lines",
+  brutal: "Brutal — one shot, hangs up fast",
 };
 
 export function labelForDifficulty(value: string): string {
@@ -38,16 +38,30 @@ export const PERSONALITIES = [
   "polite_firm",
   "fast_talker",
   "distracted",
+  "steamroller",
+  "detonator",
+  "drive_by",
+  "stonewaller",
+  "bargain_hunter",
 ] as const;
 export type Personality = (typeof PERSONALITIES)[number];
 
 export const PERSONALITY_LABELS: Record<Personality, string> = {
   guarded: "Guarded — short answers",
   irritated: "Irritated — already fed up",
-  polite_firm: "Polite but firm",
-  fast_talker: "Fast talker — talks over you",
+  polite_firm: "Polite but immovable",
+  fast_talker: "Fast talker — jumps ahead",
   distracted: "Distracted — half listening",
+  steamroller: "Steamroller — talks over you",
+  detonator: "Detonator — furious from hello",
+  drive_by: "Drive-by — states it and goes",
+  stonewaller: "Stonewaller — gives you nothing",
+  bargain_hunter: "Bargain hunter — it's all price",
 };
+
+export function labelForPersonality(value: string): string {
+  return PERSONALITY_LABELS[value as Personality] ?? "Guarded";
+}
 
 /** The public half of a scenario. Safe to show the trainee mid-call. */
 export type PublicScenario = {
@@ -86,21 +100,42 @@ export type CustomerResult = {
   endReason: "saved" | "partial" | "cancelled" | null;
 };
 
+/** Scored against the Saela Way: Gratitude, Empathy, Ownership, Clarity — plus negotiation. */
 export type ScoreBreakdown = {
-  discovery: number;
+  gratitude: number;
   empathy: number;
-  objectionHandling: number;
-  offerFit: number;
-  control: number;
+  ownership: number;
+  clarity: number;
+  negotiation: number;
 };
 
 export const SCORE_LABELS: Record<keyof ScoreBreakdown, string> = {
-  discovery: "Discovery",
-  empathy: "Empathy & acknowledgment",
-  objectionHandling: "Objection handling",
-  offerFit: "Offer fit",
-  control: "Call control & listening",
+  gratitude: "Gratitude",
+  empathy: "Empathy",
+  ownership: "Ownership",
+  clarity: "Clarity",
+  negotiation: "Negotiation & control",
 };
+
+/** Older calls were stored with the previous category keys — map them in order. */
+export function normalizeScores(raw: unknown): ScoreBreakdown | null {
+  if (!raw || typeof raw !== "object") return null;
+  const record = raw as Record<string, number | undefined>;
+  const value = (...keys: string[]) => {
+    for (const key of keys) {
+      const n = record[key];
+      if (typeof n === "number") return n;
+    }
+    return 0;
+  };
+  return {
+    gratitude: value("gratitude", "discovery"),
+    empathy: value("empathy"),
+    ownership: value("ownership", "objectionHandling"),
+    clarity: value("clarity", "offerFit"),
+    negotiation: value("negotiation", "control"),
+  };
+}
 
 export type Coaching = {
   summary: string;

@@ -29,11 +29,19 @@ export default defineTool({
     const rows = (data ?? []) as any[];
     const avg = (values: number[]) =>
       values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : null;
-    const keys = ["discovery", "empathy", "objectionHandling", "offerFit", "control"] as const;
+    const keys = ["gratitude", "empathy", "ownership", "clarity", "negotiation"] as const;
+    const legacy: Record<string, string> = {
+      gratitude: "discovery",
+      ownership: "objectionHandling",
+      clarity: "offerFit",
+      negotiation: "control",
+    };
     const categoryAverages: Record<string, number | null> = {};
     for (const key of keys) {
       categoryAverages[key] = avg(
-        rows.map((r) => Number(r.scores?.[key])).filter((n) => Number.isFinite(n)),
+        rows
+          .map((r) => Number(r.scores?.[key] ?? r.scores?.[legacy[key] ?? key]))
+          .filter((n) => Number.isFinite(n)),
       );
     }
     const reasons: Record<string, number> = {};

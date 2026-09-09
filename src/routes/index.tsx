@@ -13,13 +13,13 @@ import { labelForDifficulty } from "@/lib/scenarios";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SaveLine — Retention Call Training Dashboard" },
+      { title: "Saela Way — Retention Call Training Dashboard" },
       {
         name: "description",
         content:
           "Run realistic pest control cancellation roleplays, uncover the caller's hidden motive, and track your save rate.",
       },
-      { property: "og:title", content: "SaveLine — Retention Call Training Dashboard" },
+      { property: "og:title", content: "Saela Way — Retention Call Training Dashboard" },
       {
         property: "og:description",
         content: "Run realistic pest control cancellation roleplays and track your save rate.",
@@ -95,7 +95,7 @@ function Dashboard() {
               </div>
               <div>
                 <h1 className="font-display text-xl font-semibold leading-tight">
-                  SaveLine — Retention Call Simulator
+                  Saela Way — Retention Call Simulator
                 </h1>
                 <p className="text-xs opacity-80">Saela Pest Control · customer experience training</p>
               </div>
@@ -115,8 +115,9 @@ function Dashboard() {
           </div>
 
           <p className="mt-6 max-w-xl text-sm leading-relaxed opacity-90">
-            Every call is graded the Saela way: protect the home first, tell the truth about the
-            treatment, honor the agreement, and earn the save with service — not a discount.
+            Every call is graded on the Saela Way — GEOC: gratitude for their business, empathy that
+            validates the frustration, ownership of the fix, and clarity on the resolution. Ask for
+            their price point and meet them in the middle; three real attempts before a dollar moves.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
