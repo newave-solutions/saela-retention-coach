@@ -37,13 +37,13 @@ export const Route = createFileRoute("/call/new")({
   }),
   head: () => ({
     meta: [
-      { title: "Start a call — SaveLine" },
+      { title: "Start a call — Saela Way" },
       {
         name: "description",
         content:
           "Pick a cancellation reason, difficulty, and customer personality, then take the call live.",
       },
-      { property: "og:title", content: "Start a call — SaveLine" },
+      { property: "og:title", content: "Start a call — Saela Way" },
       {
         property: "og:description",
         content: "Pick a cancellation scenario and take the retention call live.",

@@ -180,7 +180,7 @@ export const createLinearFollowUps = createServerFn({ method: "POST" })
     if (!actions.length) throw new Error("This call has no coaching actions to turn into issues.");
 
     const description = [
-      `From a SaveLine retention roleplay with **${customer}**.`,
+      `From a Saela Way retention roleplay with **${customer}**.`,
       `Reason: ${session.scenario?.reasonLabel ?? "—"} · Outcome: ${outcomeLabel(session.outcome)} · Score: ${
         session.overall_score ?? "—"
       }/100`,

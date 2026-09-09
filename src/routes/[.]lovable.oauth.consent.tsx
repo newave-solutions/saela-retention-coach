@@ -79,7 +79,7 @@ function Consent() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Connect {clientName} to your SaveLine account</CardTitle>
+          <CardTitle>Connect {clientName} to your Saela Way account</CardTitle>
           <CardDescription>
             {clientName} will be able to read your practice calls, scorecards and coaching as you.
           </CardDescription>
