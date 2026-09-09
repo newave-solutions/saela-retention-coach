@@ -172,9 +172,10 @@ function Scorecard() {
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
                     <p className="rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
-                      Graded against Saela Pest Control service standards: protect the home first,
-                      be straight about the treatment, honor the agreement, and win the save with
-                      responsiveness rather than price.
+                      Graded on the Saela Way (GEOC): gratitude for their business, empathy that
+                      validates the concern, personal ownership of the resolution, and clarity on
+                      the fix — plus asking their price point and meeting in the middle instead of
+                      leading with a discount.
                     </p>
                     <CoachList title="Did well" items={data.coaching.didWell} tone="text-success" />
                     <CoachList title="Missed" items={data.coaching.missed} tone="text-destructive" />
