@@ -85,10 +85,26 @@ function AuthPage() {
   }
 
   async function google() {
+    setBusy(true);
     try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: next ? window.location.origin + next : window.location.origin });
-    } catch {
-      toast.error("Google sign-in didn't go through. Try email instead.");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+
+      if (result.error) {
+        setBusy(false);
+        toast.error(result.error.message || "Google sign-in didn't go through. Try email instead.");
+        return;
+      }
+
+      if (result.redirected) return;
+
+      afterAuth();
+    } catch (err) {
+      setBusy(false);
+      toast.error(
+        err instanceof Error ? err.message : "Google sign-in didn't go through. Try email instead.",
+      );
     }
   }
 
@@ -187,8 +203,14 @@ function AuthPage() {
               <span className="h-px flex-1 bg-border" />
             </div>
 
-            <Button variant="outline" className="w-full" onClick={google}>
-              Continue with Google
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={busy}
+              onClick={google}
+            >
+              {busy ? "Opening Google..." : "Continue with Google"}
             </Button>
           </CardContent>
         </Card>
