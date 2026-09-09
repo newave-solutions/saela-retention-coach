@@ -85,10 +85,26 @@ function AuthPage() {
   }
 
   async function google() {
+    setBusy(true);
     try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: next ? window.location.origin + next : window.location.origin });
-    } catch {
-      toast.error("Google sign-in didn't go through. Try email instead.");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+
+      if (result.error) {
+        setBusy(false);
+        toast.error(result.error.message || "Google sign-in didn't go through. Try email instead.");
+        return;
+      }
+
+      if (result.redirected) return;
+
+      afterAuth();
+    } catch (err) {
+      setBusy(false);
+      toast.error(
+        err instanceof Error ? err.message : "Google sign-in didn't go through. Try email instead.",
+      );
     }
   }
 
