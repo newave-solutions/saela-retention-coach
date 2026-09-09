@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   OUTCOME_LABELS,
   SCORE_LABELS,
+  normalizeScores,
   type Coaching,
   type Outcome,
   type ScoreBreakdown,
