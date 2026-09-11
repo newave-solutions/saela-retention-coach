@@ -9,7 +9,13 @@ import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
 import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
-import { settingsFor, shapeLine, voiceForScenario, type Mood } from "@/lib/voice-direction";
+import {
+  instructionsFor,
+  settingsFor,
+  shapeLine,
+  voiceForScenario,
+  type Mood,
+} from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -85,9 +91,16 @@ function LiveCall() {
   const speakAs = useCallback(
     async (text: string, mood: Mood) => {
       const current = scenarioRef.current;
-      await voice.say(current ? shapeLine(text, current, mood) : text, {
-        voice: current ? voiceForScenario(current) : undefined,
-        settings: current ? settingsFor(current, mood) : undefined,
+      if (!current) {
+        await voice.say(text);
+        return;
+      }
+      const assigned = current.voice ?? voiceForScenario(current);
+      await voice.say(shapeLine(text, current, mood), {
+        voice: assigned.id,
+        provider: assigned.provider,
+        instructions: instructionsFor(assigned, current, mood),
+        settings: settingsFor(current, mood),
       });
     },
     [voice],
