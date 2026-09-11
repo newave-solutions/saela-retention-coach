@@ -62,7 +62,12 @@ export function useCustomerVoice() {
   const say = useCallback(
     async (
       text: string,
-      options?: { voice?: string | undefined; settings?: VoiceSettings | undefined },
+      options?: {
+        voice?: string | undefined;
+        provider?: "elevenlabs" | "gateway" | undefined;
+        instructions?: string | undefined;
+        settings?: VoiceSettings | undefined;
+      },
     ) => {
       if (!text.trim()) return;
       stop();
@@ -78,6 +83,8 @@ export function useCustomerVoice() {
           body: JSON.stringify({
             text,
             voice: options?.voice,
+            provider: options?.provider,
+            instructions: options?.instructions,
             settings: options?.settings,
           }),
           signal: controller.signal,
