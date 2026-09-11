@@ -975,6 +975,160 @@ const SEEDS: Record<CancelReason, Seed[]> = {
       ],
     },
   ],
+  moved_moving: [
+    {
+      statedReason: "They're closing on a new house across town in three weeks and want the account shut off.",
+      hiddenMotive:
+        "They assume service can't move with them and nobody ever told them otherwise. Underneath it, they're worried they'll be charged an early termination fee for a move they can't avoid.",
+      emotionalDriver: "Fear of being penalized for a life change.",
+      saveConditions: [
+        "Agent congratulates them and asks where they're headed and when",
+        "Agent asks whether the move is inside the service area before assuming anything",
+        "Agent explains the transfer plainly, including what happens to the agreement",
+      ],
+      dealBreakers: [
+        "Reading agreement terms at them before understanding the move",
+        "Processing a cancellation without offering a transfer",
+        "Vague answers about fees",
+      ],
+      acceptableResolutions: [
+        "Transfer service to the new address with the timing lined up to move-in",
+        "Final service at the old home plus an initial at the new one",
+        "Clean, honest cancellation if the new address is outside the footprint",
+      ],
+      openings: [
+        "Hi — we're moving at the end of the month, so I need to cancel the service.",
+        "Yeah, I need to close out my account. We bought a house in another town.",
+      ],
+    },
+    {
+      statedReason: "They're selling the home and say the buyer can decide for themselves.",
+      hiddenMotive:
+        "The move is real, but they're also quietly unhappy — the last two services were rushed and they never said anything. Moving is the polite exit.",
+      emotionalDriver: "Avoiding a confrontation about service they already gave up on.",
+      saveConditions: [
+        "Agent asks whether anything about the service also contributed to the decision",
+        "Agent hears the rushed-visit complaint without getting defensive",
+        "Agent owns it and offers a real resolution, not just a transfer form",
+      ],
+      dealBreakers: [
+        "Taking the move at face value and closing the call",
+        "Pitching a new-homeowner referral before listening",
+        "Explaining away the short visits",
+      ],
+      acceptableResolutions: [
+        "Service recovery visit before the move plus transfer to the new address",
+        "New-homeowner handoff for the buyer with a proper introduction",
+        "Honest close-out with the service complaint documented",
+      ],
+      openings: [
+        "We're selling the house, so go ahead and cancel. New owners can do their own thing.",
+        "House is under contract. I don't need the service anymore.",
+      ],
+    },
+    {
+      statedReason: "They already moved two weeks ago and are annoyed they were billed after.",
+      hiddenMotive:
+        "The billing charge is the trigger, but the real damage is that they told the technician about the move and nothing was noted on the account.",
+      emotionalDriver: "Feeling unheard by the people who were standing in their yard.",
+      saveConditions: [
+        "Agent owns the missed note personally instead of blaming the field",
+        "Agent resolves the billing question in specific terms with a date",
+        "Agent asks about the new address before assuming the relationship is over",
+      ],
+      dealBreakers: [
+        "Saying there's no record of them mentioning it",
+        "Making them call back or wait for another department",
+        "Offering a discount instead of correcting the charge",
+      ],
+      acceptableResolutions: [
+        "Correct the billing and confirm in writing with a date",
+        "Transfer service to the new address if it's in the area",
+        "Documented close-out with the root cause recorded",
+      ],
+      openings: [
+        "We moved out two weeks ago and you still charged me. Cancel it.",
+        "I told your tech we were moving. Why am I still being billed?",
+      ],
+    },
+  ],
+  no_activity: [
+    {
+      statedReason: "They haven't seen a single bug in months, so they don't think they need service.",
+      hiddenMotive:
+        "Nobody ever explained the difference between reactive treatment and prevention. They think they're paying for nothing rather than paying for the reason nothing is happening.",
+      emotionalDriver: "Feeling like they're paying for a service that does nothing.",
+      saveConditions: [
+        "Agent asks what pests started the service in the first place",
+        "Agent ties the quiet months back to the customer's own history, not a generic line",
+        "Agent explains prevention in plain language without lecturing",
+      ],
+      dealBreakers: [
+        "Generic 'that means it's working' with nothing behind it",
+        "Scare tactics about infestations",
+        "Discount instead of an explanation",
+      ],
+      acceptableResolutions: [
+        "Service history review that shows what was found and treated",
+        "Right-sized frequency that matches their actual risk",
+        "Seasonal or exterior-only plan if that genuinely fits",
+      ],
+      openings: [
+        "Honestly I haven't seen a bug in ages, so I think we're done.",
+        "Hey — the problem's gone. I don't think I need this anymore.",
+      ],
+    },
+    {
+      statedReason: "The original ant problem is solved and they say they only signed up for that.",
+      hiddenMotive:
+        "They believe the agreement ended when the problem did, and they're bracing for a fight about a term they don't remember agreeing to.",
+      emotionalDriver: "Expecting to be trapped by fine print.",
+      saveConditions: [
+        "Agent explains the agreement honestly and calmly, without threat",
+        "Agent asks whether anything else pushed the decision",
+        "Agent offers a choice that respects what they actually want",
+      ],
+      dealBreakers: [
+        "Leading with the early termination fee",
+        "Implying they didn't read what they signed",
+        "Pressure or false urgency",
+      ],
+      acceptableResolutions: [
+        "Reduced frequency for the remainder of the term",
+        "Prevention-only plan at a fair price",
+        "Honest cancellation with terms clearly explained if that's right for them",
+      ],
+      openings: [
+        "The ants are gone. That's all I signed up for, so cancel it.",
+        "I only wanted this until the ant problem stopped. It stopped.",
+      ],
+    },
+    {
+      statedReason: "A family member told them recurring pest control is a waste of money.",
+      hiddenMotive:
+        "They actually like the service. They're defending a decision to someone else and need something concrete to point at to justify keeping it.",
+      emotionalDriver: "Being second-guessed at home.",
+      saveConditions: [
+        "Agent asks what specifically made them start service and what's changed",
+        "Agent gives them a concrete, specific value they can repeat to someone else",
+        "Agent asks what their price point would need to be to make it easy",
+      ],
+      dealBreakers: [
+        "Arguing with the absent family member's opinion",
+        "Overselling with statistics",
+        "Ignoring the money side entirely",
+      ],
+      acceptableResolutions: [
+        "Written summary of what's been found and prevented on their property",
+        "Frequency or payment structure that fits the household budget",
+        "Meet-in-the-middle price built around the number they name",
+      ],
+      openings: [
+        "My husband thinks this is a waste of money, so I guess we're cancelling.",
+        "I've been told we don't need this anymore. Go ahead and close it out.",
+      ],
+    },
+  ],
 };
 
 function pick<T>(list: readonly T[]): T {

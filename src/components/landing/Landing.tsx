@@ -45,8 +45,8 @@ const FEATURES = [
   },
   {
     icon: BarChart3,
-    title: "Graded on the Saela Way",
-    body: "Every call is scored on gratitude, empathy, ownership, clarity and negotiation, with coaching you can act on.",
+    title: "Graded on the Resolution Playbook",
+    body: "Scored on help people, build value, over-communicate, trust and integrity, and hold the line together — with coaching you can act on.",
   },
   {
     icon: Waves,
@@ -235,7 +235,7 @@ export function Landing() {
             {[
               { v: "36+", l: "Scripted cancellation scenarios" },
               { v: "10", l: "Caller personalities, from stonewaller to steamroller" },
-              { v: "5", l: "GEOC skills scored on every call" },
+              { v: "5", l: "Playbook values scored on every call" },
             ].map((s, i) => (
               <Reveal key={s.l} delay={i * 90} className="text-center">
                 <p className="font-display text-4xl font-semibold">{s.v}</p>

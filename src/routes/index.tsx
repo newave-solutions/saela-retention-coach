@@ -114,9 +114,11 @@ function Dashboard() {
           </div>
 
           <p className="mt-6 max-w-xl text-sm leading-relaxed opacity-90">
-            Every call is graded on the Saela Way — GEOC: gratitude for their business, empathy that
-            validates the frustration, ownership of the fix, and clarity on the resolution. Ask for
-            their price point and meet them in the middle; three real attempts before a dollar moves.
+            Our job is not to stop a cancellation — it's to help the customer and resolve the
+            concern. Every call is graded on the Saela Customer Resolution Playbook: help people,
+            build value, over-communicate, trust and integrity, and hold the line together. Connect,
+            discover the why behind the why, resolve, confirm. Retention is the outcome; resolution
+            is the work.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">

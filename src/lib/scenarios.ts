@@ -7,16 +7,20 @@ export const CANCEL_REASONS = [
   "poor_experience",
   "agreement_dispute",
   "product_concerns",
+  "moved_moving",
+  "no_activity",
 ] as const;
 export type CancelReason = (typeof CANCEL_REASONS)[number];
 
 export const REASON_LABELS: Record<CancelReason, string> = {
-  competitor_switch: "Switching providers",
+  competitor_switch: "Switchover",
   affordability: "Price / affordability",
-  persistent_activity: "Pests still active",
-  poor_experience: "Poor service experience",
+  persistent_activity: "Still seeing activity",
+  poor_experience: "Poor experience",
   agreement_dispute: "Agreement dispute",
   product_concerns: "Product safety concerns",
+  moved_moving: "Moved / moving",
+  no_activity: "No longer seeing activity",
 };
 
 export const DIFFICULTIES = ["standard", "hard", "brutal"] as const;
@@ -110,24 +114,27 @@ export type CustomerResult = {
   endReason: "saved" | "partial" | "cancelled" | null;
 };
 
-/** Scored against the Saela Way: Gratitude, Empathy, Ownership, Clarity — plus negotiation. */
+/**
+ * Scored against the Saela Customer Resolution Playbook values:
+ * Help People, Build Value, Over-Communicate, Trust & Integrity, Hold the Line Together.
+ */
 export type ScoreBreakdown = {
-  gratitude: number;
-  empathy: number;
-  ownership: number;
-  clarity: number;
-  negotiation: number;
+  helpPeople: number;
+  buildValue: number;
+  overCommunicate: number;
+  trustIntegrity: number;
+  ownOutcome: number;
 };
 
 export const SCORE_LABELS: Record<keyof ScoreBreakdown, string> = {
-  gratitude: "Gratitude",
-  empathy: "Empathy",
-  ownership: "Ownership",
-  clarity: "Clarity",
-  negotiation: "Negotiation & control",
+  helpPeople: "Help people",
+  buildValue: "Build value",
+  overCommunicate: "Over-communicate",
+  trustIntegrity: "Trust & integrity",
+  ownOutcome: "Hold the line together",
 };
 
-/** Older calls were stored with the previous category keys — map them in order. */
+/** Older calls were stored with previous category keys — map them in order. */
 export function normalizeScores(raw: unknown): ScoreBreakdown | null {
   if (!raw || typeof raw !== "object") return null;
   const record = raw as Record<string, number | undefined>;
@@ -139,11 +146,11 @@ export function normalizeScores(raw: unknown): ScoreBreakdown | null {
     return 0;
   };
   return {
-    gratitude: value("gratitude", "discovery"),
-    empathy: value("empathy"),
-    ownership: value("ownership", "objectionHandling"),
-    clarity: value("clarity", "offerFit"),
-    negotiation: value("negotiation", "control"),
+    helpPeople: value("helpPeople", "empathy", "discovery"),
+    buildValue: value("buildValue", "negotiation", "offerFit"),
+    overCommunicate: value("overCommunicate", "clarity"),
+    trustIntegrity: value("trustIntegrity", "gratitude"),
+    ownOutcome: value("ownOutcome", "ownership", "objectionHandling", "control"),
   };
 }
 

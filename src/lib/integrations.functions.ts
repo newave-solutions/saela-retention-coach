@@ -112,11 +112,13 @@ export const postSessionToTeams = createServerFn({ method: "POST" })
         session.outcome,
       )} · <b>Score:</b> ${session.overall_score ?? "—"}/100</p>`,
       session.scores
-        ? `<p><b>GEOC breakdown:</b> gratitude ${session.scores.gratitude ?? 0}, empathy ${
-            session.scores.empathy ?? 0
-          }, ownership ${session.scores.ownership ?? 0}, clarity ${
-            session.scores.clarity ?? 0
-          }, negotiation ${session.scores.negotiation ?? 0}</p>`
+        ? `<p><b>Playbook breakdown:</b> help people ${
+            session.scores.helpPeople ?? 0
+          }, build value ${session.scores.buildValue ?? 0}, over-communicate ${
+            session.scores.overCommunicate ?? 0
+          }, trust &amp; integrity ${session.scores.trustIntegrity ?? 0}, hold the line ${
+            session.scores.ownOutcome ?? 0
+          }</p>`
         : "",
       c?.hiddenMotive ? `<p><b>Real reason:</b> ${escapeHtml(c.hiddenMotive)}</p>` : "",
       c?.summary ? `<p>${escapeHtml(c.summary)}</p>` : "",
