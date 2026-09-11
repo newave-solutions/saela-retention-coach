@@ -72,6 +72,9 @@ function Dashboard() {
     },
   });
 
+  if (loading) return <div className="min-h-screen bg-background" />;
+  if (!user) return <Landing />;
+
   const graded = (sessions ?? []).filter((s) => s.status === "complete");
   const saves = graded.filter((s) => s.outcome === "saved").length;
   const partials = graded.filter((s) => s.outcome === "partial").length;
