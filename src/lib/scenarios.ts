@@ -7,16 +7,20 @@ export const CANCEL_REASONS = [
   "poor_experience",
   "agreement_dispute",
   "product_concerns",
+  "moved_moving",
+  "no_activity",
 ] as const;
 export type CancelReason = (typeof CANCEL_REASONS)[number];
 
 export const REASON_LABELS: Record<CancelReason, string> = {
-  competitor_switch: "Switching providers",
+  competitor_switch: "Switchover",
   affordability: "Price / affordability",
-  persistent_activity: "Pests still active",
-  poor_experience: "Poor service experience",
+  persistent_activity: "Still seeing activity",
+  poor_experience: "Poor experience",
   agreement_dispute: "Agreement dispute",
   product_concerns: "Product safety concerns",
+  moved_moving: "Moved / moving",
+  no_activity: "No longer seeing activity",
 };
 
 export const DIFFICULTIES = ["standard", "hard", "brutal"] as const;
