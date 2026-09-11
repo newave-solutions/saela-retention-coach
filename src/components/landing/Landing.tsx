@@ -45,8 +45,8 @@ const FEATURES = [
   },
   {
     icon: BarChart3,
-    title: "Graded on the Saela Way",
-    body: "Every call is scored on gratitude, empathy, ownership, clarity and negotiation, with coaching you can act on.",
+    title: "Graded on the Resolution Playbook",
+    body: "Scored on help people, build value, over-communicate, trust and integrity, and hold the line together — with coaching you can act on.",
   },
   {
     icon: Waves,
