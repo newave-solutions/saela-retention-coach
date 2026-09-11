@@ -58,10 +58,6 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) void navigate({ to: "/auth" });
-  }, [loading, user, navigate]);
-
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user?.id],
     enabled: Boolean(user),
