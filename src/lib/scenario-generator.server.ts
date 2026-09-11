@@ -20,16 +20,38 @@ type Seed = {
   openings: string[];
 };
 
-const FIRST_NAMES = [
-  "Dana","Marcus","Ashley","Ted","Alicia","Roy","Jen","Curtis","Beth","Omar","Sandra","Wes",
-  "Tyler","Megan","Darnell","Kristin","Brandon","Shauna","Vince","Lori","Chad","Denise","Hector",
-  "Kayla","Randy","Monique","Grant","Paula","Dustin","Tasha","Bill","Carmen","Nate","Rhonda",
-];
-const LAST_NAMES = [
-  "Whitaker","Alvarez","Doyle","Nakamura","Boone","Ferrell","Okafor","Kaminski","Reyes","Salinas",
-  "Mercer","Hutchins","Vaughn","Delgado","Braddock","Sizemore","Lindquist","Pruitt","Cavanaugh",
-  "Escobedo","Tolliver","Ridgeway","Barlowe","McKinney",
-];
+type NameGroupKey = "american" | "indian" | "arabic" | "british" | "australian";
+
+const NAME_POOLS: Record<
+  NameGroupKey,
+  { male: string[]; female: string[]; last: string[] }
+> = {
+  american: {
+    male: ["Marcus","Ted","Roy","Curtis","Wes","Tyler","Darnell","Brandon","Vince","Chad","Hector","Randy","Grant","Dustin","Bill","Nate","Cody","Terrence"],
+    female: ["Dana","Ashley","Alicia","Jen","Beth","Sandra","Megan","Kristin","Shauna","Lori","Denise","Kayla","Monique","Paula","Tasha","Carmen","Rhonda","Brittany"],
+    last: ["Whitaker","Alvarez","Doyle","Boone","Ferrell","Kaminski","Reyes","Salinas","Mercer","Hutchins","Vaughn","Delgado","Braddock","Sizemore","Lindquist","Pruitt","Cavanaugh","Escobedo","Tolliver","Ridgeway","Barlowe","McKinney"],
+  },
+  indian: {
+    male: ["Rajiv","Amit","Vikram","Sanjay","Arjun","Deepak","Nikhil","Praveen","Suresh"],
+    female: ["Priya","Anjali","Kavya","Meera","Divya","Neha","Sunita","Radhika"],
+    last: ["Patel","Sharma","Iyer","Reddy","Chaudhary","Nair","Gupta","Desai","Rao","Menon"],
+  },
+  arabic: {
+    male: ["Omar","Khalid","Yousef","Tariq","Hassan","Sami","Rami","Nabil"],
+    female: ["Layla","Noor","Rania","Amira","Hala","Dalia","Yasmin","Salma"],
+    last: ["Haddad","Nasser","Khoury","Farouk","Aziz","Mansour","Rahman","Saleh","Darwish"],
+  },
+  british: {
+    male: ["Nigel","Gareth","Colin","Alistair","Graham","Ian"],
+    female: ["Fiona","Imogen","Clare","Harriet","Louise","Rosalind"],
+    last: ["Ashcroft","Pemberton","Fairbanks","Hollis","Wexley","Thorne","Ellery"],
+  },
+  australian: {
+    male: ["Bruce","Callum","Jarrah","Liam","Darren"],
+    female: ["Shazza","Kylie","Bree","Tegan","Nicola"],
+    last: ["Kirby","Docherty","Rundle","Halloran","Bramley","Whitlock"],
+  },
+};
 const PLANS = [
   "quarterly Protection Program",
   "Protection Program with Perimeter Plus Mosquito",
