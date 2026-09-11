@@ -22,10 +22,26 @@ export const startCall = createServerFn({ method: "POST" })
   .inputValidator((input: StartInput) => input)
   .handler(async ({ data, context }) => {
     const { generateScenario } = await import("@/lib/scenario-generator.server");
+    const { voiceKey } = await import("@/lib/voice-direction");
+
+    // Don't hand the trainee a voice they just heard.
+    const { data: recent } = await context.supabase
+      .from("training_sessions")
+      .select("scenario")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    const excludeVoices = (recent ?? [])
+      .map((row) => (row.scenario as unknown as FullScenario | null)?.voice)
+      .filter((voice): voice is NonNullable<FullScenario["voice"]> => Boolean(voice))
+      .map((voice) => voiceKey(voice));
+
     const scenario = generateScenario({
       reason: data.reason,
       difficulty: data.difficulty,
       personality: data.personality,
+      excludeVoices,
     });
 
     const opening: TranscriptTurn = {
