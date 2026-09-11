@@ -235,7 +235,7 @@ export function Landing() {
             {[
               { v: "36+", l: "Scripted cancellation scenarios" },
               { v: "10", l: "Caller personalities, from stonewaller to steamroller" },
-              { v: "5", l: "GEOC skills scored on every call" },
+              { v: "5", l: "Playbook values scored on every call" },
             ].map((s, i) => (
               <Reveal key={s.l} delay={i * 90} className="text-center">
                 <p className="font-display text-4xl font-semibold">{s.v}</p>
