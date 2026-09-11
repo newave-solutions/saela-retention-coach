@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { Headphones, LogOut, PhoneOutgoing, SlidersHorizontal, TrendingUp } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Landing } from "@/components/landing/Landing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,10 +58,6 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) void navigate({ to: "/auth" });
-  }, [loading, user, navigate]);
-
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user?.id],
     enabled: Boolean(user),
@@ -75,6 +71,9 @@ function Dashboard() {
       return data as unknown as SessionRow[];
     },
   });
+
+  if (loading) return <div className="min-h-screen bg-background" />;
+  if (!user) return <Landing />;
 
   const graded = (sessions ?? []).filter((s) => s.status === "complete");
   const saves = graded.filter((s) => s.outcome === "saved").length;
