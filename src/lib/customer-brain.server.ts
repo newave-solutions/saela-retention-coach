@@ -215,7 +215,7 @@ export async function gradeCall(
     .map((t) => `${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
     .join("\n");
 
-  const prompt = `Grade this retention call for a Saela Pest Control customer experience agent. Be a demanding coach — a generic, discount-first call belongs in the 20s-40s, and a genuinely excellent call is rare.
+  const prompt = `Grade this call against the Saela Customer Resolution Playbook. The agent's job is not to stop a cancellation — it is to help the customer and provide a resolution. Retention is the outcome; resolution is the work. Be a demanding coach: a generic, discount-first, pressure-based call belongs in the 20s-40s, and a genuinely excellent call is rare. An honest, well-handled call that still ends in cancellation because cancelling was right for the customer can still score well.
 
 HIDDEN MOTIVE the agent had to uncover: ${scenario.hiddenMotive}
 Save conditions: ${scenario.saveConditions.join(" | ")}
