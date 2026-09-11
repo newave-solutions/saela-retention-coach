@@ -9,6 +9,7 @@ import {
   type FullScenario,
   type Personality,
 } from "./scenarios";
+import { pickVoice, toAssignment } from "./voice-direction";
 
 type Seed = {
   statedReason: string;
@@ -20,16 +21,38 @@ type Seed = {
   openings: string[];
 };
 
-const FIRST_NAMES = [
-  "Dana","Marcus","Ashley","Ted","Alicia","Roy","Jen","Curtis","Beth","Omar","Sandra","Wes",
-  "Tyler","Megan","Darnell","Kristin","Brandon","Shauna","Vince","Lori","Chad","Denise","Hector",
-  "Kayla","Randy","Monique","Grant","Paula","Dustin","Tasha","Bill","Carmen","Nate","Rhonda",
-];
-const LAST_NAMES = [
-  "Whitaker","Alvarez","Doyle","Nakamura","Boone","Ferrell","Okafor","Kaminski","Reyes","Salinas",
-  "Mercer","Hutchins","Vaughn","Delgado","Braddock","Sizemore","Lindquist","Pruitt","Cavanaugh",
-  "Escobedo","Tolliver","Ridgeway","Barlowe","McKinney",
-];
+type NameGroupKey = "american" | "indian" | "arabic" | "british" | "australian";
+
+const NAME_POOLS: Record<
+  NameGroupKey,
+  { male: string[]; female: string[]; last: string[] }
+> = {
+  american: {
+    male: ["Marcus","Ted","Roy","Curtis","Wes","Tyler","Darnell","Brandon","Vince","Chad","Hector","Randy","Grant","Dustin","Bill","Nate","Cody","Terrence"],
+    female: ["Dana","Ashley","Alicia","Jen","Beth","Sandra","Megan","Kristin","Shauna","Lori","Denise","Kayla","Monique","Paula","Tasha","Carmen","Rhonda","Brittany"],
+    last: ["Whitaker","Alvarez","Doyle","Boone","Ferrell","Kaminski","Reyes","Salinas","Mercer","Hutchins","Vaughn","Delgado","Braddock","Sizemore","Lindquist","Pruitt","Cavanaugh","Escobedo","Tolliver","Ridgeway","Barlowe","McKinney"],
+  },
+  indian: {
+    male: ["Rajiv","Amit","Vikram","Sanjay","Arjun","Deepak","Nikhil","Praveen","Suresh"],
+    female: ["Priya","Anjali","Kavya","Meera","Divya","Neha","Sunita","Radhika"],
+    last: ["Patel","Sharma","Iyer","Reddy","Chaudhary","Nair","Gupta","Desai","Rao","Menon"],
+  },
+  arabic: {
+    male: ["Omar","Khalid","Yousef","Tariq","Hassan","Sami","Rami","Nabil"],
+    female: ["Layla","Noor","Rania","Amira","Hala","Dalia","Yasmin","Salma"],
+    last: ["Haddad","Nasser","Khoury","Farouk","Aziz","Mansour","Rahman","Saleh","Darwish"],
+  },
+  british: {
+    male: ["Nigel","Gareth","Colin","Alistair","Graham","Ian"],
+    female: ["Fiona","Imogen","Clare","Harriet","Louise","Rosalind"],
+    last: ["Ashcroft","Pemberton","Fairbanks","Hollis","Wexley","Thorne","Ellery"],
+  },
+  australian: {
+    male: ["Bruce","Callum","Jarrah","Liam","Darren"],
+    female: ["Shazza","Kylie","Bree","Tegan","Nicola"],
+    last: ["Kirby","Docherty","Rundle","Halloran","Bramley","Whitlock"],
+  },
+};
 const PLANS = [
   "quarterly Protection Program",
   "Protection Program with Perimeter Plus Mosquito",
@@ -962,15 +985,21 @@ export function generateScenario(input: {
   reason: CancelReason | null;
   difficulty: Difficulty;
   personality: Personality | null;
+  excludeVoices?: readonly string[];
 }): FullScenario {
   const reason = input.reason ?? pick(CANCEL_REASONS);
   const seed = pick(SEEDS[reason]);
   const personality = input.personality ?? pick(PERSONALITIES);
-  const customerName = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+
+  // Voice first, then a name that matches its gender and background.
+  const rosterVoice = pickVoice({ exclude: input.excludeVoices ?? [] });
+  const pool = NAME_POOLS[rosterVoice.nameGroup as NameGroupKey] ?? NAME_POOLS.american;
+  const customerName = `${pick(rosterVoice.gender === "female" ? pool.female : pool.male)} ${pick(pool.last)}`;
   const tenure = 1 + Math.floor(Math.random() * 8);
 
   return {
     customerName,
+    voice: toAssignment(rosterVoice),
     accountSummary: `${tenure}-year customer on a ${pick(PLANS)}. Balance current.`,
     reason,
     reasonLabel: REASON_LABELS[reason],
@@ -998,5 +1027,6 @@ export function toPublicScenario(scenario: FullScenario) {
     personality: scenario.personality,
     personalityLabel: scenario.personalityLabel,
     openingLine: scenario.openingLine,
+    ...(scenario.voice ? { voice: scenario.voice } : {}),
   };
 }

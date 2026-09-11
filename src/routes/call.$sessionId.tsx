@@ -9,7 +9,13 @@ import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
 import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
-import { settingsFor, shapeLine, voiceForScenario, type Mood } from "@/lib/voice-direction";
+import {
+  instructionsFor,
+  settingsFor,
+  shapeLine,
+  voiceForScenario,
+  type Mood,
+} from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -85,9 +91,16 @@ function LiveCall() {
   const speakAs = useCallback(
     async (text: string, mood: Mood) => {
       const current = scenarioRef.current;
-      await voice.say(current ? shapeLine(text, current, mood) : text, {
-        voice: current ? voiceForScenario(current) : undefined,
-        settings: current ? settingsFor(current, mood) : undefined,
+      if (!current) {
+        await voice.say(text);
+        return;
+      }
+      const assigned = current.voice ?? voiceForScenario(current);
+      await voice.say(shapeLine(text, current, mood), {
+        voice: assigned.id,
+        provider: assigned.provider,
+        instructions: instructionsFor(assigned, current, mood),
+        settings: settingsFor(current, mood),
       });
     },
     [voice],
@@ -192,8 +205,16 @@ function LiveCall() {
       <header className="brand-surface">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div>
-            <h1 className="text-base font-semibold leading-tight">
+            <h1 className="flex items-center gap-2 text-base font-semibold leading-tight">
               {scenario?.customerName ?? "Connecting..."}
+              {scenario?.voice ? (
+                <Badge
+                  variant="outline"
+                  className="border-white/30 bg-white/10 text-[10px] font-normal text-inherit"
+                >
+                  {scenario.voice.accentLabel}
+                </Badge>
+              ) : null}
             </h1>
             <p className="text-xs opacity-80">
               {scenario?.accountSummary ?? "Pulling up the account"}

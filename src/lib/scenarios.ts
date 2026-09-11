@@ -63,6 +63,15 @@ export function labelForPersonality(value: string): string {
   return PERSONALITY_LABELS[value as Personality] ?? "Guarded";
 }
 
+/** The voice this caller speaks with, chosen on the backend when the call starts. */
+export type VoiceAssignment = {
+  id: string;
+  provider: "elevenlabs" | "gateway";
+  gender: "male" | "female";
+  accentLabel: string;
+  instructions?: string;
+};
+
 /** The public half of a scenario. Safe to show the trainee mid-call. */
 export type PublicScenario = {
   customerName: string;
@@ -73,6 +82,7 @@ export type PublicScenario = {
   personality: Personality;
   personalityLabel: string;
   openingLine: string;
+  voice?: VoiceAssignment;
 };
 
 /** The full scenario, including the hidden motive. Server + post-call reveal only. */
