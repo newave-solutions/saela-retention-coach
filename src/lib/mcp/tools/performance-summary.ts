@@ -29,12 +29,19 @@ export default defineTool({
     const rows = (data ?? []) as any[];
     const avg = (values: number[]) =>
       values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : null;
-    const keys = ["gratitude", "empathy", "ownership", "clarity", "negotiation"] as const;
+    const keys = [
+      "helpPeople",
+      "buildValue",
+      "overCommunicate",
+      "trustIntegrity",
+      "ownOutcome",
+    ] as const;
     const legacy: Record<string, string> = {
-      gratitude: "discovery",
-      ownership: "objectionHandling",
-      clarity: "offerFit",
-      negotiation: "control",
+      helpPeople: "empathy",
+      buildValue: "negotiation",
+      overCommunicate: "clarity",
+      trustIntegrity: "gratitude",
+      ownOutcome: "ownership",
     };
     const categoryAverages: Record<string, number | null> = {};
     for (const key of keys) {
