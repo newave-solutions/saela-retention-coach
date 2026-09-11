@@ -9,6 +9,7 @@ import {
   type FullScenario,
   type Personality,
 } from "./scenarios";
+import { pickVoice, toAssignment } from "./voice-direction";
 
 type Seed = {
   statedReason: string;
@@ -984,15 +985,21 @@ export function generateScenario(input: {
   reason: CancelReason | null;
   difficulty: Difficulty;
   personality: Personality | null;
+  excludeVoices?: readonly string[];
 }): FullScenario {
   const reason = input.reason ?? pick(CANCEL_REASONS);
   const seed = pick(SEEDS[reason]);
   const personality = input.personality ?? pick(PERSONALITIES);
-  const customerName = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+
+  // Voice first, then a name that matches its gender and background.
+  const rosterVoice = pickVoice({ exclude: input.excludeVoices ?? [] });
+  const pool = NAME_POOLS[rosterVoice.nameGroup as NameGroupKey] ?? NAME_POOLS.american;
+  const customerName = `${pick(rosterVoice.gender === "female" ? pool.female : pool.male)} ${pick(pool.last)}`;
   const tenure = 1 + Math.floor(Math.random() * 8);
 
   return {
     customerName,
+    voice: toAssignment(rosterVoice),
     accountSummary: `${tenure}-year customer on a ${pick(PLANS)}. Balance current.`,
     reason,
     reasonLabel: REASON_LABELS[reason],
