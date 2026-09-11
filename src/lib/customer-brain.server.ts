@@ -225,18 +225,28 @@ ${endedOutcome ? `The customer ended the call as: ${endedOutcome}.` : "The agent
 TRANSCRIPT
 ${dialogue || "(no conversation took place)"}
 
-THE SAELA WAY — GEOC is the standard you grade against:
-- Gratitude: sincerely thanked the customer and acknowledged their business and tenure.
-- Empathy: directly acknowledged and validated the frustration in the customer's own terms, no "sorry you feel that way".
-- Ownership: took personal responsibility for resolving it — a named owner, a date, a follow-up — instead of passing it off or hiding behind policy.
-- Clarity: confirmed the real problem thoroughly and accurately, and stated the resolution in specific, unambiguous terms.
-- Negotiation & control: asked the customer directly what their price point is and built the offer around their number, used meet-in-the-middle rather than a random discount, made at least three genuine retention attempts before conceding money, and kept control of the call without steamrolling the customer.
+THE CALL FLOW the agent was supposed to run:
+1. CONNECT — start with curiosity, not defense: "Can I ask what's leading you to make the change?" Listen before explaining agreements, fees or discounts.
+2. DISCOVER — find the why behind the why: what is happening, and why does it matter to this customer.
+3. RESOLVE — match the solution to the actual problem instead of giving every customer the same offer.
+4. CONFIRM — over-communicate what happens, when, who owns it, pricing/agreement implications, and follow-up. Then confirm: "Does that address the concern you called about today?"
+5. DO WHAT IS RIGHT — no short-term save at the expense of long-term trust.
+6. OWN THE OUTCOME — document root cause, commitments, next action, owner and follow-up date; no cold handoffs.
 
-Penalize: leading with a discount, scripted empathy, arguing, blaming the customer, over-promising, and letting the customer drive the whole call. Reward: gratitude that lands, specific ownership, accurate problem confirmation, and a customized offer built off the customer's stated number.
+THE FIVE VALUES you score:
+- Help people: understood what the customer actually needed; asked the two-layer discovery questions; got past the stated reason to the root cause.
+- Build value: connected the solution to what matters to THIS customer (better pest results, lower financial burden, convenience, confidence, prevention, service recovery, a smooth transfer) rather than a canned pitch or a reflex discount.
+- Over-communicate: stated exactly what will happen, when, who owns it, what it costs, and confirmed the customer understood.
+- Trust & integrity: honest about terms and limits, no hidden information, no false urgency, no promises Operations can't deliver, no making the customer feel trapped. Recommending cancellation when that is genuinely right scores HIGH here.
+- Hold the line together: took personal ownership, named the next step and owner, and set up a real handoff and follow-up instead of passing the customer off.
+
+Empowerment context: Level 1 Own It (discovery, education, scheduling/payment options, retreatments), Level 2 Resolve It (approved credits, pricing accommodations, service enhancements), Level 3 Elevate It (contract exceptions, large credits, repeated failures) — an agent who elevates should still keep ownership, not transfer and disappear.
+
+Penalize: jumping to discounts, defending the company, talking too much, script-reading, pressuring, focusing on the cancellation instead of the concern, over-promising, and cold transfers. Reward: curiosity first, two-layer discovery, a solution matched to the root cause, and clear commitments with an owner and a date.
 
 Score each 0-100. Return ONLY strict JSON:
-{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"gratitude":number,"empathy":number,"ownership":number,"clarity":number,"negotiation":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
-didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call and naming the GEOC element involved.`;
+{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"helpPeople":number,"buildValue":number,"overCommunicate":number,"trustIntegrity":number,"ownOutcome":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
+didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call and naming the playbook step or value involved.`;
 
   const raw = await callGateway({
     model: GRADE_MODEL,
@@ -244,7 +254,7 @@ didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing 
       {
         role: "system",
         content:
-          "You are a retention coach for Saela Pest Control who grades strictly against the GEOC framework (Gratitude, Empathy, Ownership, Clarity). You return strict JSON only.",
+          "You are a retention coach for Saela Pest Control who grades strictly against the Saela Customer Resolution Playbook (Help People, Build Value, Over-Communicate, Trust & Integrity, Hold the Line Together). You return strict JSON only.",
       },
       { role: "user", content: prompt },
     ],
@@ -259,15 +269,20 @@ didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing 
   }>(raw);
 
   const scores: ScoreBreakdown = {
-    gratitude: clamp(parsed?.scores?.gratitude, 0),
-    empathy: clamp(parsed?.scores?.empathy, 0),
-    ownership: clamp(parsed?.scores?.ownership, 0),
-    clarity: clamp(parsed?.scores?.clarity, 0),
-    negotiation: clamp(parsed?.scores?.negotiation, 0),
+    helpPeople: clamp(parsed?.scores?.helpPeople, 0),
+    buildValue: clamp(parsed?.scores?.buildValue, 0),
+    overCommunicate: clamp(parsed?.scores?.overCommunicate, 0),
+    trustIntegrity: clamp(parsed?.scores?.trustIntegrity, 0),
+    ownOutcome: clamp(parsed?.scores?.ownOutcome, 0),
   };
 
   const average = Math.round(
-    (scores.gratitude + scores.empathy + scores.ownership + scores.clarity + scores.negotiation) / 5,
+    (scores.helpPeople +
+      scores.buildValue +
+      scores.overCommunicate +
+      scores.trustIntegrity +
+      scores.ownOutcome) /
+      5,
   );
 
   const outcome: Outcome =
