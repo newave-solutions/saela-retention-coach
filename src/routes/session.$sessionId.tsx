@@ -137,7 +137,7 @@ function Scorecard() {
               <Card className="card-soft mt-4">
                 <CardHeader>
                   <h2 className="text-base font-semibold leading-none">
-                    The Saela Way — GEOC scores
+                    Customer Resolution Playbook scores
                   </h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
