@@ -137,6 +137,9 @@ function Dashboard() {
       </header>
 
       <div className="mx-auto max-w-5xl px-4 py-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          Retention track — cancellation calls
+        </h2>
         <section className="grid gap-4 sm:grid-cols-2">
           <Card className="card-soft border-border bg-card">
             <CardHeader>
@@ -177,64 +180,141 @@ function Dashboard() {
           </Card>
         </section>
 
-        <section className="mt-10">
-          <div className="mb-3 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-              Call history
-            </h2>
-          </div>
+        <h2 className="mb-3 mt-10 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          CES track — service calls & listening
+        </h2>
+        <section className="grid gap-4 sm:grid-cols-2">
+          <Card className="card-soft border-border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Ear className="h-4 w-4 text-accent" />
+                Take a service call
+              </CardTitle>
+              <CardDescription>
+                Reservices, reschedules, access problems and out-of-agreement resigns. Every detail
+                they give you is graded on whether you caught it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full">
+                <Link to="/service/new" search={{ quick: true }}>
+                  Answer the next service call
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
 
-          {!sessions?.length ? (
-            <p className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center text-sm text-muted-foreground">
-              No calls yet. Your first one shows up here with a full scorecard.
-            </p>
-          ) : (
-            <ul className="card-soft divide-y divide-border overflow-hidden rounded-xl border border-border">
-              {sessions.map((s) => (
-                <li key={s.id}>
-                  <Link
-                    to="/session/$sessionId"
-                    params={{ sessionId: s.id }}
-                    className="flex flex-wrap items-center justify-between gap-3 bg-card px-4 py-3.5 transition-colors hover:bg-secondary"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">
-                        {s.scenario?.customerName ?? "Customer"} ·{" "}
-                        {s.scenario?.reasonLabel ?? "Cancellation"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatWhen(s.created_at)} ·{" "}
-                        {labelForDifficulty(s.scenario?.difficulty ?? "hard")}
-                        {s.duration_seconds
-                          ? ` · ${Math.max(1, Math.round(s.duration_seconds / 60))} min`
-                          : ""}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {s.status === "complete" ? (
-                        <>
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${outcomeTone(s.outcome)}`}
-                          >
-                            {s.outcome === "partial" ? "partial save" : (s.outcome ?? "graded")}
-                          </span>
-                          <Badge variant="secondary">{s.overall_score ?? 0}</Badge>
-                        </>
-                      ) : (
-                        <Badge variant="outline">unfinished</Badge>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+          <Card className="card-soft">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <SlidersHorizontal className="h-4 w-4 text-ring" />
+                Build a service scenario
+              </CardTitle>
+              <CardDescription>
+                Pick the call type — including resign practice for customers out of agreement.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/service/new" search={{ quick: false }}>
+                  Configure a service call
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </section>
+
+        <HistorySection
+          title="Retention call history"
+          rows={retentionSessions}
+          emptyText="No cancellation calls yet. Your first one shows up here with a full scorecard."
+          kind="retention"
+        />
+
+        <HistorySection
+          title="Service call history"
+          rows={serviceSessions}
+          emptyText="No service calls yet. Take one and we'll grade what you heard."
+          kind="service"
+        />
       </div>
     </main>
   );
 }
+
+function HistorySection({
+  title,
+  rows,
+  emptyText,
+  kind,
+}: {
+  title: string;
+  rows: SessionRow[];
+  emptyText: string;
+  kind: "retention" | "service";
+}) {
+  return (
+    <section className="mt-10">
+      <div className="mb-3 flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          {title}
+        </h2>
+      </div>
+
+      {!rows.length ? (
+        <p className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center text-sm text-muted-foreground">
+          {emptyText}
+        </p>
+      ) : (
+        <ul className="card-soft divide-y divide-border overflow-hidden rounded-xl border border-border">
+          {rows.map((s) => (
+            <li key={s.id}>
+              <Link
+                to={kind === "service" ? "/service-session/$sessionId" : "/session/$sessionId"}
+                params={{ sessionId: s.id }}
+                className="flex flex-wrap items-center justify-between gap-3 bg-card px-4 py-3.5 transition-colors hover:bg-secondary"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">
+                    {s.scenario?.customerName ?? "Customer"} ·{" "}
+                    {s.scenario?.reasonLabel ?? s.scenario?.callTypeLabel ?? "Call"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatWhen(s.created_at)} ·{" "}
+                    {labelForDifficulty(s.scenario?.difficulty ?? "hard")}
+                    {s.duration_seconds
+                      ? ` · ${Math.max(1, Math.round(s.duration_seconds / 60))} min`
+                      : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {s.status === "complete" ? (
+                    <>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${outcomeTone(s.outcome)}`}
+                      >
+                        {s.outcome === "partial"
+                          ? kind === "service"
+                            ? "partly resolved"
+                            : "partial save"
+                          : (s.outcome ?? "graded")}
+                      </span>
+                      <Badge variant="secondary">{s.overall_score ?? 0}</Badge>
+                    </>
+                  ) : (
+                    <Badge variant="outline">unfinished</Badge>
+                  )}
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
