@@ -1184,3 +1184,14 @@ export function toPublicScenario(scenario: FullScenario) {
     ...(scenario.voice ? { voice: scenario.voice } : {}),
   };
 }
+
+/** Pick a caller name that matches a roster voice's gender and background. */
+export function nameForVoice(voice: { gender: "male" | "female"; nameGroup: string }): string {
+  const pool = NAME_POOLS[voice.nameGroup as NameGroupKey] ?? NAME_POOLS.american;
+  return `${pick(voice.gender === "female" ? pool.female : pool.male)} ${pick(pool.last)}`;
+}
+
+/** Shared plan descriptions for account summaries. */
+export function randomPlan(): string {
+  return pick(PLANS);
+}

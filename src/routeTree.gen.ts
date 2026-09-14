@@ -16,6 +16,9 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as ApiSpeechRouteImport } from './routes/api/speech'
 import { Route as CallSessionIdRouteImport } from './routes/call.$sessionId'
 import { Route as CallNewRouteImport } from './routes/call.new'
+import { Route as ServiceSessionSessionIdRouteImport } from './routes/service-session.$sessionId'
+import { Route as ServiceSessionIdRouteImport } from './routes/service.$sessionId'
+import { Route as ServiceNewRouteImport } from './routes/service.new'
 import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -55,6 +58,21 @@ const CallNewRoute = CallNewRouteImport.update({
   path: '/call/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServiceSessionSessionIdRoute = ServiceSessionSessionIdRouteImport.update({
+  id: '/service-session/$sessionId',
+  path: '/service-session/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceSessionIdRoute = ServiceSessionIdRouteImport.update({
+  id: '/service/$sessionId',
+  path: '/service/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceNewRoute = ServiceNewRouteImport.update({
+  id: '/service/new',
+  path: '/service/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SessionSessionIdRoute = SessionSessionIdRouteImport.update({
   id: '/session/$sessionId',
   path: '/session/$sessionId',
@@ -74,6 +92,9 @@ export interface FileRoutesByFullPath {
   '/api/speech': typeof ApiSpeechRoute
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
+  '/service-session/$sessionId': typeof ServiceSessionSessionIdRoute
+  '/service/$sessionId': typeof ServiceSessionIdRoute
+  '/service/new': typeof ServiceNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
@@ -85,6 +106,9 @@ export interface FileRoutesByTo {
   '/api/speech': typeof ApiSpeechRoute
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
+  '/service-session/$sessionId': typeof ServiceSessionSessionIdRoute
+  '/service/$sessionId': typeof ServiceSessionIdRoute
+  '/service/new': typeof ServiceNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
@@ -97,6 +121,9 @@ export interface FileRoutesById {
   '/api/speech': typeof ApiSpeechRoute
   '/call/$sessionId': typeof CallSessionIdRoute
   '/call/new': typeof CallNewRoute
+  '/service-session/$sessionId': typeof ServiceSessionSessionIdRoute
+  '/service/$sessionId': typeof ServiceSessionIdRoute
+  '/service/new': typeof ServiceNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
@@ -110,6 +137,9 @@ export interface FileRouteTypes {
     | '/api/speech'
     | '/call/$sessionId'
     | '/call/new'
+    | '/service-session/$sessionId'
+    | '/service/$sessionId'
+    | '/service/new'
     | '/session/$sessionId'
     | '/.lovable/oauth/consent'
   fileRoutesByTo: FileRoutesByTo
@@ -121,6 +151,9 @@ export interface FileRouteTypes {
     | '/api/speech'
     | '/call/$sessionId'
     | '/call/new'
+    | '/service-session/$sessionId'
+    | '/service/$sessionId'
+    | '/service/new'
     | '/session/$sessionId'
     | '/.lovable/oauth/consent'
   id:
@@ -132,6 +165,9 @@ export interface FileRouteTypes {
     | '/api/speech'
     | '/call/$sessionId'
     | '/call/new'
+    | '/service-session/$sessionId'
+    | '/service/$sessionId'
+    | '/service/new'
     | '/session/$sessionId'
     | '/.lovable/oauth/consent'
   fileRoutesById: FileRoutesById
@@ -144,6 +180,9 @@ export interface RootRouteChildren {
   ApiSpeechRoute: typeof ApiSpeechRoute
   CallSessionIdRoute: typeof CallSessionIdRoute
   CallNewRoute: typeof CallNewRoute
+  ServiceSessionSessionIdRoute: typeof ServiceSessionSessionIdRoute
+  ServiceSessionIdRoute: typeof ServiceSessionIdRoute
+  ServiceNewRoute: typeof ServiceNewRoute
   SessionSessionIdRoute: typeof SessionSessionIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
 }
@@ -199,6 +238,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CallNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/service-session/$sessionId': {
+      id: '/service-session/$sessionId'
+      path: '/service-session/$sessionId'
+      fullPath: '/service-session/$sessionId'
+      preLoaderRoute: typeof ServiceSessionSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service/$sessionId': {
+      id: '/service/$sessionId'
+      path: '/service/$sessionId'
+      fullPath: '/service/$sessionId'
+      preLoaderRoute: typeof ServiceSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service/new': {
+      id: '/service/new'
+      path: '/service/new'
+      fullPath: '/service/new'
+      preLoaderRoute: typeof ServiceNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/session/$sessionId': {
       id: '/session/$sessionId'
       path: '/session/$sessionId'
@@ -225,6 +285,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSpeechRoute: ApiSpeechRoute,
   CallSessionIdRoute: CallSessionIdRoute,
   CallNewRoute: CallNewRoute,
+  ServiceSessionSessionIdRoute: ServiceSessionSessionIdRoute,
+  ServiceSessionIdRoute: ServiceSessionIdRoute,
+  ServiceNewRoute: ServiceNewRoute,
   SessionSessionIdRoute: SessionSessionIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
 }
