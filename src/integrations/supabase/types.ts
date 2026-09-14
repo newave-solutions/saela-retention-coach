@@ -36,6 +36,7 @@ export type Database = {
         Row: {
           coaching: Json | null
           created_at: string
+          detail_checks: Json | null
           duration_seconds: number | null
           ended_at: string | null
           id: string
@@ -45,12 +46,14 @@ export type Database = {
           scores: Json | null
           started_at: string
           status: string
+          track: string
           transcript: Json
           user_id: string
         }
         Insert: {
           coaching?: Json | null
           created_at?: string
+          detail_checks?: Json | null
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
@@ -60,12 +63,14 @@ export type Database = {
           scores?: Json | null
           started_at?: string
           status?: string
+          track?: string
           transcript?: Json
           user_id: string
         }
         Update: {
           coaching?: Json | null
           created_at?: string
+          detail_checks?: Json | null
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
@@ -75,6 +80,7 @@ export type Database = {
           scores?: Json | null
           started_at?: string
           status?: string
+          track?: string
           transcript?: Json
           user_id?: string
         }
