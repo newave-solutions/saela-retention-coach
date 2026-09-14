@@ -47,7 +47,7 @@ The scorecard adds a resign section: did they ask the price point, did they offe
 ## Technical outline
 
 - Add a `track` column (`retention` | `service`) to `training_sessions`, defaulting to `retention` so existing rows and dashboards keep working. Add a nullable `detail_checks` JSON column for the listening breakdown.
-- New `src/lib/service-scenarios.ts`: call types, CES score categories, and a `ServiceScenario` type carrying a `keyDetails[]` array — each detail with an id, what it is, how it surfaces in conversation, and whether the caller will restate it if asked.
+- New `src/lib/service-scenarios.ts`: call types, CES score categories, and a `ServiceScenario` type carrying a `keyDetails[]` array — each detail with an id, what it is, how it surfaces in conversation, and whether the caller will restate it if asked. Resign scenarios additionally carry the customer's real budget ceiling and what resign terms they would actually accept, kept hidden from the agent.
 - New `src/lib/service-scenario-generator.server.ts`: seeded scenarios per call type (several each), reusing the existing caller name pools, personalities, and `pickVoice` voice assignment so callers keep sounding different.
 - New `src/lib/service-brain.server.ts`: the in-call caller prompt (cooperative but naturally messy, volunteers details only once, never re-offers a missed detail unprompted) and the grader, which walks `keyDetails` one by one against the transcript and returns per-detail status plus category scores and coaching.
 - New server functions in `src/lib/service-training.functions.ts` (`startServiceCall`, `getServiceCall`, `sendServiceTurn`, `endServiceCall`), following the existing `requireSupabaseAuth` pattern.
