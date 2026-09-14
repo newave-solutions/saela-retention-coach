@@ -1,6 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Headphones, LogOut, PhoneOutgoing, SlidersHorizontal, TrendingUp } from "lucide-react";
+import {
+  Ear,
+  Headphones,
+  LogOut,
+  PhoneOutgoing,
+  SlidersHorizontal,
+  TrendingUp,
+} from "lucide-react";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
