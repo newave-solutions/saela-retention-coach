@@ -79,7 +79,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("training_sessions")
-        .select("id, scenario, status, outcome, overall_score, duration_seconds, created_at")
+        .select("id, scenario, track, status, outcome, overall_score, duration_seconds, created_at")
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -90,13 +90,17 @@ function Dashboard() {
   if (loading) return <div className="min-h-screen bg-background" />;
   if (!user) return <Landing />;
 
-  const graded = (sessions ?? []).filter((s) => s.status === "complete");
+  const all = sessions ?? [];
+  const serviceSessions = all.filter((s) => s.track === "service");
+  const retentionSessions = all.filter((s) => s.track !== "service");
+  const graded = retentionSessions.filter((s) => s.status === "complete");
   const saves = graded.filter((s) => s.outcome === "saved").length;
   const partials = graded.filter((s) => s.outcome === "partial").length;
   const saveRate = graded.length ? Math.round(((saves + partials * 0.5) / graded.length) * 100) : 0;
   const avgScore = graded.length
     ? Math.round(graded.reduce((sum, s) => sum + (s.overall_score ?? 0), 0) / graded.length)
     : 0;
+
 
   return (
     <main className="min-h-screen bg-background">
