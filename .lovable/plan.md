@@ -30,6 +30,20 @@ The difference is that these callers bury real, checkable details in ordinary ch
 
 Value-building is graded as part of the call, not a bolt-on: using the reservice conversation to explain the 28-day follow-up and the 10–12 week cycle, why activity between services is normal and covered, that stand-alone reservices cost them nothing, and — where it genuinely fits the call — seasonal coverage such as mosquito or rodent protection. Pitching where it does not fit, or pitching before the customer's problem is understood, loses points.
 
+## Resign practice (out of agreement)
+
+A dedicated call type where the customer's agreement has ended, or they are still under service but struggling financially. The agent's job is to practice offering a resign instead of losing the account or reflexively discounting.
+
+These callers arrive with situations such as: agreement finished and they are "just going to stop for now", a job loss or reduced hours, a big upcoming expense, a spouse saying to cut the bill, or a customer who liked the service but cannot pay the current rate.
+
+What the agent is drilled on:
+- Ask the price point first and let the customer anchor, before naming any number.
+- Offer a resign with a real commitment: minimum 4 services, better ongoing price, and — only if needed to close it — 50% off or a free service up front so the customer gets breathing room while their finances recover.
+- Lock the ongoing price before giving away free or half-price services; free service is a closing tool, not an opener.
+- Meet in the middle rather than jumping to the floor, and state the full terms plainly: how many services, what each costs, what is free, when billing resumes.
+
+The scorecard adds a resign section: did they ask the price point, did they offer a resign at all, was the commitment length and pricing structure sound, did they lead with the giveaway, and were the terms stated clearly enough that the customer could repeat them back. Leading with a free service, or closing without confirming the number of services and the ongoing price, is marked down.
+
 ## Technical outline
 
 - Add a `track` column (`retention` | `service`) to `training_sessions`, defaulting to `retention` so existing rows and dashboards keep working. Add a nullable `detail_checks` JSON column for the listening breakdown.
