@@ -31,13 +31,20 @@ export const Route = createFileRoute("/")({
 
 type SessionRow = {
   id: string;
-  scenario: { customerName?: string; reasonLabel?: string; difficulty?: string } | null;
+  scenario: {
+    customerName?: string;
+    reasonLabel?: string;
+    callTypeLabel?: string;
+    difficulty?: string;
+  } | null;
+  track?: string | null;
   status: string;
   outcome: string | null;
   overall_score: number | null;
   duration_seconds: number | null;
   created_at: string;
 };
+
 
 function outcomeTone(outcome: string | null) {
   if (outcome === "saved") return "bg-success/15 text-success ring-1 ring-success/30";
