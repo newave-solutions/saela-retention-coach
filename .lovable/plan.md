@@ -16,6 +16,7 @@ Each track shows its own recent calls and its own stats, so a save rate never ge
 - Reschedule because of access problems (gate, dog, work hours, travel)
 - Reservice for a specific new pest issue (wasps, rodents in the garage, ants indoors)
 - Vague request where the customer does not actually know what they need
+- Out-of-agreement customer — resign practice (see below)
 
 **The live call** works exactly like the retention call: real voice, accents, personalities, talk or type.
 
