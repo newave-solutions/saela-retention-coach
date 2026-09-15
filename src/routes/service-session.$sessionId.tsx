@@ -58,6 +58,8 @@ type Row = {
   scores: ServiceScoreBreakdown | null;
   coaching: ServiceCoaching | null;
   detail_checks: DetailCheck[] | null;
+  opportunity_checks: OpportunityCheck[] | null;
+  language_flags: LanguageFlag[] | null;
   transcript: TranscriptTurn[] | null;
   duration_seconds: number | null;
 };
