@@ -93,7 +93,7 @@ function ServiceScorecard() {
       const { data: row, error } = await supabase
         .from("training_sessions")
         .select(
-          "id, scenario, status, outcome, overall_score, scores, coaching, detail_checks, transcript, duration_seconds",
+          "id, scenario, status, outcome, overall_score, scores, coaching, detail_checks, opportunity_checks, language_flags, transcript, duration_seconds",
         )
         .eq("id", sessionId)
         .single();
