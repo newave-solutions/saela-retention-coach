@@ -1,7 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { ArrowLeft, CheckCircle2, CircleSlash, Ear, HandCoins, PhoneCall, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  CircleSlash,
+  Ear,
+  HandCoins,
+  Lightbulb,
+  MessageSquareWarning,
+  PhoneCall,
+  XCircle,
+} from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
