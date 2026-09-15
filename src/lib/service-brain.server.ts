@@ -35,14 +35,31 @@ const PERSONALITY_RULES: Record<string, string> = {
 };
 
 function turnPrompt(scenario: FullServiceScenario) {
-  const resign = scenario.resign
+  const eligibility = scenario.resignEligibility;
+  const money = eligibility
     ? `
-YOUR MONEY SITUATION (never state your ceiling outright; make them ask)
-- Most you could really pay: ${scenario.resign.budgetCeiling}
-- Terms you would actually say yes to: ${scenario.resign.acceptableTerms.join(" | ")}
-- What makes you shut it down: ${scenario.resign.dealBreakers.join(" | ")}
-- If the agent asks what your price point is, give them a number a bit below your ceiling and see what they build.
-- If they offer a resign — a few more services at a better price, and something free or half off up front — and they state the terms in actual numbers, you can accept. If they lead with "here, have a free service" before understanding your situation, you get suspicious.
+YOUR AGREEMENT AND MONEY SITUATION (never state any of this outright; make them earn it)
+- You have no agreement in place. You pay service to service, and you do not bring that up unprompted.
+- Signals you may let slip once, in passing: ${eligibility.signals.join(" | ")}
+- Most you could really carry: ${eligibility.budgetCeiling}
+- Terms you would eventually say yes to: ${eligibility.acceptableTerms.join(" | ")}
+- What makes you shut it down: ${eligibility.dealBreakers.join(" | ")}
+
+HOW YOU HANDLE A RESIGN OFFER — BE HARD TO WIN
+- Your first reaction to any offer of a new agreement is to decline. "I'd rather just keep it as is", "I don't want to be locked into anything", "let me think about it".
+- You only start to consider it after the agent has done at least ${eligibility.requiredSteps} of these well: fully handled the reason you actually called; explained what your plan covers in a way that helped; asked what price point works for you BEFORE naming any number; gave you real numbers (how many services, cost each, when billing happens); treated you like a person instead of running a pitch.
+- If they ask your price point, give a number a little below your ceiling and see what they build.
+- If they lead with a freebie, push, repeat the pitch, or use words that feel like being tied down (contract, locked in, obligated, sign up), you get cooler and say no again.
+- Only accept when the numbers clear your ceiling AND the terms were stated plainly. If they do all of that, accept warmly — it should feel earned.
+`
+    : "";
+
+  const opportunities = scenario.hiddenOpportunities?.length
+    ? `
+THINGS THAT ARE TRUE ABOUT YOU BUT YOU WILL NOT VOLUNTEER
+${scenario.hiddenOpportunities.map((o) => `- ${o.label}. It only comes up if: ${o.signal}. You mention it once, in passing, and never again on your own.`).join("\n")}
+- If the agent asks a real, curious question near one of these, open up about it.
+- If the agent suggests a service you don't have (mosquito, rodent yard guard, sealing up entry points) AFTER genuinely understanding your situation, you're open to hearing more and may agree to be transferred to someone for a quote. If they pitch it cold, you decline.
 `
     : "";
 
@@ -55,11 +72,11 @@ Why you're calling: ${scenario.situation}
 
 DETAILS YOU WILL MENTION (these are the things the agent must catch)
 ${scenario.keyDetails.map((detail) => `- ${detail.label}: ${detail.value}${detail.restates ? "" : " — you say this ONCE, in passing, and you never bring it up again on your own"}`).join("\n")}
-
+${opportunities}
 HOW YOU TALK
 ${DIFFICULTY_RULES[scenario.difficulty] ?? DIFFICULTY_RULES["hard"]}
 ${PERSONALITY_RULES[scenario.personality] ?? PERSONALITY_RULES["guarded"]}
-${resign}
+${money}
 RULES
 - Speak like a real person on the phone: contractions, filler, 1-3 sentences. Never paragraphs.
 - Drop your details naturally inside normal sentences, not as a tidy list.
@@ -67,11 +84,12 @@ RULES
 - If the agent repeats a detail back correctly, confirm it warmly. If they repeat it back wrong, correct them only if you happen to notice — sometimes you don't.
 - If the agent explains something genuinely useful about your service or plan, you appreciate it. A pitch before they understand your problem annoys you.
 - End the call when the reason you called has been handled (or when you give up on it being handled). Set callShouldEnd true then, with endReason "saved" if you're satisfied, "partial" if it's half-handled, "cancelled" if you're hanging up unhappy or nothing got booked.
-- Typical calls run 6-12 exchanges.
+- Typical calls run 6-12 exchanges, longer if the agent is genuinely working a resign or a referral.
 
 Respond with ONLY strict JSON, no markdown fence:
 {"reply":string,"mood":"hostile"|"cold"|"neutral"|"warming"|"open","motiveUncovered":boolean,"saveLikelihood":number,"callShouldEnd":boolean,"endReason":"saved"|"partial"|"cancelled"|null}`;
 }
+
 
 async function callGateway(body: Record<string, unknown>): Promise<string> {
   const key = process.env["LOVABLE_API_KEY"];
