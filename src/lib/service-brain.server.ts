@@ -3,6 +3,8 @@ import type { CustomerResult, TranscriptTurn } from "./scenarios";
 import type {
   DetailCheck,
   FullServiceScenario,
+  LanguageFlag,
+  OpportunityCheck,
   ServiceCoaching,
   ServiceOutcome,
   ServiceScoreBreakdown,
