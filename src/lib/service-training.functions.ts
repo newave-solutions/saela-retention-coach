@@ -160,6 +160,8 @@ export const endServiceCall = createServerFn({ method: "POST" })
         scores: graded.scores as unknown as Json,
         coaching: graded.coaching as unknown as Json,
         detail_checks: graded.detailChecks as unknown as Json,
+        opportunity_checks: graded.opportunityChecks as unknown as Json,
+        language_flags: graded.languageFlags as unknown as Json,
         duration_seconds: duration,
         ended_at: new Date().toISOString(),
       })

@@ -8,6 +8,13 @@
       "when": 1789391988126,
       "tag": "0000_add_training_track",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789495660584,
+      "tag": "0001_add_service_call_checks",
+      "breakpoints": true
     }
   ]
 }

@@ -1,17 +1,30 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { ArrowLeft, CheckCircle2, CircleSlash, Ear, HandCoins, PhoneCall, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  CircleSlash,
+  Ear,
+  HandCoins,
+  Lightbulb,
+  MessageSquareWarning,
+  PhoneCall,
+  XCircle,
+} from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { TranscriptTurn } from "@/lib/scenarios";
 import {
   DETAIL_STATUS_LABELS,
+  OPPORTUNITY_STATUS_LABELS,
   SERVICE_OUTCOME_LABELS,
   SERVICE_SCORE_LABELS,
   normalizeServiceScores,
   type DetailCheck,
+  type LanguageFlag,
+  type OpportunityCheck,
   type ServiceCoaching,
   type ServiceOutcome,
   type ServiceScoreBreakdown,
@@ -55,6 +68,8 @@ type Row = {
   scores: ServiceScoreBreakdown | null;
   coaching: ServiceCoaching | null;
   detail_checks: DetailCheck[] | null;
+  opportunity_checks: OpportunityCheck[] | null;
+  language_flags: LanguageFlag[] | null;
   transcript: TranscriptTurn[] | null;
   duration_seconds: number | null;
 };
@@ -88,7 +103,7 @@ function ServiceScorecard() {
       const { data: row, error } = await supabase
         .from("training_sessions")
         .select(
-          "id, scenario, status, outcome, overall_score, scores, coaching, detail_checks, transcript, duration_seconds",
+          "id, scenario, status, outcome, overall_score, scores, coaching, detail_checks, opportunity_checks, language_flags, transcript, duration_seconds",
         )
         .eq("id", sessionId)
         .single();
@@ -99,6 +114,10 @@ function ServiceScorecard() {
 
   const scores = normalizeServiceScores(data?.scores);
   const hasResign = (data?.coaching?.resignNotes?.length ?? 0) > 0 || (scores?.resignOffer ?? 0) > 0;
+  const hasSales =
+    (data?.coaching?.salesNotes?.length ?? 0) > 0 ||
+    (scores?.salesTransfer ?? 0) > 0 ||
+    Boolean(data?.opportunity_checks?.some((o) => o.kind === "sales_transfer"));
 
   return (
     <main className="min-h-screen bg-background px-4 py-8">
@@ -184,6 +203,72 @@ function ServiceScorecard() {
               </Card>
             ) : null}
 
+            {data.opportunity_checks?.length ? (
+              <Card className="card-soft mt-4">
+                <CardHeader>
+                  <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                    <Lightbulb className="h-4 w-4 text-accent" />
+                    Openings they never told you about
+                  </h2>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {data.opportunity_checks.map((opp) => {
+                    const tone =
+                      opp.status === "found"
+                        ? "text-success"
+                        : opp.status === "partial"
+                          ? "text-accent"
+                          : "text-destructive";
+                    return (
+                      <div
+                        key={opp.id}
+                        className="rounded-lg border border-border bg-secondary/30 p-3"
+                      >
+                        <p className="text-sm font-medium">{opp.label}</p>
+                        <p className={`text-xs font-semibold uppercase tracking-widest ${tone}`}>
+                          {OPPORTUNITY_STATUS_LABELS[opp.status]}
+                          {opp.kind === "sales_transfer"
+                            ? " · sales handoff"
+                            : opp.kind === "resign"
+                              ? " · resign"
+                              : " · coverage"}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">{opp.note}</p>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {data.language_flags?.length ? (
+              <Card className="card-soft mt-4">
+                <CardHeader>
+                  <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                    <MessageSquareWarning className="h-4 w-4 text-destructive" />
+                    Wording that landed wrong
+                  </h2>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {data.language_flags.map((flag, i) => (
+                    <div
+                      key={`${flag.phrase}-${i}`}
+                      className="rounded-lg border border-border bg-secondary/30 p-3"
+                    >
+                      <p className="text-sm font-medium">&ldquo;{flag.phrase}&rdquo;</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{flag.why}</p>
+                      {flag.rewrite ? (
+                        <p className="mt-2 text-xs text-foreground/90">
+                          <span className="font-semibold text-success">Say instead: </span>
+                          {flag.rewrite}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : null}
+
             {scores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
@@ -192,6 +277,8 @@ function ServiceScorecard() {
                 <CardContent className="space-y-4">
                   {(Object.keys(SERVICE_SCORE_LABELS) as (keyof ServiceScoreBreakdown)[])
                     .filter((key) => key !== "resignOffer" || hasResign)
+                    .filter((key) => key !== "salesTransfer" || hasSales)
+
                     .map((key) => (
                       <div key={key}>
                         <div className="mb-1 flex items-center justify-between text-sm">
@@ -222,14 +309,39 @@ function ServiceScorecard() {
                         ))}
                       </ul>
                       <p className="mt-3 rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
-                        Ask their price point first, then build the resign around it: at least 4
-                        services at a price they can carry, and 50% off or a free service only if
-                        that's what closes it. Lock the ongoing price before giving anything away,
-                        and say the terms in numbers.
+                        Resolve what they called about first. Then ask their price point before you
+                        name a number, build at least 4 services at a price they can carry, lock
+                        that ongoing price before giving anything away, and use 50% off or a free
+                        service only as the closer. Say the terms in numbers, and keep the wording
+                        warm — no "contract", no "locked in".
                       </p>
                     </CardContent>
                   </Card>
                 ) : null}
+
+                {hasSales && data.coaching.salesNotes?.length ? (
+                  <Card className="card-soft mt-4">
+                    <CardHeader>
+                      <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                        <Lightbulb className="h-4 w-4 text-ring" />
+                        Handoff to sales
+                      </h2>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="list-disc space-y-1 pl-5 text-sm text-foreground/90">
+                        {data.coaching.salesNotes.map((note) => (
+                          <li key={note}>{note}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
+                        You don't quote — you build the value and ask if they'd like to be connected
+                        with the team who can price it out, then set expectations for that call.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : null}
+
+
 
                 <Card className="card-soft mt-4">
                   <CardHeader>
