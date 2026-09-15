@@ -8,10 +8,13 @@ import { useAuth } from "@/hooks/useAuth";
 import type { TranscriptTurn } from "@/lib/scenarios";
 import {
   DETAIL_STATUS_LABELS,
+  OPPORTUNITY_STATUS_LABELS,
   SERVICE_OUTCOME_LABELS,
   SERVICE_SCORE_LABELS,
   normalizeServiceScores,
   type DetailCheck,
+  type LanguageFlag,
+  type OpportunityCheck,
   type ServiceCoaching,
   type ServiceOutcome,
   type ServiceScoreBreakdown,
