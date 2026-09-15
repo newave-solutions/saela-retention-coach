@@ -309,14 +309,39 @@ function ServiceScorecard() {
                         ))}
                       </ul>
                       <p className="mt-3 rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
-                        Ask their price point first, then build the resign around it: at least 4
-                        services at a price they can carry, and 50% off or a free service only if
-                        that's what closes it. Lock the ongoing price before giving anything away,
-                        and say the terms in numbers.
+                        Resolve what they called about first. Then ask their price point before you
+                        name a number, build at least 4 services at a price they can carry, lock
+                        that ongoing price before giving anything away, and use 50% off or a free
+                        service only as the closer. Say the terms in numbers, and keep the wording
+                        warm — no "contract", no "locked in".
                       </p>
                     </CardContent>
                   </Card>
                 ) : null}
+
+                {hasSales && data.coaching.salesNotes?.length ? (
+                  <Card className="card-soft mt-4">
+                    <CardHeader>
+                      <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                        <Lightbulb className="h-4 w-4 text-ring" />
+                        Handoff to sales
+                      </h2>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="list-disc space-y-1 pl-5 text-sm text-foreground/90">
+                        {data.coaching.salesNotes.map((note) => (
+                          <li key={note}>{note}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 rounded-lg border border-border bg-secondary/50 p-3 text-xs text-muted-foreground">
+                        You don't quote — you build the value and ask if they'd like to be connected
+                        with the team who can price it out, then set expectations for that call.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : null}
+
+
 
                 <Card className="card-soft mt-4">
                   <CardHeader>
