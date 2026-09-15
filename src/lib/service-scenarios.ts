@@ -8,6 +8,7 @@ export const SERVICE_CALL_TYPES = [
   "reschedule",
   "access_issue",
   "new_pest_issue",
+  "coverage_question",
   "unclear_need",
   "resign_out_of_agreement",
 ] as const;
@@ -18,6 +19,7 @@ export const SERVICE_TYPE_LABELS: Record<ServiceCallType, string> = {
   reschedule: "Reschedule a regular service",
   access_issue: "Reschedule — access problem",
   new_pest_issue: "Reservice — new pest issue",
+  coverage_question: "Coverage & pricing question",
   unclear_need: "Customer isn't sure what they need",
   resign_out_of_agreement: "Out of agreement — resign offer",
 };
@@ -35,6 +37,48 @@ export type KeyDetail = {
   restates: boolean;
 };
 
+/** An opening the agent can only surface by engaging — never shown mid-call. */
+export type HiddenOpportunity = {
+  id: string;
+  label: string;
+  /** The thing the customer says or implies that hints at it. */
+  signal: string;
+  /** What a strong CES agent does with it. */
+  goodMove: string;
+  /** Where this leads if handled well. */
+  kind: "coverage" | "resign" | "sales_transfer";
+};
+
+export type OpportunityStatus = "found" | "partial" | "missed";
+
+export const OPPORTUNITY_STATUS_LABELS: Record<OpportunityStatus, string> = {
+  found: "Found and worked",
+  partial: "Noticed, not developed",
+  missed: "Missed",
+};
+
+export type OpportunityCheck = {
+  id: string;
+  label: string;
+  kind: HiddenOpportunity["kind"];
+  status: OpportunityStatus;
+  note: string;
+};
+
+/** Hidden: whether this caller could be resigned, and how hard they are to win. */
+export type ResignEligibility = {
+  /** Paying service to service with no agreement in place. */
+  serviceToService: boolean;
+  /** Signals the agent can pick up on. */
+  signals: string[];
+  /** What they can genuinely carry per service. */
+  budgetCeiling: string;
+  acceptableTerms: string[];
+  dealBreakers: string[];
+  /** How many things the agent must get right before they'll even consider it. */
+  requiredSteps: number;
+};
+
 export type ResignTarget = {
   /** What the customer can genuinely afford per service. */
   budgetCeiling: string;
@@ -42,6 +86,14 @@ export type ResignTarget = {
   acceptableTerms: string[];
   /** What makes them shut the conversation down. */
   dealBreakers: string[];
+};
+
+export type LanguageFlag = {
+  phrase: string;
+  turn: number;
+  why: string;
+  rewrite: string;
+  severity: "low" | "medium" | "high";
 };
 
 export type PublicServiceScenario = {
@@ -61,6 +113,8 @@ export type FullServiceScenario = PublicServiceScenario & {
   keyDetails: KeyDetail[];
   valueOpportunities: string[];
   frustrationTriggers: string[];
+  hiddenOpportunities?: HiddenOpportunity[];
+  resignEligibility?: ResignEligibility;
   resign?: ResignTarget;
 };
 
@@ -71,6 +125,8 @@ export type ServiceScoreBreakdown = {
   valueBuilt: number;
   clarity: number;
   resignOffer: number;
+  salesTransfer: number;
+  languageTone: number;
 };
 
 export const SERVICE_SCORE_LABELS: Record<keyof ServiceScoreBreakdown, string> = {
@@ -80,6 +136,8 @@ export const SERVICE_SCORE_LABELS: Record<keyof ServiceScoreBreakdown, string> =
   valueBuilt: "Value built on their plan",
   clarity: "Clarity of the confirmation",
   resignOffer: "Resign offer",
+  salesTransfer: "Warm handoff to sales",
+  languageTone: "Wording & tone",
 };
 
 export type DetailStatus = "confirmed" | "captured" | "missed" | "wrong";
@@ -106,6 +164,7 @@ export type ServiceCoaching = {
   nextTime: string[];
   experienceImpact: string[];
   resignNotes: string[];
+  salesNotes?: string[];
 };
 
 export type ServiceOutcome = "resolved" | "partial" | "mishandled";
@@ -128,5 +187,7 @@ export function normalizeServiceScores(raw: unknown): ServiceScoreBreakdown | nu
     valueBuilt: value("valueBuilt"),
     clarity: value("clarity"),
     resignOffer: value("resignOffer"),
+    salesTransfer: value("salesTransfer"),
+    languageTone: value("languageTone"),
   };
 }
