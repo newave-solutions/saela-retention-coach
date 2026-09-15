@@ -415,7 +415,73 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       ],
     },
   ],
+  coverage_question: [
+    {
+      situation:
+        "Wants to know what the protection program actually covers. They saw a wasp nest and a mouse dropping in the garage and aren't sure either is included, and they think the price is high for 'spraying outside'.",
+      keyDetails: [
+        d("question", "What they're asking", "What is and isn't covered by the plan they pay for"),
+        d("wasp", "Thing they saw", "Wasp nest starting under the back eave"),
+        d("mouse", "Second thing", "One mouse dropping in the garage, nothing since", true),
+        d("price", "Price concern", "Feels the quarterly amount is high for exterior spraying"),
+        d("yard", "Yard detail", "Kids play in the back yard most evenings in summer"),
+      ],
+      valueOpportunities: [
+        "Explain interior and exterior coverage plainly, plus what falls outside the plan",
+        "Reservices between visits cost them nothing",
+        "The 28-day follow-up and the 10-12 week cycle explain what they're paying for",
+      ],
+      frustrationTriggers: [
+        "Reciting a feature list instead of answering the question",
+        "Dodging the price question",
+        "Pitching an add-on before answering what's covered",
+      ],
+      openings: [
+        "Hi — I just want to understand what I'm actually paying for here. What does this cover?",
+        "Quick question: is a wasp nest covered under my plan, or is that extra?",
+      ],
+    },
+    {
+      situation:
+        "Got their renewal notice and noticed the price went up over the last few services. They're not angry, just want it explained, and they're service-to-service now.",
+      keyDetails: [
+        d("increase", "What they noticed", "Price has crept up about $15 over the last three services"),
+        d("status", "Account status", "No agreement in place — paying service to service", true),
+        d("usage", "How they use it", "Mostly worried about ants and the crawlspace"),
+        d("budget", "Money comment", "Says they're watching every bill this year"),
+        d("contact", "Contact detail", "Prefers texts over calls for reminders"),
+      ],
+      valueOpportunities: [
+        "Explain what the plan covers before talking about the number",
+        "A resign locks a better ongoing price instead of drifting up service to service",
+        "Coverage through their worst season is worth naming",
+      ],
+      frustrationTriggers: [
+        "Defending the increase without explaining it",
+        "Naming a new price before asking what works for them",
+        "Ignoring the money comment",
+      ],
+      openings: [
+        "Hey, I'm looking at my bill and it seems like this keeps going up. What's going on?",
+        "Hi — my price has gone up a couple times now. Can you explain that to me?",
+      ],
+      resign: {
+        budgetCeiling: "About $115 a service if it's locked in",
+        acceptableTerms: [
+          "4 or more services at a fixed price that won't drift",
+          "Plain numbers: what each service costs and when it's billed",
+          "A half-off or free service only if it's what closes it",
+        ],
+        dealBreakers: [
+          "Being sold before the price question is answered",
+          "Language that sounds like being tied down",
+          "Any 'we'll see what we can do' without numbers",
+        ],
+      },
+    },
+  ],
   resign_out_of_agreement: [
+
     {
       situation:
         "Their agreement finished last month. They liked the service but want to 'stop for now' because money is tight after a job change.",
