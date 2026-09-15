@@ -603,6 +603,114 @@ function pick<T>(list: readonly T[]): T {
   return list[Math.floor(Math.random() * list.length)] as T;
 }
 
+function pickSome<T>(list: readonly T[], count: number): T[] {
+  const copy = [...list];
+  const out: T[] = [];
+  while (copy.length && out.length < count) {
+    out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0] as T);
+  }
+  return out;
+}
+
+/** Openings the caller never announces — the agent has to surface them. */
+const OPPORTUNITY_POOL: HiddenOpportunity[] = [
+  {
+    id: "yard_use",
+    label: "Family uses the back yard in the evenings",
+    signal: "Mentions kids, a dog, or sitting outside after work — mosquitoes come up as an aside",
+    goodMove:
+      "Ask how they use the yard, connect it to mosquito abatement, and offer a warm handoff to sales for a quote",
+    kind: "sales_transfer",
+  },
+  {
+    id: "outbuilding",
+    label: "Shed, detached garage or crawlspace they never mention twice",
+    signal: "Refers in passing to a shed, garage or crawlspace where they've seen droppings or nesting",
+    goodMove: "Ask what they're seeing out there and build value toward rodent yard guard, then offer sales for a quote",
+    kind: "sales_transfer",
+  },
+  {
+    id: "coverage_gap",
+    label: "They don't actually know what their plan covers",
+    signal: "Asks whether something is 'extra', or assumes a reservice costs money",
+    goodMove:
+      "Explain interior/exterior coverage, the 28-day follow-up, the 10-12 week cycle, and that reservices between visits are free",
+    kind: "coverage",
+  },
+  {
+    id: "entry_points",
+    label: "Gaps around doors, vents or the garage they've noticed",
+    signal: "Says something about a gap under the door, a vent screen, or 'they're getting in somewhere'",
+    goodMove: "Ask where they're getting in and explain that exclusion work is quoted by sales alongside the plan",
+    kind: "sales_transfer",
+  },
+  {
+    id: "price_drift",
+    label: "Price has moved and they've noticed",
+    signal: "A quiet remark about the bill, the last invoice, or things getting more expensive",
+    goodMove:
+      "Ask their price point before naming anything, then build a resign that locks a steady price instead of drifting",
+    kind: "resign",
+  },
+  {
+    id: "money_pressure",
+    label: "Money is tighter than they're admitting",
+    signal: "Hours cut, a big bill, a spouse watching the budget — said once, in passing",
+    goodMove:
+      "Resolve what they called about first, then ask what works for them and build a resign around that number",
+    kind: "resign",
+  },
+  {
+    id: "second_contact",
+    label: "Someone else really handles the account",
+    signal: "A spouse, parent or roommate is mentioned as the one who deals with this",
+    goodMove: "Capture the right contact and confirm who will be home and who should be called",
+    kind: "coverage",
+  },
+];
+
+const RESIGN_SIGNALS = [
+  "Says the price has gone up over the last few services",
+  "Mentions money being tight without asking for anything",
+  "Refers to their plan being finished or 'just going service to service now'",
+];
+
+function eligibilityFor(seed: Seed, callType: ServiceCallType): ResignEligibility | null {
+  if (callType === "resign_out_of_agreement") {
+    const target = seed.resign;
+    if (!target) return null;
+    return {
+      serviceToService: true,
+      signals: RESIGN_SIGNALS,
+      budgetCeiling: target.budgetCeiling,
+      acceptableTerms: target.acceptableTerms,
+      dealBreakers: target.dealBreakers,
+      requiredSteps: 3 + Math.floor(Math.random() * 2),
+    };
+  }
+
+  // Roughly half of ordinary callers are quietly service-to-service and resignable.
+  if (Math.random() > 0.5) return null;
+
+  const ceiling = pick(["about $105 a service", "around $110 a service", "no more than $115 a service"]);
+  return {
+    serviceToService: true,
+    signals: pickSome(RESIGN_SIGNALS, 2),
+    budgetCeiling: ceiling,
+    acceptableTerms: [
+      "At least 4 more services at a price that stays put",
+      "The numbers said plainly: cost per service and when billing happens",
+      "A half-off or free service only if that is what finally closes it",
+    ],
+    dealBreakers: [
+      "Being pitched before the reason they called is actually handled",
+      "Wording that makes it sound like being tied into something",
+      "A giveaway offered before any price is discussed",
+    ],
+    requiredSteps: 4,
+  };
+}
+
 export function generateServiceScenario(input: {
   callType: ServiceCallType | null;
   difficulty: Difficulty;
@@ -616,11 +724,22 @@ export function generateServiceScenario(input: {
   const rosterVoice = pickVoice({ exclude: input.excludeVoices ?? [] });
   const customerName = nameForVoice(rosterVoice);
   const tenure = 1 + Math.floor(Math.random() * 6);
+  const eligibility = eligibilityFor(seed, callType);
+
+  const pool = eligibility
+    ? OPPORTUNITY_POOL
+    : OPPORTUNITY_POOL.filter((item) => item.kind !== "resign");
+  const hiddenOpportunities = pickSome(pool, 2 + Math.floor(Math.random() * 2));
+  if (eligibility && !hiddenOpportunities.some((item) => item.kind === "resign")) {
+    hiddenOpportunities.push(
+      OPPORTUNITY_POOL.find((item) => item.id === "price_drift") as HiddenOpportunity,
+    );
+  }
 
   return {
     customerName,
     voice: toAssignment(rosterVoice),
-    accountSummary: `${tenure}-year customer on a ${randomPlan()}.`,
+    accountSummary: `${tenure}-year customer on a ${randomPlan()}${eligibility ? ", currently paying service to service" : ""}.`,
     callType,
     callTypeLabel: SERVICE_TYPE_LABELS[callType],
     difficulty: input.difficulty,
@@ -631,9 +750,12 @@ export function generateServiceScenario(input: {
     keyDetails: seed.keyDetails,
     valueOpportunities: seed.valueOpportunities,
     frustrationTriggers: seed.frustrationTriggers,
+    hiddenOpportunities,
+    ...(eligibility ? { resignEligibility: eligibility } : {}),
     ...(seed.resign ? { resign: seed.resign } : {}),
   };
 }
+
 
 /** Strip the hidden half before anything reaches the browser mid-call. */
 export function toPublicServiceScenario(scenario: FullServiceScenario) {
