@@ -45,7 +45,7 @@ The resign section of the scorecard is expanded to grade the full sequence, not 
 Coaching calls out the specific turn where the opening appeared and what should have been said there.
 
 
-## 4. Language and tone check
+## 5. Language and tone check
 
 The transcript is run through a language pass that flags wording that makes customers feel tied down — "contract", "locked in", "obligated", "sign up for", "terms and conditions", "commit to" — along with over-explaining, hedging, and anything that reads defensive.
 
@@ -53,9 +53,10 @@ The scorecard gets a **Wording** panel: each flagged phrase, the turn it appeare
 
 ## Technical outline
 
-- `src/lib/service-scenarios.ts`: add `HiddenOpportunity` (id, label, trigger signal, what a good agent does, fit-or-not flag), `OpportunityCheck` with found/partial/missed status, `resignEligibility` (out-of-agreement flag, price-increase signal, affordability signal, acceptance threshold), `LanguageFlag` (phrase, turn index, why, suggested rewrite), and `languageTone` in `ServiceScoreBreakdown`. Add `coverage_question` to `SERVICE_CALL_TYPES`.
-- `src/lib/service-scenario-generator.server.ts`: attach 2–4 hidden opportunities to every seed; add coverage-question seeds; randomly attach resign eligibility to a share of non-resign scenarios with hidden acceptance thresholds.
-- `src/lib/service-brain.server.ts`: the in-call prompt gets rules for revealing opportunity signals only when asked, and for accepting a resign only when the original issue is resolved, terms clear the hidden threshold, and the numbers were stated. The grader gains opportunity checks, the expanded resign runway rubric, and a language/tone pass returning flagged phrases with rewrites.
+- `src/lib/service-scenarios.ts`: add `HiddenOpportunity` (id, label, trigger signal, what a good agent does, whether it is a resign fit or a sales-transfer fit), `OpportunityCheck` with found/partial/missed status, `resignEligibility` (service-to-service flag, price-increase signal, affordability signal, hidden acceptance threshold, minimum well-handled steps before acceptance), `LanguageFlag` (phrase, turn index, why, suggested rewrite), and `languageTone` + `salesTransfer` in `ServiceScoreBreakdown`. Add `coverage_question` to `SERVICE_CALL_TYPES`.
+- `src/lib/service-scenario-generator.server.ts`: attach 2–4 hidden opportunities to every seed; add coverage-question seeds; attach resign eligibility only to service-to-service callers, with hidden thresholds skewed hard.
+- `src/lib/service-brain.server.ts`: the in-call prompt gets rules for revealing opportunity signals only when asked, declining the first resign ask by default, accepting only once the original issue is resolved, value was built, price point was asked, and numbers clear the hidden threshold — plus agreeing to a sales transfer only when genuinely warmed up. The grader gains opportunity checks, the expanded resign runway rubric, sales-transfer scoring, and a language/tone pass returning flagged phrases with rewrites.
+
 - `src/lib/service-training.functions.ts`: persist `opportunity_checks` and `language_flags` alongside `detail_checks`.
 - Migration: two nullable JSON columns on `training_sessions`.
 - `src/routes/service-session.$sessionId.tsx`: new Opportunities and Wording panels, expanded resign section.
