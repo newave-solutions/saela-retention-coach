@@ -189,6 +189,72 @@ function ServiceScorecard() {
               </Card>
             ) : null}
 
+            {data.opportunity_checks?.length ? (
+              <Card className="card-soft mt-4">
+                <CardHeader>
+                  <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                    <Lightbulb className="h-4 w-4 text-accent" />
+                    Openings they never told you about
+                  </h2>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {data.opportunity_checks.map((opp) => {
+                    const tone =
+                      opp.status === "found"
+                        ? "text-success"
+                        : opp.status === "partial"
+                          ? "text-accent"
+                          : "text-destructive";
+                    return (
+                      <div
+                        key={opp.id}
+                        className="rounded-lg border border-border bg-secondary/30 p-3"
+                      >
+                        <p className="text-sm font-medium">{opp.label}</p>
+                        <p className={`text-xs font-semibold uppercase tracking-widest ${tone}`}>
+                          {OPPORTUNITY_STATUS_LABELS[opp.status]}
+                          {opp.kind === "sales_transfer"
+                            ? " · sales handoff"
+                            : opp.kind === "resign"
+                              ? " · resign"
+                              : " · coverage"}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">{opp.note}</p>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {data.language_flags?.length ? (
+              <Card className="card-soft mt-4">
+                <CardHeader>
+                  <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
+                    <MessageSquareWarning className="h-4 w-4 text-destructive" />
+                    Wording that landed wrong
+                  </h2>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {data.language_flags.map((flag, i) => (
+                    <div
+                      key={`${flag.phrase}-${i}`}
+                      className="rounded-lg border border-border bg-secondary/30 p-3"
+                    >
+                      <p className="text-sm font-medium">&ldquo;{flag.phrase}&rdquo;</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{flag.why}</p>
+                      {flag.rewrite ? (
+                        <p className="mt-2 text-xs text-foreground/90">
+                          <span className="font-semibold text-success">Say instead: </span>
+                          {flag.rewrite}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : null}
+
             {scores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
@@ -197,6 +263,8 @@ function ServiceScorecard() {
                 <CardContent className="space-y-4">
                   {(Object.keys(SERVICE_SCORE_LABELS) as (keyof ServiceScoreBreakdown)[])
                     .filter((key) => key !== "resignOffer" || hasResign)
+                    .filter((key) => key !== "salesTransfer" || hasSales)
+
                     .map((key) => (
                       <div key={key}>
                         <div className="mb-1 flex items-center justify-between text-sm">
