@@ -40,6 +40,8 @@ export type Database = {
           duration_seconds: number | null
           ended_at: string | null
           id: string
+          language_flags: Json | null
+          opportunity_checks: Json | null
           outcome: string | null
           overall_score: number | null
           scenario: Json
@@ -57,6 +59,8 @@ export type Database = {
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
+          language_flags?: Json | null
+          opportunity_checks?: Json | null
           outcome?: string | null
           overall_score?: number | null
           scenario: Json
@@ -74,6 +78,8 @@ export type Database = {
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
+          language_flags?: Json | null
+          opportunity_checks?: Json | null
           outcome?: string | null
           overall_score?: number | null
           scenario?: Json
