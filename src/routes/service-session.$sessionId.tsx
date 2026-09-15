@@ -114,6 +114,10 @@ function ServiceScorecard() {
 
   const scores = normalizeServiceScores(data?.scores);
   const hasResign = (data?.coaching?.resignNotes?.length ?? 0) > 0 || (scores?.resignOffer ?? 0) > 0;
+  const hasSales =
+    (data?.coaching?.salesNotes?.length ?? 0) > 0 ||
+    (scores?.salesTransfer ?? 0) > 0 ||
+    Boolean(data?.opportunity_checks?.some((o) => o.kind === "sales_transfer"));
 
   return (
     <main className="min-h-screen bg-background px-4 py-8">
