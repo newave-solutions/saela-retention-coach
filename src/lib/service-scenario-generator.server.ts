@@ -9,7 +9,9 @@ import {
   SERVICE_CALL_TYPES,
   SERVICE_TYPE_LABELS,
   type FullServiceScenario,
+  type HiddenOpportunity,
   type KeyDetail,
+  type ResignEligibility,
   type ResignTarget,
   type ServiceCallType,
 } from "./service-scenarios";
