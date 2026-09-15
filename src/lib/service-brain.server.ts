@@ -198,6 +198,8 @@ export type ServiceGradeResult = {
   scores: ServiceScoreBreakdown;
   coaching: ServiceCoaching;
   detailChecks: DetailCheck[];
+  opportunityChecks: OpportunityCheck[];
+  languageFlags: LanguageFlag[];
 };
 
 export async function gradeServiceCall(
@@ -205,23 +207,39 @@ export async function gradeServiceCall(
   transcript: TranscriptTurn[],
 ): Promise<ServiceGradeResult> {
   const dialogue = transcript
-    .map((t) => `${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
+    .map((t, i) => `[${i}] ${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
     .join("\n");
 
-  const resignBlock = scenario.resign
-    ? `
-RESIGN SITUATION — this caller is out of agreement or financially stuck, and the agent was supposed to practice offering a RESIGN.
-Customer's real ceiling: ${scenario.resign.budgetCeiling}
-Terms they would have accepted: ${scenario.resign.acceptableTerms.join(" | ")}
-Deal breakers: ${scenario.resign.dealBreakers.join(" | ")}
+  const eligibility = scenario.resignEligibility;
+  const target = scenario.resign;
+  const hasResign = Boolean(eligibility || target);
 
-Score "resignOffer" on: did the agent ask the customer's price point BEFORE naming a number; did they offer a resign at all; was it a real commitment of at least 4 services; did they lock the ongoing price before giving anything away; did they use 50% off or a free service only as the closer if it was needed; and did they state the full terms in numbers (how many services, cost each, what's free, when billing resumes). Leading with a giveaway, or closing without confirming service count and ongoing price, scores low. Put concrete notes in coaching.resignNotes.
+  const resignBlock = hasResign
+    ? `
+RESIGN SITUATION — this caller pays service to service with no agreement in place, whether or not that was the reason they called. The agent was supposed to spot it and work toward a resign.
+Customer's real ceiling: ${eligibility?.budgetCeiling ?? target?.budgetCeiling}
+Terms they would have accepted: ${(eligibility?.acceptableTerms ?? target?.acceptableTerms ?? []).join(" | ")}
+Deal breakers: ${(eligibility?.dealBreakers ?? target?.dealBreakers ?? []).join(" | ")}
+Signals the customer dropped: ${(eligibility?.signals ?? []).join(" | ") || "(implicit in the conversation)"}
+
+Score "resignOffer" on the whole runway, not just the ask: did the agent fully handle the reason the customer called FIRST; did they notice the price/affordability/out-of-agreement signal; did they build value on the plan in the customer's own terms; did they ask the customer's price point BEFORE naming a number; did they offer at least 4 services; did they lock the ongoing price before giving anything away; was 50% off or a free service used only as the closer, if needed; and did they state the terms in plain numbers (how many services, cost each, what's free, when billing resumes). Pitching before the issue is resolved, leading with a giveaway, or closing without confirming service count and ongoing price all score low. Concrete notes go in coaching.resignNotes.
 `
     : `
-This call had no resign component. Set "resignOffer" to 0 and leave coaching.resignNotes as an empty array.
+This caller was already under an agreement — no resign was available. Set "resignOffer" to 0 and leave coaching.resignNotes empty.
 `;
 
-  const prompt = `You are coaching a Saela Pest Control Customer Experience Specialist (CES) on a NON-cancellation service call. The focus of this grading is LISTENING COMPREHENSION: did the agent actually hear what the customer said, confirm it back, and act on it correctly? Be demanding. A pleasant call that missed half the details is a mediocre call.
+  const opportunityBlock = scenario.hiddenOpportunities?.length
+    ? `
+HIDDEN OPPORTUNITIES the customer never announced. Grade whether the agent surfaced and worked each one:
+${scenario.hiddenOpportunities.map((o) => `- id "${o.id}" | ${o.label} | signal: ${o.signal} | a strong agent would: ${o.goodMove} | leads to: ${o.kind}`).join("\n")}
+Status per opportunity: "found" (surfaced AND developed into a real next step), "partial" (noticed but dropped), "missed".
+For "sales_transfer" opportunities, score "salesTransfer" on: did the agent identify a genuine fit, build value in the customer's own words, ask for the handoff to sales for a quote, and set expectations about what happens next — without quoting a price themselves (CES agents do not quote). If there were no sales-transfer opportunities, set salesTransfer to 0 and leave salesNotes empty.
+`
+    : `
+There were no hidden opportunities on this call. Return an empty opportunityChecks array and set salesTransfer to 0.
+`;
+
+  const prompt = `You are coaching a Saela Pest Control Customer Experience Specialist (CES) on a NON-cancellation service call. Grade LISTENING COMPREHENSION first: did the agent actually hear what the customer said, confirm it back, and act on it correctly? Be demanding. A pleasant call that missed half the details is a mediocre call.
 
 CUSTOMER SITUATION: ${scenario.situation}
 
@@ -233,7 +251,10 @@ ${scenario.valueOpportunities.map((v) => `- ${v}`).join("\n")}
 
 THINGS THAT DAMAGE THE EXPERIENCE:
 ${scenario.frustrationTriggers.map((v) => `- ${v}`).join("\n")}
-${resignBlock}
+${opportunityBlock}${resignBlock}
+WORDING AND TONE PASS
+Scan every AGENT turn for language that makes a customer feel tied down, pressured, or talked at: "contract", "locked in", "obligated", "sign up for", "terms and conditions", "commit to", "you have to", "required", plus over-explaining, hedging, and defensive phrasing. Return each as a languageFlag with the exact phrase, the turn index from the transcript, why it lands badly, and a warmer rewrite ("agreement", "your plan", "we'd keep you covered for your next four services"). Do not invent flags — if the wording was clean, return an empty array and score languageTone high. Over-explaining terms counts against languageTone just as much as cold wording does.
+
 TRANSCRIPT
 ${dialogue || "(no conversation took place)"}
 
@@ -242,18 +263,20 @@ For every detail id above, return a status:
 - "captured" — the agent clearly heard and used it, but never confirmed it back
 - "missed" — never acknowledged or acted on
 - "wrong" — the agent restated or booked it incorrectly
-Each detail gets a short note quoting or referencing the moment in the call.
+Each detail gets a short note referencing the moment in the call.
 
 Score 0-100 each:
 - listening: how much of what the customer said was actually caught and confirmed
 - discovery: questions that opened the customer up rather than closed-ended box-ticking
 - accuracy: was the right thing booked/arranged for the right day, place, and person
-- valueBuilt: genuine value built on their existing services where it fit (coverage explained, reservices are free, seasonal protection when relevant). Pitching before understanding the problem loses points
+- valueBuilt: genuine value built on their existing services where it fit. Pitching before understanding the problem loses points
 - clarity: the close — exactly what happens, when, who, what it costs, and confirming the customer understood
 - resignOffer: as described above
+- salesTransfer: as described above
+- languageTone: wording that keeps the customer comfortable, explained plainly and not over-explained
 
 Return ONLY strict JSON:
-{"outcome":"resolved"|"partial"|"mishandled","overallScore":number,"scores":{"listening":number,"discovery":number,"accuracy":number,"valueBuilt":number,"clarity":number,"resignOffer":number},"detailChecks":[{"id":string,"status":"confirmed"|"captured"|"missed"|"wrong","note":string}],"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[],"experienceImpact":string[],"resignNotes":string[]}}
+{"outcome":"resolved"|"partial"|"mishandled","overallScore":number,"scores":{"listening":number,"discovery":number,"accuracy":number,"valueBuilt":number,"clarity":number,"resignOffer":number,"salesTransfer":number,"languageTone":number},"detailChecks":[{"id":string,"status":"confirmed"|"captured"|"missed"|"wrong","note":string}],"opportunityChecks":[{"id":string,"status":"found"|"partial"|"missed","note":string}],"languageFlags":[{"phrase":string,"turn":number,"why":string,"rewrite":string,"severity":"low"|"medium"|"high"}],"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[],"experienceImpact":string[],"resignNotes":string[],"salesNotes":string[]}}
 didWell/missed/nextTime: 2-4 short specific items each, referencing real moments. experienceImpact: 1-3 items describing what the customer will actually experience because of what was missed.`;
 
   const raw = await callGateway({
@@ -262,7 +285,7 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
       {
         role: "system",
         content:
-          "You are a Saela Pest Control customer experience coach grading CES service calls on listening comprehension, accuracy, value building, and resign offers. You return strict JSON only.",
+          "You are a Saela Pest Control customer experience coach grading CES service calls on listening comprehension, accuracy, value building, resign offers, sales handoffs, and wording. You return strict JSON only.",
       },
       { role: "user", content: prompt },
     ],
@@ -274,10 +297,21 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
     overallScore?: number;
     scores?: Partial<ServiceScoreBreakdown>;
     detailChecks?: { id?: string; status?: string; note?: string }[];
+    opportunityChecks?: { id?: string; status?: string; note?: string }[];
+    languageFlags?: {
+      phrase?: string;
+      turn?: number;
+      why?: string;
+      rewrite?: string;
+      severity?: string;
+    }[];
     coaching?: Partial<ServiceCoaching>;
   }>(raw);
 
-  const hasResign = Boolean(scenario.resign);
+  const hasSalesOpp = Boolean(
+    scenario.hiddenOpportunities?.some((o) => o.kind === "sales_transfer"),
+  );
+
   const scores: ServiceScoreBreakdown = {
     listening: clamp(parsed?.scores?.listening, 0),
     discovery: clamp(parsed?.scores?.discovery, 0),
@@ -285,20 +319,28 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
     valueBuilt: clamp(parsed?.scores?.valueBuilt, 0),
     clarity: clamp(parsed?.scores?.clarity, 0),
     resignOffer: hasResign ? clamp(parsed?.scores?.resignOffer, 0) : 0,
+    salesTransfer: hasSalesOpp ? clamp(parsed?.scores?.salesTransfer, 0) : 0,
+    languageTone: clamp(parsed?.scores?.languageTone, 0),
   };
 
-  const weighted = hasResign
-    ? (scores.listening * 2 +
-        scores.discovery +
-        scores.accuracy * 1.5 +
-        scores.valueBuilt +
-        scores.clarity +
-        scores.resignOffer * 2) /
-      8.5
-    : (scores.listening * 2 + scores.discovery + scores.accuracy * 1.5 + scores.valueBuilt + scores.clarity) /
-      6.5;
+  let total =
+    scores.listening * 2 +
+    scores.discovery +
+    scores.accuracy * 1.5 +
+    scores.valueBuilt +
+    scores.clarity +
+    scores.languageTone;
+  let weight = 7.5;
+  if (hasResign) {
+    total += scores.resignOffer * 2;
+    weight += 2;
+  }
+  if (hasSalesOpp) {
+    total += scores.salesTransfer;
+    weight += 1;
+  }
 
-  const overallScore = clamp(parsed?.overallScore, Math.round(weighted));
+  const overallScore = clamp(parsed?.overallScore, Math.round(total / weight));
 
   const byId = new Map(
     (parsed?.detailChecks ?? []).map((check) => [String(check.id ?? ""), check] as const),
@@ -315,6 +357,35 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
       note: found?.note ?? "Never came up in the call.",
     };
   });
+
+  const oppById = new Map(
+    (parsed?.opportunityChecks ?? []).map((check) => [String(check.id ?? ""), check] as const),
+  );
+  const opportunityChecks: OpportunityCheck[] = (scenario.hiddenOpportunities ?? []).map((opp) => {
+    const found = oppById.get(opp.id);
+    const status = found?.status;
+    return {
+      id: opp.id,
+      label: opp.label,
+      kind: opp.kind,
+      status: status === "found" || status === "partial" ? status : "missed",
+      note: found?.note ?? `Never surfaced. ${opp.goodMove}`,
+    };
+  });
+
+  const languageFlags: LanguageFlag[] = (parsed?.languageFlags ?? [])
+    .filter((flag) => typeof flag.phrase === "string" && flag.phrase.trim().length > 0)
+    .slice(0, 12)
+    .map((flag) => ({
+      phrase: String(flag.phrase),
+      turn: typeof flag.turn === "number" ? flag.turn : 0,
+      why: flag.why ?? "",
+      rewrite: flag.rewrite ?? "",
+      severity:
+        flag.severity === "high" || flag.severity === "low"
+          ? flag.severity
+          : ("medium" as const),
+    }));
 
   const outcome: ServiceOutcome =
     parsed?.outcome === "resolved" || parsed?.outcome === "partial"
@@ -334,7 +405,9 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
     nextTime: parsed?.coaching?.nextTime ?? [],
     experienceImpact: parsed?.coaching?.experienceImpact ?? [],
     resignNotes: hasResign ? (parsed?.coaching?.resignNotes ?? []) : [],
+    salesNotes: hasSalesOpp ? (parsed?.coaching?.salesNotes ?? []) : [],
   };
 
-  return { outcome, overallScore, scores, coaching, detailChecks };
+  return { outcome, overallScore, scores, coaching, detailChecks, opportunityChecks, languageFlags };
 }
+
