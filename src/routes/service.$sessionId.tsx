@@ -7,11 +7,7 @@ import { Mic, MicOff, PhoneOff, Send, Volume2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
-import {
-  endServiceCall,
-  getServiceCall,
-  sendServiceTurn,
-} from "@/lib/service-training.functions";
+import { endServiceCall, getServiceCall, sendServiceTurn } from "@/lib/service-training.functions";
 import type { PublicServiceScenario } from "@/lib/service-scenarios";
 import type { TranscriptTurn } from "@/lib/scenarios";
 import {

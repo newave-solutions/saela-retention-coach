@@ -140,10 +140,7 @@ export const postSessionToTeams = createServerFn({ method: "POST" })
   });
 
 function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /* --------------------------------- Linear --------------------------------- */

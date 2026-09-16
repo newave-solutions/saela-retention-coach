@@ -161,9 +161,9 @@ function Scorecard() {
                 <Card className="card-soft mt-4 border-accent/40 bg-accent/10">
                   <CardHeader>
                     <h2 className="flex items-center gap-2 text-base font-semibold leading-none">
-                        <Eye className="h-4 w-4 text-accent" />
-                        What was really going on
-                      </h2>
+                      <Eye className="h-4 w-4 text-accent" />
+                      What was really going on
+                    </h2>
                   </CardHeader>
                   <CardContent className="text-sm leading-relaxed text-foreground/90">
                     {data.coaching.hiddenMotive}
@@ -183,12 +183,12 @@ function Scorecard() {
                       problem, confirm it in specific terms, and own the follow-up.
                     </p>
                     <CoachList title="Did well" items={data.coaching.didWell} tone="text-success" />
-                    <CoachList title="Missed" items={data.coaching.missed} tone="text-destructive" />
                     <CoachList
-                      title="Next time"
-                      items={data.coaching.nextTime}
-                      tone="text-ring"
+                      title="Missed"
+                      items={data.coaching.missed}
+                      tone="text-destructive"
                     />
+                    <CoachList title="Next time" items={data.coaching.nextTime} tone="text-ring" />
                   </CardContent>
                 </Card>
               </>
@@ -202,7 +202,9 @@ function Scorecard() {
                 {(data.transcript ?? []).map((turn, index) => (
                   <div key={`${turn.at}-${index}`} className="text-sm">
                     <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {turn.speaker === "agent" ? "You" : (data.scenario?.customerName ?? "Customer")}
+                      {turn.speaker === "agent"
+                        ? "You"
+                        : (data.scenario?.customerName ?? "Customer")}
                     </span>
                     <p className="text-foreground/90">{turn.text}</p>
                   </div>

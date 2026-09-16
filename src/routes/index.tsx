@@ -9,7 +9,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Landing } from "@/components/landing/Landing";
@@ -53,9 +52,9 @@ type SessionRow = {
   created_at: string;
 };
 
-
 function outcomeTone(outcome: string | null) {
-  if (outcome === "saved") return "bg-success/15 text-success ring-1 ring-success/30";
+  if (outcome === "saved" || outcome === "resolved")
+    return "bg-success/15 text-success ring-1 ring-success/30";
   if (outcome === "partial") return "bg-accent/20 text-accent-foreground ring-1 ring-accent/40";
   return "bg-destructive/15 text-destructive ring-1 ring-destructive/30";
 }
@@ -101,7 +100,6 @@ function Dashboard() {
     ? Math.round(graded.reduce((sum, s) => sum + (s.overall_score ?? 0), 0) / graded.length)
     : 0;
 
-
   return (
     <main className="min-h-screen bg-background">
       <header className="brand-surface">
@@ -115,7 +113,9 @@ function Dashboard() {
                 <h1 className="font-display text-xl font-semibold leading-tight">
                   Saela Way — Retention Call Simulator
                 </h1>
-                <p className="text-xs opacity-80">Saela Pest Control · customer experience training</p>
+                <p className="text-xs opacity-80">
+                  Saela Pest Control · customer experience training
+                </p>
               </div>
             </div>
             <Button
@@ -326,7 +326,6 @@ function HistorySection({
     </section>
   );
 }
-
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (

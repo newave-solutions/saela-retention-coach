@@ -30,7 +30,8 @@ const PERSONALITY_RULES: Record<string, string> = {
   fast_talker: "You run sentences together and put three facts in one breath.",
   distracted: "You are doing something else. You trail off and ask them to repeat.",
   steamroller: "You talk over the agent and finish their sentences.",
-  detonator: "You are frustrated from the first second, though this is a service call, not a cancellation. Mild words at most ('damn', 'hell'), never abuse of the agent.",
+  detonator:
+    "You are frustrated from the first second, though this is a service call, not a cancellation. Mild words at most ('damn', 'hell'), never abuse of the agent.",
   drive_by: "You are in a hurry. Short sentences. You want it booked and gone.",
   stonewaller: "One-word answers. You make the agent ask for everything.",
   bargain_hunter: "You bring money into it quickly and ask what things cost.",
@@ -91,7 +92,6 @@ RULES
 Respond with ONLY strict JSON, no markdown fence:
 {"reply":string,"mood":"hostile"|"cold"|"neutral"|"warming"|"open","motiveUncovered":boolean,"saveLikelihood":number,"callShouldEnd":boolean,"endReason":"saved"|"partial"|"cancelled"|null}`;
 }
-
 
 async function callGateway(body: Record<string, unknown>): Promise<string> {
   const key = process.env["LOVABLE_API_KEY"];
@@ -180,7 +180,9 @@ export async function nextServiceTurn(
   }
 
   const endReason =
-    parsed.endReason === "saved" || parsed.endReason === "partial" || parsed.endReason === "cancelled"
+    parsed.endReason === "saved" ||
+    parsed.endReason === "partial" ||
+    parsed.endReason === "cancelled"
       ? parsed.endReason
       : null;
 
@@ -384,9 +386,7 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
       why: flag.why ?? "",
       rewrite: flag.rewrite ?? "",
       severity:
-        flag.severity === "high" || flag.severity === "low"
-          ? flag.severity
-          : ("medium" as const),
+        flag.severity === "high" || flag.severity === "low" ? flag.severity : ("medium" as const),
     }));
 
   const outcome: ServiceOutcome =
@@ -410,6 +410,13 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
     salesNotes: hasSalesOpp ? (parsed?.coaching?.salesNotes ?? []) : [],
   };
 
-  return { outcome, overallScore, scores, coaching, detailChecks, opportunityChecks, languageFlags };
+  return {
+    outcome,
+    overallScore,
+    scores,
+    coaching,
+    detailChecks,
+    opportunityChecks,
+    languageFlags,
+  };
 }
-

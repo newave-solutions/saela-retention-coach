@@ -5,12 +5,14 @@ Today the app only trains retention (cancellation) calls. This adds a second tra
 ## What the agent will see
 
 **Dashboard** gets two clearly separated practice tracks:
+
 - Retention calls (existing, unchanged)
 - Service calls — CES (new)
 
 Each track shows its own recent calls and its own stats, so a save rate never gets mixed with a listening score.
 
 **Starting a CES call**: same simple setup as today — pick a call type or let it pick randomly, pick how demanding the caller is, then dial. Call types:
+
 - Reservice request (still seeing activity between services)
 - Reschedule a regular service to a later date
 - Reschedule because of access problems (gate, dog, work hours, travel)
@@ -23,6 +25,7 @@ Each track shows its own recent calls and its own stats, so a save rate never ge
 The difference is that these callers bury real, checkable details in ordinary chatter — the room where they see activity, when they are home, a new puppy in the back yard, an upcoming trip, a gate code, a spouse who handles the account, whether they already tried a reservice. Some details are stated once, quickly, or contradicted later ("Tuesday — no wait, Tuesday I'm out, make it Thursday"). If the agent never confirms them back, the caller will not repeat them, and the call ends with something wrong booked.
 
 **The scorecard** after the call gives:
+
 - A listening comprehension score built from a detail checklist: every key fact the caller gave, marked captured / confirmed back / missed / got wrong. This is the centrepiece and is shown as an explicit list, so the agent sees the exact sentence they skipped past.
 - Category scores: listening and recall, questions that opened the customer up, accuracy of what was booked, value built on the existing plan, clarity of the confirmation (what happens, when, who, cost).
 - Written feedback: what went well, what was missed, what to do next time, plus the customer-experience impact of the misses.
@@ -37,6 +40,7 @@ A dedicated call type where the customer's agreement has ended, or they are stil
 These callers arrive with situations such as: agreement finished and they are "just going to stop for now", a job loss or reduced hours, a big upcoming expense, a spouse saying to cut the bill, or a customer who liked the service but cannot pay the current rate.
 
 What the agent is drilled on:
+
 - Ask the price point first and let the customer anchor, before naming any number.
 - Offer a resign with a real commitment: minimum 4 services, better ongoing price, and — only if needed to close it — 50% off or a free service up front so the customer gets breathing room while their finances recover.
 - Lock the ongoing price before giving away free or half-price services; free service is a closing tool, not an opener.

@@ -113,7 +113,8 @@ function ServiceScorecard() {
   });
 
   const scores = normalizeServiceScores(data?.scores);
-  const hasResign = (data?.coaching?.resignNotes?.length ?? 0) > 0 || (scores?.resignOffer ?? 0) > 0;
+  const hasResign =
+    (data?.coaching?.resignNotes?.length ?? 0) > 0 || (scores?.resignOffer ?? 0) > 0;
   const hasSales =
     (data?.coaching?.salesNotes?.length ?? 0) > 0 ||
     (scores?.salesTransfer ?? 0) > 0 ||
@@ -190,7 +191,9 @@ function ServiceScorecard() {
                               {check.label}:{" "}
                               <span className="font-normal text-foreground/80">{check.value}</span>
                             </p>
-                            <p className={`text-xs font-semibold uppercase tracking-widest ${tone}`}>
+                            <p
+                              className={`text-xs font-semibold uppercase tracking-widest ${tone}`}
+                            >
                               {DETAIL_STATUS_LABELS[check.status]}
                             </p>
                             <p className="mt-1 text-xs text-muted-foreground">{check.note}</p>
@@ -341,8 +344,6 @@ function ServiceScorecard() {
                   </Card>
                 ) : null}
 
-
-
                 <Card className="card-soft mt-4">
                   <CardHeader>
                     <h2 className="text-base font-semibold leading-none">Coaching</h2>
@@ -350,7 +351,11 @@ function ServiceScorecard() {
                   <CardContent className="space-y-5 text-sm">
                     <p className="text-muted-foreground">{data.coaching.summary}</p>
                     <CoachList title="Did well" items={data.coaching.didWell} tone="text-success" />
-                    <CoachList title="Missed" items={data.coaching.missed} tone="text-destructive" />
+                    <CoachList
+                      title="Missed"
+                      items={data.coaching.missed}
+                      tone="text-destructive"
+                    />
                     <CoachList title="Next time" items={data.coaching.nextTime} tone="text-ring" />
                     <CoachList
                       title="What the customer experiences"
