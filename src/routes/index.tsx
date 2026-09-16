@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   Ear,
   Headphones,
@@ -68,9 +70,99 @@ function formatWhen(iso: string) {
   });
 }
 
+type Position = "ces" | "cem";
+
+function RolePicker({ onPick, busy }: { onPick: (p: Position) => void; busy: boolean }) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-2xl">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+            <Headphones className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="font-display text-xl font-semibold">Which seat do you work?</h1>
+            <p className="text-sm text-muted-foreground">
+              Your training floor is built around your role. You can change it later.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card className="card-soft">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Ear className="h-4 w-4 text-accent" />
+                Customer Experience Specialist
+              </CardTitle>
+              <CardDescription>
+                First point of contact. Reservices, reschedules, coverage questions, resigns and
+                listening comprehension.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" disabled={busy} onClick={() => onPick("ces")}>
+                I'm a CES
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="card-soft">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <PhoneOutgoing className="h-4 w-4 text-accent" />
+                Customer Experience Manager
+              </CardTitle>
+              <CardDescription>
+                Retention seat. Cancellation calls, hidden motives, GEOC and escalated save
+                authority.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" disabled={busy} onClick={() => onPick("cem")}>
+                I'm a CEM
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 function Dashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, loading } = useAuth();
+  const [savingRole, setSavingRole] = useState(false);
+
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, position")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  async function setPosition(position: Position | null) {
+    if (!user) return;
+    setSavingRole(true);
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, position }, { onConflict: "id" });
+    setSavingRole(false);
+    if (error) {
+      toast.error("Couldn't save your role. Try again.");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+  }
 
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user?.id],
@@ -88,12 +180,19 @@ function Dashboard() {
 
   if (loading) return <div className="min-h-screen bg-background" />;
   if (!user) return <Landing />;
+  if (profileLoading) return <div className="min-h-screen bg-background" />;
+
+  const position = (profile?.position ?? null) as Position | null;
+  if (!position) return <RolePicker onPick={(p) => void setPosition(p)} busy={savingRole} />;
+
+  const isCes = position === "ces";
 
   const all = sessions ?? [];
   const serviceSessions = all.filter((s) => s.track === "service");
   const retentionSessions = all.filter((s) => s.track !== "service");
-  const graded = retentionSessions.filter((s) => s.status === "complete");
-  const saves = graded.filter((s) => s.outcome === "saved").length;
+  const mine = isCes ? serviceSessions : retentionSessions;
+  const graded = mine.filter((s) => s.status === "complete");
+  const saves = graded.filter((s) => s.outcome === "saved" || s.outcome === "resolved").length;
   const partials = graded.filter((s) => s.outcome === "partial").length;
   const saveRate = graded.length ? Math.round(((saves + partials * 0.5) / graded.length) * 100) : 0;
   const avgScore = graded.length
@@ -111,144 +210,159 @@ function Dashboard() {
               </div>
               <div>
                 <h1 className="font-display text-xl font-semibold leading-tight">
-                  Saela Way — Retention Call Simulator
+                  {isCes ? "Saela Way — CES Service Call Simulator" : "Saela Way — Retention Call Simulator"}
                 </h1>
                 <p className="text-xs opacity-80">
                   Saela Pest Control · customer experience training
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-white/10"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                void navigate({ to: "/auth" });
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-white/10"
+                disabled={savingRole}
+                onClick={() => void setPosition(null)}
+              >
+                Change role
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-white/10"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  void navigate({ to: "/auth" });
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </Button>
+            </div>
           </div>
 
           <p className="mt-6 max-w-xl text-sm leading-relaxed opacity-90">
-            Our job is not to stop a cancellation — it's to help the customer and resolve the
-            concern. Every call is graded on the Saela Customer Resolution Playbook: help people,
-            build value, over-communicate, trust and integrity, and hold the line together. Connect,
-            discover the why behind the why, resolve, confirm. Retention is the outcome; resolution
-            is the work.
+            {isCes
+              ? "You're the first voice the customer hears. Listen for every detail, resolve the reason they called, build value on what they already pay for, and spot the opening to help them further. Connect, discover the why behind the why, resolve, confirm."
+              : "Our job is not to stop a cancellation — it's to help the customer and resolve the concern. Every call is graded on the Saela Customer Resolution Playbook: help people, build value, over-communicate, trust and integrity, and hold the line together."}
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <StatCard label="Calls graded" value={String(graded.length)} />
-            <StatCard label="Save rate" value={`${saveRate}%`} />
+            <StatCard label={isCes ? "Resolution rate" : "Save rate"} value={`${saveRate}%`} />
             <StatCard label="Average score" value={graded.length ? String(avgScore) : "—"} />
           </div>
         </div>
       </header>
 
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Retention track — cancellation calls
-        </h2>
-        <section className="grid gap-4 sm:grid-cols-2">
-          <Card className="card-soft border-border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <PhoneOutgoing className="h-4 w-4 text-accent" />
-                Take a live call
-              </CardTitle>
-              <CardDescription>
-                A cancellation comes through with a hidden motive. Find it, or lose the account.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link to="/call/new" search={{ quick: true }}>
-                  Answer the next call
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+        {isCes ? (
+          <>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+              CES track — service calls & listening
+            </h2>
+            <section className="grid gap-4 sm:grid-cols-2">
+              <Card className="card-soft border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Ear className="h-4 w-4 text-accent" />
+                    Take a service call
+                  </CardTitle>
+                  <CardDescription>
+                    Reservices, reschedules, access problems and out-of-agreement resigns. Every
+                    detail they give you is graded on whether you caught it.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full">
+                    <Link to="/service/new" search={{ quick: true }}>
+                      Answer the next service call
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
 
-          <Card className="card-soft">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <SlidersHorizontal className="h-4 w-4 text-ring" />
-                Build a scenario
-              </CardTitle>
-              <CardDescription>
-                Drill a specific cancel reason, difficulty, and customer personality.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/call/new" search={{ quick: false }}>
-                  Configure a call
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
+              <Card className="card-soft">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <SlidersHorizontal className="h-4 w-4 text-ring" />
+                    Build a service scenario
+                  </CardTitle>
+                  <CardDescription>
+                    Pick the call type — including resign practice for customers out of agreement.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/service/new" search={{ quick: false }}>
+                      Configure a service call
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </section>
 
-        <h2 className="mb-3 mt-10 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          CES track — service calls & listening
-        </h2>
-        <section className="grid gap-4 sm:grid-cols-2">
-          <Card className="card-soft border-border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Ear className="h-4 w-4 text-accent" />
-                Take a service call
-              </CardTitle>
-              <CardDescription>
-                Reservices, reschedules, access problems and out-of-agreement resigns. Every detail
-                they give you is graded on whether you caught it.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link to="/service/new" search={{ quick: true }}>
-                  Answer the next service call
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+            <HistorySection
+              title="Service call history"
+              rows={serviceSessions}
+              emptyText="No service calls yet. Take one and we'll grade what you heard."
+              kind="service"
+            />
+          </>
+        ) : (
+          <>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+              Retention track — cancellation calls
+            </h2>
+            <section className="grid gap-4 sm:grid-cols-2">
+              <Card className="card-soft border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <PhoneOutgoing className="h-4 w-4 text-accent" />
+                    Take a live call
+                  </CardTitle>
+                  <CardDescription>
+                    A cancellation comes through with a hidden motive. Find it, or lose the account.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full">
+                    <Link to="/call/new" search={{ quick: true }}>
+                      Answer the next call
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
 
-          <Card className="card-soft">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <SlidersHorizontal className="h-4 w-4 text-ring" />
-                Build a service scenario
-              </CardTitle>
-              <CardDescription>
-                Pick the call type — including resign practice for customers out of agreement.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/service/new" search={{ quick: false }}>
-                  Configure a service call
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
+              <Card className="card-soft">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <SlidersHorizontal className="h-4 w-4 text-ring" />
+                    Build a scenario
+                  </CardTitle>
+                  <CardDescription>
+                    Drill a specific cancel reason, difficulty, and customer personality.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/call/new" search={{ quick: false }}>
+                      Configure a call
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </section>
 
-        <HistorySection
-          title="Retention call history"
-          rows={retentionSessions}
-          emptyText="No cancellation calls yet. Your first one shows up here with a full scorecard."
-          kind="retention"
-        />
-
-        <HistorySection
-          title="Service call history"
-          rows={serviceSessions}
-          emptyText="No service calls yet. Take one and we'll grade what you heard."
-          kind="service"
-        />
+            <HistorySection
+              title="Retention call history"
+              rows={retentionSessions}
+              emptyText="No cancellation calls yet. Your first one shows up here with a full scorecard."
+              kind="retention"
+            />
+          </>
+        )}
       </div>
     </main>
   );

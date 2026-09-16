@@ -82,6 +82,53 @@ async function speakViaGateway(options: {
   });
 }
 
+/** Keep the same caller sounding like the same person when we fall back to the gateway. */
+function gatewayVoiceFor(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return GATEWAY_VOICE_LIST[hash % GATEWAY_VOICE_LIST.length] as string;
+}
+
+async function speakViaGateway(options: {
+  text: string;
+  voice: string;
+  instructions?: string | undefined;
+  speed: number;
+  signal: AbortSignal;
+}): Promise<Response> {
+  const gatewayKey = process.env["LOVABLE_API_KEY"];
+  if (!gatewayKey) return new Response("Voice is not configured for this project.", { status: 401 });
+
+  const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${gatewayKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-4o-mini-tts",
+      voice: options.voice,
+      input: options.text,
+      response_format: "mp3",
+      speed: options.speed,
+      ...(options.instructions ? { instructions: options.instructions } : {}),
+    }),
+    signal: options.signal,
+  });
+
+  if (!upstream.ok || !upstream.body) {
+    const detail = await upstream.text().catch(() => "");
+    console.error(`Gateway TTS failed [${upstream.status}]: ${detail}`);
+    return new Response(detail || "The voice service is unavailable.", {
+      status: upstream.status || 502,
+    });
+  }
+
+  return new Response(upstream.body, {
+    headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
+  });
+}
+
 export const Route = createFileRoute("/api/speech")({
   server: {
     handlers: {
