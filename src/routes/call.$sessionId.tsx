@@ -9,6 +9,7 @@ import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
 import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
+import { CallTimer } from "@/components/CallTimer";
 import {
   instructionsFor,
   settingsFor,
@@ -54,7 +55,6 @@ function LiveCall() {
   const [thinking, setThinking] = useState(false);
   const [ending, setEnding] = useState(false);
   const [typed, setTyped] = useState("");
-  const [seconds, setSeconds] = useState(0);
   const [micOn, setMicOn] = useState(false);
 
   const busyRef = useRef(false);
@@ -168,11 +168,6 @@ function LiveCall() {
   }, [sessionId, user]);
 
   useEffect(() => {
-    const timer = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [turns, thinking]);
 
@@ -198,8 +193,6 @@ function LiveCall() {
         ? "Listening to you"
         : "Mic off";
 
-  const mmss = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
-
   return (
     <main className="flex min-h-screen flex-col bg-background">
       <header className="brand-surface">
@@ -221,9 +214,7 @@ function LiveCall() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-white/30 bg-white/10 font-mono text-inherit">
-              {mmss}
-            </Badge>
+            <CallTimer />
             <Button variant="destructive" size="sm" onClick={() => finish(null)} disabled={ending}>
               <PhoneOff className="mr-2 h-4 w-4" />
               {ending ? "Wrapping up..." : "End call"}
@@ -303,7 +294,11 @@ function LiveCall() {
             placeholder="Or type what you'd say..."
             disabled={ending}
           />
-          <Button type="submit" aria-label="Send message" disabled={!typed.trim() || thinking || ending}>
+          <Button
+            type="submit"
+            aria-label="Send message"
+            disabled={!typed.trim() || thinking || ending}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </form>
