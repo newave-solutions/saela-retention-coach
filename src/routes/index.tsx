@@ -55,7 +55,8 @@ type SessionRow = {
 
 
 function outcomeTone(outcome: string | null) {
-  if (outcome === "saved") return "bg-success/15 text-success ring-1 ring-success/30";
+  if (outcome === "saved" || outcome === "resolved")
+    return "bg-success/15 text-success ring-1 ring-success/30";
   if (outcome === "partial") return "bg-accent/20 text-accent-foreground ring-1 ring-accent/40";
   return "bg-destructive/15 text-destructive ring-1 ring-destructive/30";
 }
