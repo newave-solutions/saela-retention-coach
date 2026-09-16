@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-declare global {
-  interface Window {
-    interimDebounce: number | null;
-  }
-}
-
 type RecognitionResult = { transcript: string };
 type RecognitionAlternative = { 0: RecognitionResult; isFinal: boolean; length: number };
 type RecognitionEvent = {
@@ -50,6 +44,8 @@ export function useSpeechRecognition(options: {
   const recognitionRef = useRef<RecognitionLike | null>(null);
   const bufferRef = useRef("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingInterimRef = useRef("");
+  const rafRef = useRef<number | null>(null);
   const wantListeningRef = useRef(false);
   const onUtteranceRef = useRef(onUtterance);
   onUtteranceRef.current = onUtterance;
@@ -87,11 +83,11 @@ export function useSpeechRecognition(options: {
         if (result.isFinal) bufferRef.current += ` ${text}`;
         else live += text;
       }
-      // Debounce the interim state
-      if (!window.interimDebounce) {
-        window.interimDebounce = requestAnimationFrame(() => {
-          setInterim(live);
-          window.interimDebounce = null;
+      pendingInterimRef.current = live;
+      if (rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(() => {
+          setInterim(pendingInterimRef.current);
+          rafRef.current = null;
         });
       }
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -140,6 +136,9 @@ export function useSpeechRecognition(options: {
     wantListeningRef.current = false;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = null;
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    pendingInterimRef.current = "";
     bufferRef.current = "";
     setInterim("");
     const recognition = recognitionRef.current;

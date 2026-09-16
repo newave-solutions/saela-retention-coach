@@ -12,7 +12,7 @@ export function useCustomerVoice() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const cache = useRef<Map<string, string>>(new Map());
+  const cache = useRef<Map<string, Blob>>(new Map());
 
   const cleanup = useCallback(() => {
     if (audioRef.current) {
@@ -73,20 +73,37 @@ export function useCustomerVoice() {
       if (!text.trim()) return;
       stop();
 
-      const cacheKey = `${text}|${options?.voice}`;
-      if (cache.current.has(cacheKey)) {
+      const cacheKey = JSON.stringify({
+        text,
+        provider: options?.provider ?? null,
+        voice: options?.voice ?? null,
+        instructions: options?.instructions ?? null,
+        settings: options?.settings ?? null,
+      });
+      const cachedBlob = cache.current.get(cacheKey);
+      if (cachedBlob) {
+        const controller = new AbortController();
+        abortRef.current = controller;
         setSpeaking(true);
-        const url = cache.current.get(cacheKey)!;
+        const url = URL.createObjectURL(cachedBlob);
         urlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;
-        await new Promise<void>((resolve) => {
-          audio.onended = () => resolve();
-          audio.onerror = () => resolve();
-          void audio.play().catch(() => resolve());
-        });
-        cleanup();
-        setSpeaking(false);
+        try {
+          await new Promise<void>((resolve) => {
+            audio.onended = () => resolve();
+            audio.onerror = () => resolve();
+            controller.signal.addEventListener("abort", () => resolve(), { once: true });
+            void audio.play().catch(() => resolve());
+          });
+
+          if (!controller.signal.aborted) {
+            cleanup();
+            setSpeaking(false);
+          }
+        } finally {
+          if (abortRef.current === controller) abortRef.current = null;
+        }
         return;
       }
 
@@ -115,7 +132,7 @@ export function useCustomerVoice() {
         if (blob.size === 0) throw new Error("no-audio");
 
         const url = URL.createObjectURL(blob);
-        cache.current.set(cacheKey, url);
+        cache.current.set(cacheKey, blob);
         urlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;
