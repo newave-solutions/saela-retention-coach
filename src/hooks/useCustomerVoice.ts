@@ -12,6 +12,7 @@ export function useCustomerVoice() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const cache = useRef<Map<string, string>>(new Map());
 
   const cleanup = useCallback(() => {
     if (audioRef.current) {
@@ -72,6 +73,23 @@ export function useCustomerVoice() {
       if (!text.trim()) return;
       stop();
 
+      const cacheKey = `${text}|${options?.voice}`;
+      if (cache.current.has(cacheKey)) {
+        setSpeaking(true);
+        const url = cache.current.get(cacheKey)!;
+        urlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        await new Promise<void>((resolve) => {
+          audio.onended = () => resolve();
+          audio.onerror = () => resolve();
+          void audio.play().catch(() => resolve());
+        });
+        cleanup();
+        setSpeaking(false);
+        return;
+      }
+
       const controller = new AbortController();
       abortRef.current = controller;
       setSpeaking(true);
@@ -97,6 +115,7 @@ export function useCustomerVoice() {
         if (blob.size === 0) throw new Error("no-audio");
 
         const url = URL.createObjectURL(blob);
+        cache.current.set(cacheKey, url);
         urlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;

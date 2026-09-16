@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+declare global {
+  interface Window {
+    interimDebounce: number | null;
+  }
+}
+
 type RecognitionResult = { transcript: string };
 type RecognitionAlternative = { 0: RecognitionResult; isFinal: boolean; length: number };
 type RecognitionEvent = {
@@ -81,7 +87,13 @@ export function useSpeechRecognition(options: {
         if (result.isFinal) bufferRef.current += ` ${text}`;
         else live += text;
       }
-      setInterim(live);
+      // Debounce the interim state
+      if (!window.interimDebounce) {
+        window.interimDebounce = requestAnimationFrame(() => {
+          setInterim(live);
+          window.interimDebounce = null;
+        });
+      }
       if (timerRef.current) clearTimeout(timerRef.current);
       if (bufferRef.current.trim()) {
         timerRef.current = setTimeout(flush, silenceMs);

@@ -76,7 +76,7 @@ export const Route = createFileRoute("/api/speech")({
             }
 
             return new Response(upstream.body, {
-              headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
+              headers: { "Content-Type": "audio/mpeg", "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400" },
             });
           }
 
@@ -125,7 +125,7 @@ export const Route = createFileRoute("/api/speech")({
           return new Response(upstream.body, {
             headers: {
               "Content-Type": "audio/mpeg",
-              "Cache-Control": "no-store",
+              "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
             },
           });
         } catch (error) {
