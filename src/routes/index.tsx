@@ -70,9 +70,99 @@ function formatWhen(iso: string) {
   });
 }
 
+type Position = "ces" | "cem";
+
+function RolePicker({ onPick, busy }: { onPick: (p: Position) => void; busy: boolean }) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-2xl">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+            <Headphones className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="font-display text-xl font-semibold">Which seat do you work?</h1>
+            <p className="text-sm text-muted-foreground">
+              Your training floor is built around your role. You can change it later.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card className="card-soft">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Ear className="h-4 w-4 text-accent" />
+                Customer Experience Specialist
+              </CardTitle>
+              <CardDescription>
+                First point of contact. Reservices, reschedules, coverage questions, resigns and
+                listening comprehension.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" disabled={busy} onClick={() => onPick("ces")}>
+                I'm a CES
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="card-soft">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <PhoneOutgoing className="h-4 w-4 text-accent" />
+                Customer Experience Manager
+              </CardTitle>
+              <CardDescription>
+                Retention seat. Cancellation calls, hidden motives, GEOC and escalated save
+                authority.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" disabled={busy} onClick={() => onPick("cem")}>
+                I'm a CEM
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 function Dashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, loading } = useAuth();
+  const [savingRole, setSavingRole] = useState(false);
+
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, position")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  async function setPosition(position: Position | null) {
+    if (!user) return;
+    setSavingRole(true);
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, position }, { onConflict: "id" });
+    setSavingRole(false);
+    if (error) {
+      toast.error("Couldn't save your role. Try again.");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+  }
 
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user?.id],
