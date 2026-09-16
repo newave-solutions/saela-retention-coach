@@ -1,10 +1,5 @@
 // Server-only. Builds a CES service-call scenario with hidden listening details.
-import {
-  PERSONALITIES,
-  PERSONALITY_LABELS,
-  type Difficulty,
-  type Personality,
-} from "./scenarios";
+import { PERSONALITIES, PERSONALITY_LABELS, type Difficulty, type Personality } from "./scenarios";
 import {
   SERVICE_CALL_TYPES,
   SERVICE_TYPE_LABELS,
@@ -40,7 +35,11 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       situation:
         "Serviced 5 weeks ago. Ants are back along the kitchen baseboard and now in the upstairs bathroom. They have not asked for a reservice before and assume it costs money.",
       keyDetails: [
-        d("where", "Where the activity is", "Kitchen baseboard by the dishwasher AND the upstairs bathroom"),
+        d(
+          "where",
+          "Where the activity is",
+          "Kitchen baseboard by the dishwasher AND the upstairs bathroom",
+        ),
         d("when", "How long it's been happening", "Started about 8 days ago, worse after the rain"),
         d("tried", "What they already tried", "Store-bought spray from the hardware store", true),
         d("availability", "When they're home", "Works from home Mondays and Fridays only", true),
@@ -68,8 +67,17 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
         d("where", "Where the activity is", "Garage corners and under the back patio eaves"),
         d("when", "Last service", "Tech came about three weeks ago"),
         d("access", "Access", "Garage side door is usually unlocked; front gate sticks"),
-        d("who", "Who to contact", "Wife handles the scheduling — her cell, not the house line", true),
-        d("concern", "Underlying concern", "Wondering whether the service is doing anything at all"),
+        d(
+          "who",
+          "Who to contact",
+          "Wife handles the scheduling — her cell, not the house line",
+          true,
+        ),
+        d(
+          "concern",
+          "Underlying concern",
+          "Wondering whether the service is doing anything at all",
+        ),
       ],
       valueOpportunities: [
         "Web knockdown and eave treatment are part of the exterior service",
@@ -93,7 +101,12 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
         d("where", "Nest location", "Above the front door frame, and maybe one at the shed"),
         d("urgency", "Why it's urgent", "Their 6-year-old was stung on Saturday"),
         d("height", "Access constraint", "Nest is high up — about 12 feet"),
-        d("availability", "Availability", "Any day after 2pm; before that they're at school pickup", true),
+        d(
+          "availability",
+          "Availability",
+          "Any day after 2pm; before that they're at school pickup",
+          true,
+        ),
         d("history", "History", "Same thing happened last spring in the same spot"),
       ],
       valueOpportunities: [
@@ -118,7 +131,11 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
         "Service is scheduled for Thursday. They want it later in the month. They change the day mid-sentence.",
       keyDetails: [
         d("original", "Currently scheduled", "This Thursday morning"),
-        d("newday", "Day they actually want", "Tuesday — no, Tuesday they're out; they land on Thursday the following week"),
+        d(
+          "newday",
+          "Day they actually want",
+          "Tuesday — no, Tuesday they're out; they land on Thursday the following week",
+        ),
         d("why", "Reason", "Out of town for a work trip through the weekend"),
         d("window", "Time preference", "Afternoon only; mornings are meetings", true),
         d("note", "Extra ask", "Wants the tech to skip the side yard because it was just seeded"),
@@ -164,8 +181,7 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       ],
     },
     {
-      situation:
-        "Hosting a big family event and does not want a truck in the driveway that week.",
+      situation: "Hosting a big family event and does not want a truck in the driveway that week.",
       keyDetails: [
         d("why", "Reason", "Graduation party Saturday, family arriving Wednesday"),
         d("avoid", "Days to avoid", "Wednesday through Sunday"),
@@ -216,14 +232,26 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       ],
     },
     {
-      situation:
-        "Gated community. The tech has been turned away at the gate twice.",
+      situation: "Gated community. The tech has been turned away at the gate twice.",
       keyDetails: [
-        d("gate", "Gate detail", "Guard gate needs the company on the visitor list — resident must call it in"),
+        d(
+          "gate",
+          "Gate detail",
+          "Guard gate needs the company on the visitor list — resident must call it in",
+        ),
         d("code", "Backup", "Vendor code 9-1-4-4 works after 5pm only"),
-        d("unit", "Address nuance", "It's unit 12B, not 12 — mail keeps going to the wrong one", true),
+        d(
+          "unit",
+          "Address nuance",
+          "It's unit 12B, not 12 — mail keeps going to the wrong one",
+          true,
+        ),
         d("time", "Best window", "Weekday mornings before 11"),
-        d("mood", "Underlying feeling", "Embarrassed and worried they'll be charged for missed visits"),
+        d(
+          "mood",
+          "Underlying feeling",
+          "Embarrassed and worried they'll be charged for missed visits",
+        ),
       ],
       valueOpportunities: [
         "Correct the address on the account so this stops",
@@ -241,8 +269,7 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       ],
     },
     {
-      situation:
-        "Works nights and sleeps during the day. The visits keep waking them up.",
+      situation: "Works nights and sleeps during the day. The visits keep waking them up.",
       keyDetails: [
         d("schedule", "Their schedule", "Night shift nurse; sleeps 8am to 3pm"),
         d("pref", "What they want", "Exterior-only when they're asleep, interior on a day off"),
@@ -342,13 +369,17 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
   ],
   unclear_need: [
     {
-      situation:
-        "Rambles. Mentions three different things and never actually says what they want.",
+      situation: "Rambles. Mentions three different things and never actually says what they want.",
       keyDetails: [
         d("bugs", "Pest mention", "Little black bugs in the window sills upstairs"),
         d("bill", "Billing mention", "Thinks last month's charge looked different"),
         d("sched", "Scheduling mention", "Not sure when the next visit is supposed to be"),
-        d("real", "What they actually need", "Reassurance plus a reservice for the window sill bugs", true),
+        d(
+          "real",
+          "What they actually need",
+          "Reassurance plus a reservice for the window sill bugs",
+          true,
+        ),
         d("aside", "Aside", "Mentions a neighbor who might want service too"),
       ],
       valueOpportunities: [
@@ -367,8 +398,7 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       ],
     },
     {
-      situation:
-        "An elderly customer who is a little confused about what plan they have.",
+      situation: "An elderly customer who is a little confused about what plan they have.",
       keyDetails: [
         d("plan", "What they think they have", "Believes they pay monthly for 'the bug spray'"),
         d("real", "The real question", "Whether the wasps at the shed are covered"),
@@ -392,8 +422,7 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       ],
     },
     {
-      situation:
-        "Calling on behalf of a parent's house and does not have all the answers.",
+      situation: "Calling on behalf of a parent's house and does not have all the answers.",
       keyDetails: [
         d("who", "Who they are", "Son calling about his mother's account"),
         d("address", "Address", "Different from his own; mother's house on Bellview"),
@@ -447,7 +476,11 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
       situation:
         "Got their renewal notice and noticed the price went up over the last few services. They're not angry, just want it explained, and they're service-to-service now.",
       keyDetails: [
-        d("increase", "What they noticed", "Price has crept up about $15 over the last three services"),
+        d(
+          "increase",
+          "What they noticed",
+          "Price has crept up about $15 over the last three services",
+        ),
         d("status", "Account status", "No agreement in place — paying service to service", true),
         d("usage", "How they use it", "Mostly worried about ants and the crawlspace"),
         d("budget", "Money comment", "Says they're watching every bill this year"),
@@ -483,7 +516,6 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
     },
   ],
   resign_out_of_agreement: [
-
     {
       situation:
         "Their agreement finished last month. They liked the service but want to 'stop for now' because money is tight after a job change.",
@@ -527,7 +559,11 @@ const SEEDS: Record<ServiceCallType, Seed[]> = {
         "Out of agreement and shopping. A neighbor told them a cheaper company is going door to door.",
       keyDetails: [
         d("status", "Account status", "Out of agreement for three weeks"),
-        d("competitor", "Competitor detail", "Door-to-door rep quoted $89 a service, no initial fee"),
+        d(
+          "competitor",
+          "Competitor detail",
+          "Door-to-door rep quoted $89 a service, no initial fee",
+        ),
         d("doubt", "Their doubt", "Not sure the cheaper company is any good", true),
         d("history", "History", "Four years with Saela, never a real problem"),
         d("spouse", "Decision maker", "Spouse wants to switch; caller doesn't"),
@@ -627,8 +663,10 @@ const OPPORTUNITY_POOL: HiddenOpportunity[] = [
   {
     id: "outbuilding",
     label: "Shed, detached garage or crawlspace they never mention twice",
-    signal: "Refers in passing to a shed, garage or crawlspace where they've seen droppings or nesting",
-    goodMove: "Ask what they're seeing out there and build value toward rodent yard guard, then offer sales for a quote",
+    signal:
+      "Refers in passing to a shed, garage or crawlspace where they've seen droppings or nesting",
+    goodMove:
+      "Ask what they're seeing out there and build value toward rodent yard guard, then offer sales for a quote",
     kind: "sales_transfer",
   },
   {
@@ -642,8 +680,10 @@ const OPPORTUNITY_POOL: HiddenOpportunity[] = [
   {
     id: "entry_points",
     label: "Gaps around doors, vents or the garage they've noticed",
-    signal: "Says something about a gap under the door, a vent screen, or 'they're getting in somewhere'",
-    goodMove: "Ask where they're getting in and explain that exclusion work is quoted by sales alongside the plan",
+    signal:
+      "Says something about a gap under the door, a vent screen, or 'they're getting in somewhere'",
+    goodMove:
+      "Ask where they're getting in and explain that exclusion work is quoted by sales alongside the plan",
     kind: "sales_transfer",
   },
   {
@@ -694,7 +734,11 @@ function eligibilityFor(seed: Seed, callType: ServiceCallType): ResignEligibilit
   // Roughly half of ordinary callers are quietly service-to-service and resignable.
   if (Math.random() > 0.5) return null;
 
-  const ceiling = pick(["about $105 a service", "around $110 a service", "no more than $115 a service"]);
+  const ceiling = pick([
+    "about $105 a service",
+    "around $110 a service",
+    "no more than $115 a service",
+  ]);
   return {
     serviceToService: true,
     signals: pickSome(RESIGN_SIGNALS, 2),
@@ -757,7 +801,6 @@ export function generateServiceScenario(input: {
     ...(seed.resign ? { resign: seed.resign } : {}),
   };
 }
-
 
 /** Strip the hidden half before anything reaches the browser mid-call. */
 export function toPublicServiceScenario(scenario: FullServiceScenario) {

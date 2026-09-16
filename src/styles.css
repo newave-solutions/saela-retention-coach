@@ -108,7 +108,8 @@
   --sidebar-ring: oklch(0.74 0.145 62);
   --brand-deep: oklch(0.29 0.04 168);
   --gradient-brand: linear-gradient(135deg, oklch(0.35 0.045 168), oklch(0.45 0.06 178));
-  --shadow-soft: 0 1px 2px oklch(0.29 0.04 168 / 0.06), 0 12px 28px -18px oklch(0.29 0.04 168 / 0.35);
+  --shadow-soft:
+    0 1px 2px oklch(0.29 0.04 168 / 0.06), 0 12px 28px -18px oklch(0.29 0.04 168 / 0.35);
 }
 
 .dark {

@@ -318,10 +318,7 @@ export function Landing() {
             <Carousel opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent className="-ml-4">
                 {REVIEWS.map((r) => (
-                  <CarouselItem
-                    key={r.name}
-                    className="pl-4 sm:basis-1/2 lg:basis-1/3"
-                  >
+                  <CarouselItem key={r.name} className="pl-4 sm:basis-1/2 lg:basis-1/3">
                     <Card className="card-soft h-full border-border">
                       <CardContent className="flex h-full flex-col pt-6">
                         <Quote className="h-6 w-6 text-accent" />
@@ -345,7 +342,9 @@ export function Landing() {
         <section id="faq" className="border-y border-border bg-secondary/40 scroll-mt-20">
           <div className="mx-auto max-w-3xl px-4 py-20">
             <Reveal>
-              <h2 className="font-display text-3xl font-semibold sm:text-4xl">Questions, answered</h2>
+              <h2 className="font-display text-3xl font-semibold sm:text-4xl">
+                Questions, answered
+              </h2>
             </Reveal>
             <Reveal className="mt-8">
               <Accordion type="single" collapsible className="w-full">
@@ -370,8 +369,8 @@ export function Landing() {
                 Your next save starts with one practice call
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed opacity-90">
-                Free while we're in early-access testing. Create an account, answer the call, and see
-                your first scorecard in minutes.
+                Free while we're in early-access testing. Create an account, answer the call, and
+                see your first scorecard in minutes.
               </p>
               <Button asChild size="lg" variant="secondary" className="mt-8 gap-2">
                 <Link to="/auth">
@@ -386,7 +385,9 @@ export function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8 text-xs text-muted-foreground">
-          <p>Saela Way — Retention Call Simulator · Saela Pest Control customer experience training</p>
+          <p>
+            Saela Way — Retention Call Simulator · Saela Pest Control customer experience training
+          </p>
           <Link to="/auth" className="transition-colors hover:text-foreground">
             Sign in
           </Link>

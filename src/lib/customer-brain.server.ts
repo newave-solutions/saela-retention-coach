@@ -193,9 +193,9 @@ export async function nextCustomerTurn(
     motiveUncovered: Boolean(parsed.motiveUncovered),
     saveLikelihood: clamp(parsed.saveLikelihood, 20),
     callShouldEnd: Boolean(parsed.callShouldEnd) || endReason !== null,
-    endReason: (Boolean(parsed.callShouldEnd) && endReason === null ? "cancelled" : endReason) as
-      | Outcome
-      | null,
+    endReason: (Boolean(parsed.callShouldEnd) && endReason === null
+      ? "cancelled"
+      : endReason) as Outcome | null,
   };
 }
 
@@ -295,7 +295,8 @@ didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing 
     overallScore: clamp(parsed?.overallScore, average),
     scores,
     coaching: {
-      summary: parsed?.coaching?.summary ?? "The call ended before enough happened to grade deeply.",
+      summary:
+        parsed?.coaching?.summary ?? "The call ended before enough happened to grade deeply.",
       didWell: parsed?.coaching?.didWell ?? [],
       missed: parsed?.coaching?.missed ?? [],
       nextTime: parsed?.coaching?.nextTime ?? [],

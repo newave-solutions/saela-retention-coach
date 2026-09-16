@@ -11,7 +11,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Landing } from "@/components/landing/Landing";
@@ -54,7 +53,6 @@ type SessionRow = {
   duration_seconds: number | null;
   created_at: string;
 };
-
 
 function outcomeTone(outcome: string | null) {
   if (outcome === "saved" || outcome === "resolved")
@@ -201,7 +199,6 @@ function Dashboard() {
     ? Math.round(graded.reduce((sum, s) => sum + (s.overall_score ?? 0), 0) / graded.length)
     : 0;
 
-
   return (
     <main className="min-h-screen bg-background">
       <header className="brand-surface">
@@ -216,8 +213,7 @@ function Dashboard() {
                   {isCes ? "Saela Way — CES Service Call Simulator" : "Saela Way — Retention Call Simulator"}
                 </h1>
                 <p className="text-xs opacity-80">
-                  Saela Pest Control ·{" "}
-                  {isCes ? "Customer Experience Specialist" : "Customer Experience Manager"}
+                  Saela Pest Control · customer experience training
                 </p>
               </div>
             </div>
@@ -444,7 +440,6 @@ function HistorySection({
     </section>
   );
 }
-
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (

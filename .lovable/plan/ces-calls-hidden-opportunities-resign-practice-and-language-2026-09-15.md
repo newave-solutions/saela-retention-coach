@@ -44,7 +44,6 @@ The resign section of the scorecard is expanded to grade the full sequence, not 
 
 Coaching calls out the specific turn where the opening appeared and what should have been said there.
 
-
 ## 5. Language and tone check
 
 The transcript is run through a language pass that flags wording that makes customers feel tied down — "contract", "locked in", "obligated", "sign up for", "terms and conditions", "commit to" — along with over-explaining, hedging, and anything that reads defensive.

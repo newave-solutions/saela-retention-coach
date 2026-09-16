@@ -44,6 +44,8 @@ export function useSpeechRecognition(options: {
   const recognitionRef = useRef<RecognitionLike | null>(null);
   const bufferRef = useRef("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingInterimRef = useRef("");
+  const rafRef = useRef<number | null>(null);
   const wantListeningRef = useRef(false);
   const onUtteranceRef = useRef(onUtterance);
   onUtteranceRef.current = onUtterance;
@@ -81,7 +83,13 @@ export function useSpeechRecognition(options: {
         if (result.isFinal) bufferRef.current += ` ${text}`;
         else live += text;
       }
-      setInterim(live);
+      pendingInterimRef.current = live;
+      if (rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(() => {
+          setInterim(pendingInterimRef.current);
+          rafRef.current = null;
+        });
+      }
       if (timerRef.current) clearTimeout(timerRef.current);
       if (bufferRef.current.trim()) {
         timerRef.current = setTimeout(flush, silenceMs);
@@ -128,6 +136,9 @@ export function useSpeechRecognition(options: {
     wantListeningRef.current = false;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = null;
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    pendingInterimRef.current = "";
     bufferRef.current = "";
     setInterim("");
     const recognition = recognitionRef.current;

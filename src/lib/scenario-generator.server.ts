@@ -23,34 +23,103 @@ type Seed = {
 
 type NameGroupKey = "american" | "indian" | "arabic" | "british" | "australian";
 
-const NAME_POOLS: Record<
-  NameGroupKey,
-  { male: string[]; female: string[]; last: string[] }
-> = {
+const NAME_POOLS: Record<NameGroupKey, { male: string[]; female: string[]; last: string[] }> = {
   american: {
-    male: ["Marcus","Ted","Roy","Curtis","Wes","Tyler","Darnell","Brandon","Vince","Chad","Hector","Randy","Grant","Dustin","Bill","Nate","Cody","Terrence"],
-    female: ["Dana","Ashley","Alicia","Jen","Beth","Sandra","Megan","Kristin","Shauna","Lori","Denise","Kayla","Monique","Paula","Tasha","Carmen","Rhonda","Brittany"],
-    last: ["Whitaker","Alvarez","Doyle","Boone","Ferrell","Kaminski","Reyes","Salinas","Mercer","Hutchins","Vaughn","Delgado","Braddock","Sizemore","Lindquist","Pruitt","Cavanaugh","Escobedo","Tolliver","Ridgeway","Barlowe","McKinney"],
+    male: [
+      "Marcus",
+      "Ted",
+      "Roy",
+      "Curtis",
+      "Wes",
+      "Tyler",
+      "Darnell",
+      "Brandon",
+      "Vince",
+      "Chad",
+      "Hector",
+      "Randy",
+      "Grant",
+      "Dustin",
+      "Bill",
+      "Nate",
+      "Cody",
+      "Terrence",
+    ],
+    female: [
+      "Dana",
+      "Ashley",
+      "Alicia",
+      "Jen",
+      "Beth",
+      "Sandra",
+      "Megan",
+      "Kristin",
+      "Shauna",
+      "Lori",
+      "Denise",
+      "Kayla",
+      "Monique",
+      "Paula",
+      "Tasha",
+      "Carmen",
+      "Rhonda",
+      "Brittany",
+    ],
+    last: [
+      "Whitaker",
+      "Alvarez",
+      "Doyle",
+      "Boone",
+      "Ferrell",
+      "Kaminski",
+      "Reyes",
+      "Salinas",
+      "Mercer",
+      "Hutchins",
+      "Vaughn",
+      "Delgado",
+      "Braddock",
+      "Sizemore",
+      "Lindquist",
+      "Pruitt",
+      "Cavanaugh",
+      "Escobedo",
+      "Tolliver",
+      "Ridgeway",
+      "Barlowe",
+      "McKinney",
+    ],
   },
   indian: {
-    male: ["Rajiv","Amit","Vikram","Sanjay","Arjun","Deepak","Nikhil","Praveen","Suresh"],
-    female: ["Priya","Anjali","Kavya","Meera","Divya","Neha","Sunita","Radhika"],
-    last: ["Patel","Sharma","Iyer","Reddy","Chaudhary","Nair","Gupta","Desai","Rao","Menon"],
+    male: ["Rajiv", "Amit", "Vikram", "Sanjay", "Arjun", "Deepak", "Nikhil", "Praveen", "Suresh"],
+    female: ["Priya", "Anjali", "Kavya", "Meera", "Divya", "Neha", "Sunita", "Radhika"],
+    last: [
+      "Patel",
+      "Sharma",
+      "Iyer",
+      "Reddy",
+      "Chaudhary",
+      "Nair",
+      "Gupta",
+      "Desai",
+      "Rao",
+      "Menon",
+    ],
   },
   arabic: {
-    male: ["Omar","Khalid","Yousef","Tariq","Hassan","Sami","Rami","Nabil"],
-    female: ["Layla","Noor","Rania","Amira","Hala","Dalia","Yasmin","Salma"],
-    last: ["Haddad","Nasser","Khoury","Farouk","Aziz","Mansour","Rahman","Saleh","Darwish"],
+    male: ["Omar", "Khalid", "Yousef", "Tariq", "Hassan", "Sami", "Rami", "Nabil"],
+    female: ["Layla", "Noor", "Rania", "Amira", "Hala", "Dalia", "Yasmin", "Salma"],
+    last: ["Haddad", "Nasser", "Khoury", "Farouk", "Aziz", "Mansour", "Rahman", "Saleh", "Darwish"],
   },
   british: {
-    male: ["Nigel","Gareth","Colin","Alistair","Graham","Ian"],
-    female: ["Fiona","Imogen","Clare","Harriet","Louise","Rosalind"],
-    last: ["Ashcroft","Pemberton","Fairbanks","Hollis","Wexley","Thorne","Ellery"],
+    male: ["Nigel", "Gareth", "Colin", "Alistair", "Graham", "Ian"],
+    female: ["Fiona", "Imogen", "Clare", "Harriet", "Louise", "Rosalind"],
+    last: ["Ashcroft", "Pemberton", "Fairbanks", "Hollis", "Wexley", "Thorne", "Ellery"],
   },
   australian: {
-    male: ["Bruce","Callum","Jarrah","Liam","Darren"],
-    female: ["Shazza","Kylie","Bree","Tegan","Nicola"],
-    last: ["Kirby","Docherty","Rundle","Halloran","Bramley","Whitlock"],
+    male: ["Bruce", "Callum", "Jarrah", "Liam", "Darren"],
+    female: ["Shazza", "Kylie", "Bree", "Tegan", "Nicola"],
+    last: ["Kirby", "Docherty", "Rundle", "Halloran", "Bramley", "Whitlock"],
   },
 };
 const PLANS = [
@@ -90,7 +159,8 @@ const SEEDS: Record<CancelReason, Seed[]> = {
       ],
     },
     {
-      statedReason: "A door-to-door rep from another company signed them up on the porch yesterday.",
+      statedReason:
+        "A door-to-door rep from another company signed them up on the porch yesterday.",
       hiddenMotive:
         "They never see their own technician. The other rep knocked, looked them in the eye, and remembered their dog's name. It's about being treated like a person, not a route stop.",
       emotionalDriver: "Feeling anonymous to their own provider.",
@@ -977,7 +1047,8 @@ const SEEDS: Record<CancelReason, Seed[]> = {
   ],
   moved_moving: [
     {
-      statedReason: "They're closing on a new house across town in three weeks and want the account shut off.",
+      statedReason:
+        "They're closing on a new house across town in three weeks and want the account shut off.",
       hiddenMotive:
         "They assume service can't move with them and nobody ever told them otherwise. Underneath it, they're worried they'll be charged an early termination fee for a move they can't avoid.",
       emotionalDriver: "Fear of being penalized for a life change.",
@@ -1054,7 +1125,8 @@ const SEEDS: Record<CancelReason, Seed[]> = {
   ],
   no_activity: [
     {
-      statedReason: "They haven't seen a single bug in months, so they don't think they need service.",
+      statedReason:
+        "They haven't seen a single bug in months, so they don't think they need service.",
       hiddenMotive:
         "Nobody ever explained the difference between reactive treatment and prevention. They think they're paying for nothing rather than paying for the reason nothing is happening.",
       emotionalDriver: "Feeling like they're paying for a service that does nothing.",

@@ -303,7 +303,11 @@ function LiveCall() {
             placeholder="Or type what you'd say..."
             disabled={ending}
           />
-          <Button type="submit" aria-label="Send message" disabled={!typed.trim() || thinking || ending}>
+          <Button
+            type="submit"
+            aria-label="Send message"
+            disabled={!typed.trim() || thinking || ending}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </form>

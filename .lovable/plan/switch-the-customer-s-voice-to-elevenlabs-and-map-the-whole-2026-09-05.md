@@ -25,13 +25,13 @@ What changes:
 
 ## Part 2 — The experience, screen by screen
 
-| Screen | Purpose | Design intent |
-| --- | --- | --- |
-| Landing / dashboard (`/`) | Start a call, see save rate and recent sessions | Calm control-room feel: score summary up top, one obvious "Start a call" action, session list below |
-| Sign in (`/auth`) | Get in fast | Single card, Google first, email second, nothing else competing |
-| Call setup (`/call/new`) | Pick reason, difficulty, persona | Three clear choices as cards, difficulty stated in plain terms, "Random" for realistic practice |
-| Live call (`/call/:id`) | The actual roleplay | Phone-call feel, not chat: caller name and timer prominent, big mic button, transcript secondary, mood cue visible, typing available as fallback |
-| Scorecard (`/session/:id`) | Debrief | Overall score first, category bars, the hidden motive revealed, then what went well / missed / next time; sharing to Teams and Linear at the bottom |
+| Screen                     | Purpose                                         | Design intent                                                                                                                                       |
+| -------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Landing / dashboard (`/`)  | Start a call, see save rate and recent sessions | Calm control-room feel: score summary up top, one obvious "Start a call" action, session list below                                                 |
+| Sign in (`/auth`)          | Get in fast                                     | Single card, Google first, email second, nothing else competing                                                                                     |
+| Call setup (`/call/new`)   | Pick reason, difficulty, persona                | Three clear choices as cards, difficulty stated in plain terms, "Random" for realistic practice                                                     |
+| Live call (`/call/:id`)    | The actual roleplay                             | Phone-call feel, not chat: caller name and timer prominent, big mic button, transcript secondary, mood cue visible, typing available as fallback    |
+| Scorecard (`/session/:id`) | Debrief                                         | Overall score first, category bars, the hidden motive revealed, then what went well / missed / next time; sharing to Teams and Linear at the bottom |
 
 ### Improvements proposed for these screens (after the voice work)
 

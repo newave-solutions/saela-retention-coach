@@ -46,7 +46,7 @@ Profanity stays mild and realistic ("damn", "hell", the occasional stronger word
 - Fewer free openings: callers no longer volunteer helpful detail.
 - Generic empathy, scripted lines, and early discounts actively cool the caller.
 - Shorter patience windows on every difficulty; brutal callers can hang up early.
-- A save now requires the hidden motive named *and* a GEOC-consistent, specific remedy.
+- A save now requires the hidden motive named _and_ a GEOC-consistent, specific remedy.
 - Grading is stricter: a discount-first or motive-missing call lands in the 20s-40s.
 
 ## Technical notes

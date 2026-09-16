@@ -63,9 +63,7 @@ export default defineTool({
       partial: rows.filter((r) => r.outcome === "partial").length,
       cancelled: rows.filter((r) => r.outcome === "cancelled").length,
       saveRatePercent: rows.length ? Math.round((saved / rows.length) * 100) : null,
-      averageScore: avg(
-        rows.map((r) => Number(r.overall_score)).filter((n) => Number.isFinite(n)),
-      ),
+      averageScore: avg(rows.map((r) => Number(r.overall_score)).filter((n) => Number.isFinite(n))),
       categoryAverages,
       reasonCounts: reasons,
     };
