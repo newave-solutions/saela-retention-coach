@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, PhoneCall } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
+import { usePosition } from "@/hooks/usePosition";
 import { startServiceCall } from "@/lib/service-training.functions";
 import {
   DIFFICULTIES,
@@ -68,9 +69,15 @@ function NewServiceCall() {
   const [personality, setPersonality] = useState<string>(ANY);
   const [dialing, setDialing] = useState(false);
 
+  const { position, loading: positionLoading } = usePosition(user?.id);
+
   useEffect(() => {
     if (!loading && !user) void navigate({ to: "/auth" });
   }, [loading, user, navigate]);
+
+  useEffect(() => {
+    if (!positionLoading && position === "cem") void navigate({ to: "/" });
+  }, [positionLoading, position, navigate]);
 
   async function dial() {
     setDialing(true);
