@@ -70,10 +70,12 @@ export function labelForPersonality(value: string): string {
 /** The voice this caller speaks with, chosen on the backend when the call starts. */
 export type VoiceAssignment = {
   id: string;
-  provider: "elevenlabs" | "gateway";
+  provider: "elevenlabs" | "google" | "gateway";
   gender: "male" | "female";
   accentLabel: string;
   instructions?: string;
+  /** Equivalent Google Cloud voice, used when the primary service is unavailable. */
+  google?: string;
 };
 
 /** The public half of a scenario. Safe to show the trainee mid-call. */

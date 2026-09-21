@@ -21,7 +21,7 @@ export type NameGroup = "american" | "indian" | "arabic" | "british" | "australi
 
 export type RosterVoice = {
   id: string;
-  provider: "elevenlabs" | "gateway";
+  provider: "elevenlabs" | "google" | "gateway";
   gender: "male" | "female";
   accentLabel: string;
   nameGroup: NameGroup;
