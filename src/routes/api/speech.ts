@@ -45,12 +45,6 @@ function gatewayVoiceFor(seed: string): string {
   return GATEWAY_VOICE_LIST[hashOf(seed) % GATEWAY_VOICE_LIST.length] as string;
 }
 
-function googleFallbackVoice(seed: string, female: boolean): string {
-  const pool = female
-    ? ["en-US-Neural2-C", "en-US-Neural2-E", "en-US-Neural2-F", "en-US-Neural2-H"]
-    : ["en-US-Neural2-A", "en-US-Neural2-D", "en-US-Neural2-I", "en-US-Neural2-J"];
-  return pool[hashOf(seed) % pool.length] as string;
-}
 
 /**
  * Short-lived memory of which voice services are out of credits, unconfigured
