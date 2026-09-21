@@ -10,6 +10,7 @@ import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
 import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
 import { CallTimer } from "@/components/CallTimer";
+import { CallInput } from "@/components/CallInput";
 import {
   instructionsFor,
   settingsFor,
@@ -18,7 +19,6 @@ import {
   type Mood,
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/call/$sessionId")({
@@ -54,7 +54,6 @@ function LiveCall() {
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [thinking, setThinking] = useState(false);
   const [ending, setEnding] = useState(false);
-  const [typed, setTyped] = useState("");
   const [micOn, setMicOn] = useState(false);
 
   const busyRef = useRef(false);
@@ -214,7 +213,9 @@ function LiveCall() {
               {scenario?.accountSummary ?? "Pulling up the account"}
             </p>
             {voice.degraded ? (
-              <p className="text-xs opacity-80">Backup voice in use — realistic voice unavailable.</p>
+              <p className="text-xs opacity-80">
+                Backup voice in use — realistic voice unavailable.
+              </p>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
@@ -282,30 +283,14 @@ function LiveCall() {
           {thinking && <p className="text-xs text-muted-foreground">Customer is responding...</p>}
         </div>
 
-        <form
-          className="mt-3 flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const text = typed.trim();
-            if (!text || busyRef.current) return;
-            setTyped("");
+        <CallInput
+          onSend={(text) => {
+            if (busyRef.current) return;
             void speak(text);
           }}
-        >
-          <Input
-            value={typed}
-            onChange={(e) => setTyped(e.target.value)}
-            placeholder="Or type what you'd say..."
-            disabled={ending}
-          />
-          <Button
-            type="submit"
-            aria-label="Send message"
-            disabled={!typed.trim() || thinking || ending}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+          disabled={ending}
+          busy={thinking}
+        />
       </div>
     </main>
   );
