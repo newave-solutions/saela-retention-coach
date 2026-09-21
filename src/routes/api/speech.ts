@@ -120,9 +120,10 @@ async function speakViaGoogle(options: SpeakOptions): Promise<SpeakResult> {
   const key = process.env["GOOGLE_TTS_API_KEY"];
   if (!key) return { ok: false, status: 401, detail: "Google text-to-speech is not configured." };
 
-  const name =
-    options.googleVoice ??
-    googleFallbackVoice(options.seed, /female/i.test(String(options.instructions ?? "")));
+  // Only speak here when this caller has a matching Google voice of the right
+  // accent and gender; otherwise skip so the persona is never re-gendered.
+  const name = options.googleVoice;
+  if (!name) return { ok: false, status: 501, detail: "No matching Google voice for this caller." };
   const languageCode = name.split("-").slice(0, 2).join("-");
   const speed = num(options.settings["speed"], 1, 0.7, 1.2);
   // Agitated callers read a little higher; calm ones a little lower.
