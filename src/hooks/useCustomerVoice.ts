@@ -9,6 +9,8 @@ import type { VoiceSettings } from "@/lib/voice-direction";
  */
 export function useCustomerVoice() {
   const [speaking, setSpeaking] = useState(false);
+  /** True once a line had to be read by the browser's built-in voice. */
+  const [degraded, setDegraded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -65,7 +67,8 @@ export function useCustomerVoice() {
       text: string,
       options?: {
         voice?: string | undefined;
-        provider?: "elevenlabs" | "gateway" | undefined;
+        provider?: "elevenlabs" | "google" | "gateway" | undefined;
+        google?: string | undefined;
         instructions?: string | undefined;
         settings?: VoiceSettings | undefined;
       },
