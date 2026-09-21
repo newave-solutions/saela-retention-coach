@@ -9,6 +9,8 @@ import type { VoiceSettings } from "@/lib/voice-direction";
  */
 export function useCustomerVoice() {
   const [speaking, setSpeaking] = useState(false);
+  /** True once a line had to be read by the browser's built-in voice. */
+  const [degraded, setDegraded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -65,7 +67,8 @@ export function useCustomerVoice() {
       text: string,
       options?: {
         voice?: string | undefined;
-        provider?: "elevenlabs" | "gateway" | undefined;
+        provider?: "elevenlabs" | "google" | "gateway" | undefined;
+        google?: string | undefined;
         instructions?: string | undefined;
         settings?: VoiceSettings | undefined;
       },
@@ -119,6 +122,7 @@ export function useCustomerVoice() {
             text,
             voice: options?.voice,
             provider: options?.provider,
+            google: options?.google,
             instructions: options?.instructions,
             settings: options?.settings,
           }),
@@ -126,6 +130,7 @@ export function useCustomerVoice() {
         });
 
         if (!response.ok) throw new Error(String(response.status));
+        setDegraded(false);
 
         const blob = await response.blob();
         if (controller.signal.aborted) return;
@@ -150,6 +155,7 @@ export function useCustomerVoice() {
         }
       } catch (error) {
         if (controller.signal.aborted || (error as Error)?.name === "AbortError") return;
+        setDegraded(true);
         await fallbackSay(text);
       } finally {
         if (abortRef.current === controller) abortRef.current = null;
@@ -160,5 +166,5 @@ export function useCustomerVoice() {
 
   useEffect(() => () => stop(), [stop]);
 
-  return { say, stop, speaking };
+  return { say, stop, speaking, degraded };
 }

@@ -99,6 +99,7 @@ function LiveServiceCall() {
       await voice.say(shapeLine(text, current, mood), {
         voice: assigned.id,
         provider: assigned.provider,
+        google: assigned.google,
         instructions: instructionsFor(assigned, current, mood),
         settings: settingsFor(current, mood),
       });
@@ -212,6 +213,9 @@ function LiveServiceCall() {
             <p className="text-xs opacity-80">
               {scenario?.accountSummary ?? "Pulling up the account"}
             </p>
+            {voice.degraded ? (
+              <p className="text-xs opacity-80">Backup voice in use — realistic voice unavailable.</p>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <CallTimer />
