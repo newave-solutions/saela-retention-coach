@@ -389,13 +389,51 @@ export function pickVoice(options?: { exclude?: readonly string[] }): RosterVoic
   return pool[pool.length - 1] as RosterVoice;
 }
 
+/**
+ * Equivalent Google Cloud voices per accent family, so a caller keeps the same
+ * kind of voice when another service has to serve the audio. Arabic-accented
+ * English has no Google equivalent, so those callers stay on the built-in
+ * expressive engine, which takes accent direction per line.
+ */
+const GOOGLE_VOICES: Record<NameGroup, Record<"male" | "female", readonly string[]>> = {
+  american: {
+    male: ["en-US-Neural2-A", "en-US-Neural2-D", "en-US-Neural2-I", "en-US-Neural2-J"],
+    female: ["en-US-Neural2-C", "en-US-Neural2-E", "en-US-Neural2-F", "en-US-Neural2-H"],
+  },
+  indian: {
+    male: ["en-IN-Neural2-B", "en-IN-Neural2-C"],
+    female: ["en-IN-Neural2-A", "en-IN-Neural2-D"],
+  },
+  british: {
+    male: ["en-GB-Neural2-B", "en-GB-Neural2-D"],
+    female: ["en-GB-Neural2-A", "en-GB-Neural2-C"],
+  },
+  australian: {
+    male: ["en-AU-Neural2-B", "en-AU-Neural2-D"],
+    female: ["en-AU-Neural2-A", "en-AU-Neural2-C"],
+  },
+  arabic: { male: [], female: [] },
+};
+
+/** Stable pick so the same roster voice always maps to the same Google voice. */
+export function googleVoiceFor(voice: RosterVoice): string | undefined {
+  const pool = GOOGLE_VOICES[voice.nameGroup]?.[voice.gender] ?? [];
+  if (pool.length === 0) return undefined;
+  const seed = `${voice.provider}:${voice.id}:${voice.accentLabel}`;
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return pool[hash % pool.length];
+}
+
 export function toAssignment(voice: RosterVoice): VoiceAssignment {
+  const google = googleVoiceFor(voice);
   return {
     id: voice.id,
     provider: voice.provider,
     gender: voice.gender,
     accentLabel: voice.accentLabel,
     ...(voice.instructions ? { instructions: voice.instructions } : {}),
+    ...(google ? { google } : {}),
   };
 }
 
