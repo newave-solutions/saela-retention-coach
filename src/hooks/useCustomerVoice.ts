@@ -122,6 +122,7 @@ export function useCustomerVoice() {
             text,
             voice: options?.voice,
             provider: options?.provider,
+            google: options?.google,
             instructions: options?.instructions,
             settings: options?.settings,
           }),
@@ -129,6 +130,7 @@ export function useCustomerVoice() {
         });
 
         if (!response.ok) throw new Error(String(response.status));
+        setDegraded(false);
 
         const blob = await response.blob();
         if (controller.signal.aborted) return;
@@ -153,6 +155,7 @@ export function useCustomerVoice() {
         }
       } catch (error) {
         if (controller.signal.aborted || (error as Error)?.name === "AbortError") return;
+        setDegraded(true);
         await fallbackSay(text);
       } finally {
         if (abortRef.current === controller) abortRef.current = null;
@@ -163,5 +166,5 @@ export function useCustomerVoice() {
 
   useEffect(() => () => stop(), [stop]);
 
-  return { say, stop, speaking };
+  return { say, stop, speaking, degraded };
 }
