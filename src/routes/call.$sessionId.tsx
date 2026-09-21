@@ -99,6 +99,7 @@ function LiveCall() {
       await voice.say(shapeLine(text, current, mood), {
         voice: assigned.id,
         provider: assigned.provider,
+        google: assigned.google,
         instructions: instructionsFor(assigned, current, mood),
         settings: settingsFor(current, mood),
       });
