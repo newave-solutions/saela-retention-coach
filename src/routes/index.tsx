@@ -210,7 +210,9 @@ function Dashboard() {
               </div>
               <div>
                 <h1 className="font-display text-xl font-semibold leading-tight">
-                  {isCes ? "Saela Way — CES Service Call Simulator" : "Saela Way — Retention Call Simulator"}
+                  {isCes
+                    ? "Saela Way — CES Service Call Simulator"
+                    : "Saela Way — Retention Call Simulator"}
                 </h1>
                 <p className="text-xs opacity-80">
                   Saela Pest Control · customer experience training

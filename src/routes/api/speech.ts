@@ -45,7 +45,6 @@ function gatewayVoiceFor(seed: string): string {
   return GATEWAY_VOICE_LIST[hashOf(seed) % GATEWAY_VOICE_LIST.length] as string;
 }
 
-
 /**
  * Short-lived memory of which voice services are out of credits, unconfigured
  * or rate limited, so we skip them instead of retrying on every single line.
@@ -110,7 +109,8 @@ async function speakViaElevenLabs(options: SpeakOptions): Promise<SpeakResult> {
     },
   );
 
-  if (upstream.ok && upstream.body) return { ok: true, response: audioResponse(upstream.body, "elevenlabs") };
+  if (upstream.ok && upstream.body)
+    return { ok: true, response: audioResponse(upstream.body, "elevenlabs") };
 
   const detail = await upstream.text().catch(() => "");
   return { ok: false, status: upstream.status || 502, detail };
@@ -182,7 +182,8 @@ async function speakViaGateway(options: SpeakOptions): Promise<SpeakResult> {
     signal: options.signal,
   });
 
-  if (upstream.ok && upstream.body) return { ok: true, response: audioResponse(upstream.body, "gateway") };
+  if (upstream.ok && upstream.body)
+    return { ok: true, response: audioResponse(upstream.body, "gateway") };
 
   const detail = await upstream.text().catch(() => "");
   return { ok: false, status: upstream.status || 502, detail };
@@ -203,7 +204,11 @@ export const Route = createFileRoute("/api/speech")({
         if (!text) return new Response("Nothing to say.", { status: 400 });
 
         const requested: ProviderName =
-          body.provider === "gateway" ? "gateway" : body.provider === "google" ? "google" : "elevenlabs";
+          body.provider === "gateway"
+            ? "gateway"
+            : body.provider === "google"
+              ? "google"
+              : "elevenlabs";
 
         const elevenVoice =
           typeof body.voice === "string" && /^[A-Za-z0-9]{3,32}$/.test(body.voice)
