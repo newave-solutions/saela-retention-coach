@@ -19,6 +19,8 @@ import {
   type Mood,
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/call/$sessionId")({
@@ -241,7 +243,11 @@ function LiveCall() {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">{state}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {recognition.interim || "The customer is on the line. Talk to them."}
+              <InterimText
+                subscribe={recognition.subscribeInterim}
+                getSnapshot={recognition.getInterim}
+                fallback="The customer is on the line. Talk to them."
+              />
             </p>
           </div>
           <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>

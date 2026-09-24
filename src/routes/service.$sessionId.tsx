@@ -18,6 +18,8 @@ import {
   type Mood,
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
@@ -241,7 +243,11 @@ function LiveServiceCall() {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">{state}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {recognition.interim || "Listen for the details. Confirm them back."}
+              <InterimText
+                subscribe={recognition.subscribeInterim}
+                getSnapshot={recognition.getInterim}
+                fallback="Listen for the details. Confirm them back."
+              />
             </p>
           </div>
           <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
