@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Mic, MicOff, PhoneOff, Send, Volume2 } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Volume2 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useCustomerVoice } from "@/hooks/useCustomerVoice";
@@ -18,7 +18,6 @@ import {
   type Mood,
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
@@ -177,14 +176,19 @@ function LiveServiceCall() {
     if (recognition.error) toast.error(recognition.error);
   }, [recognition.error]);
 
+  useEffect(() => {
+    if (!recognition.supported || recognition.error) {
+      setMicOn(false);
+    }
+  }, [recognition.error, recognition.supported]);
+
   function toggleMic() {
     if (micOn) {
       recognition.stop();
       setMicOn(false);
       return;
     }
-    recognition.start();
-    setMicOn(true);
+    setMicOn(recognition.start());
   }
 
   const state = voice.speaking
