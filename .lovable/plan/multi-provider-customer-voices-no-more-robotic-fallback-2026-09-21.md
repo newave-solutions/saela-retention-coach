@@ -13,6 +13,7 @@ Give each caller a voice from a pool spread across three voice services, and pic
 3. **OpenAI voices through Lovable AI** — already available on this project, no extra account or key.
 
 Order of use per call:
+
 - Voice assigned to the session keeps its intended accent/gender.
 - If its primary service fails (no credits, key missing, outage), the same persona is re-routed to the closest matching voice on the next available service, not a random one.
 - Browser speech stays only as a last resort, and the call screen shows a small note when the realistic voice is unavailable so it is never silently degraded.
