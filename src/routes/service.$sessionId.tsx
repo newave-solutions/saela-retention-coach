@@ -19,6 +19,7 @@ import {
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
@@ -99,6 +100,7 @@ function LiveServiceCall() {
       await voice.say(shapeLine(text, current, mood), {
         voice: assigned.id,
         provider: assigned.provider,
+        google: assigned.google,
         instructions: instructionsFor(assigned, current, mood),
         settings: settingsFor(current, mood),
       });
@@ -212,6 +214,11 @@ function LiveServiceCall() {
             <p className="text-xs opacity-80">
               {scenario?.accountSummary ?? "Pulling up the account"}
             </p>
+            {voice.degraded ? (
+              <p className="text-xs opacity-80">
+                Backup voice in use — realistic voice unavailable.
+              </p>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <CallTimer />
@@ -236,7 +243,11 @@ function LiveServiceCall() {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">{state}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {recognition.interim || "Listen for the details. Confirm them back."}
+              <InterimText
+                subscribe={recognition.subscribeInterim}
+                getSnapshot={recognition.getInterim}
+                fallback="Listen for the details. Confirm them back."
+              />
             </p>
           </div>
           <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
@@ -279,10 +290,12 @@ function LiveServiceCall() {
         </div>
 
         <CallInput
-          onSend={(text) => void speak(text)}
+          onSend={(text) => {
+            if (busyRef.current) return;
+            void speak(text);
+          }}
           disabled={ending}
-          thinking={thinking}
-          busyRef={busyRef}
+          busy={thinking}
         />
       </div>
     </main>

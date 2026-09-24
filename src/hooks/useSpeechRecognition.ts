@@ -37,9 +37,23 @@ export function useSpeechRecognition(options: {
 }) {
   const { onUtterance, silenceMs = 1200 } = options;
   const [listening, setListening] = useState(false);
-  const [interim, setInterim] = useState("");
   const [supported, setSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ⚡ Bolt Optimization: Replace useState with a mutable ref and subscription model
+  // to prevent the hook's consumer (often large route components) from re-rendering
+  // on every requestAnimationFrame tick during live dictation.
+  const interimRef = useRef("");
+  const listenersRef = useRef(new Set<() => void>());
+
+  const subscribeInterim = useCallback((listener: () => void) => {
+    listenersRef.current.add(listener);
+    return () => {
+      listenersRef.current.delete(listener);
+    };
+  }, []);
+
+  const getInterim = useCallback(() => interimRef.current, []);
 
   const recognitionRef = useRef<RecognitionLike | null>(null);
   const bufferRef = useRef("");
@@ -57,7 +71,8 @@ export function useSpeechRecognition(options: {
   const flush = useCallback(() => {
     const text = bufferRef.current.trim();
     bufferRef.current = "";
-    setInterim("");
+    interimRef.current = "";
+    listenersRef.current.forEach((listener) => listener());
     if (text) onUtteranceRef.current(text);
   }, []);
 
@@ -86,7 +101,8 @@ export function useSpeechRecognition(options: {
       pendingInterimRef.current = live;
       if (rafRef.current === null) {
         rafRef.current = requestAnimationFrame(() => {
-          setInterim(pendingInterimRef.current);
+          interimRef.current = pendingInterimRef.current;
+          listenersRef.current.forEach((listener) => listener());
           rafRef.current = null;
         });
       }
@@ -140,7 +156,8 @@ export function useSpeechRecognition(options: {
     rafRef.current = null;
     pendingInterimRef.current = "";
     bufferRef.current = "";
-    setInterim("");
+    interimRef.current = "";
+    listenersRef.current.forEach((listener) => listener());
     const recognition = recognitionRef.current;
     recognitionRef.current = null;
     setListening(false);
@@ -153,5 +170,5 @@ export function useSpeechRecognition(options: {
 
   useEffect(() => () => stop(), [stop]);
 
-  return { listening, interim, supported, error, start, stop };
+  return { listening, subscribeInterim, getInterim, supported, error, start, stop };
 }
