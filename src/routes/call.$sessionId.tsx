@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
+import { CallInput } from "@/components/CallInput";
 
 export const Route = createFileRoute("/call/$sessionId")({
   head: () => ({
