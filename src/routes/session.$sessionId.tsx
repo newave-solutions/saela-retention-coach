@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ArrowLeft, Eye, PhoneCall } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +85,14 @@ function Scorecard() {
     },
   });
 
+  // ⚡ Bolt Optimization: Memoize the normalizeScores result.
+  // Previously, normalizeScores(data.scores) was called inside the render function and
+  // repeatedly inside the Object.keys().map loop. By memoizing it, we prevent redundant
+  // object allocations and calculations on every render and for every map iteration.
+  const normalizedScores = useMemo(() => {
+    return data?.scores ? normalizeScores(data.scores) : null;
+  }, [data?.scores]);
+
   return (
     <main className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-3xl">
@@ -133,7 +141,7 @@ function Scorecard() {
               </div>
             </section>
 
-            {normalizeScores(data.scores) && (
+            {normalizedScores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
                   <h2 className="text-base font-semibold leading-none">
@@ -145,11 +153,9 @@ function Scorecard() {
                     <div key={key}>
                       <div className="mb-1 flex items-center justify-between text-sm">
                         <span>{SCORE_LABELS[key]}</span>
-                        <span className="text-muted-foreground">
-                          {normalizeScores(data.scores)?.[key] ?? 0}
-                        </span>
+                        <span className="text-muted-foreground">{normalizedScores[key] ?? 0}</span>
                       </div>
-                      <Progress value={normalizeScores(data.scores)?.[key] ?? 0} />
+                      <Progress value={normalizedScores[key] ?? 0} />
                     </div>
                   ))}
                 </CardContent>
