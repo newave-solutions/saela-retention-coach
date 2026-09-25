@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Mic, MicOff, PhoneOff, Volume2 } from "lucide-react";
 
@@ -199,6 +199,30 @@ function LiveServiceCall() {
         ? "Listening to you"
         : "Mic off";
 
+  // ⚡ Bolt Optimization: Memoize the transcript list to prevent rendering overhead
+  // when unrelated states (micOn, voice.speaking) trigger LiveServiceCall re-renders.
+  const chatBubbles = useMemo(() => {
+    return turns.map((turn, index) => (
+      <div
+        key={`${turn.at}-${index}`}
+        className={turn.speaker === "agent" ? "flex justify-end" : "flex justify-start"}
+      >
+        <div
+          className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+            turn.speaker === "agent"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-foreground"
+          }`}
+        >
+          <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
+            {turn.speaker === "agent" ? "You" : (scenario?.customerName ?? "Customer")}
+          </p>
+          {turn.text}
+        </div>
+      </div>
+    ));
+  }, [turns, scenario?.customerName]);
+
   return (
     <main className="flex min-h-screen flex-col bg-background">
       <header className="brand-surface">
@@ -271,25 +295,7 @@ function LiveServiceCall() {
           className="card-soft flex-1 space-y-3 overflow-y-auto rounded-xl border border-border bg-card p-4"
           style={{ maxHeight: "52vh" }}
         >
-          {turns.map((turn, index) => (
-            <div
-              key={`${turn.at}-${index}`}
-              className={turn.speaker === "agent" ? "flex justify-end" : "flex justify-start"}
-            >
-              <div
-                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                  turn.speaker === "agent"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-foreground"
-                }`}
-              >
-                <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
-                  {turn.speaker === "agent" ? "You" : (scenario?.customerName ?? "Customer")}
-                </p>
-                {turn.text}
-              </div>
-            </div>
-          ))}
+          {chatBubbles}
           {thinking && <p className="text-xs text-muted-foreground">Customer is responding...</p>}
         </div>
 
