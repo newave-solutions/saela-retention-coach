@@ -58,6 +58,7 @@ export function useSpeechRecognition(options: {
   const recognitionRef = useRef<RecognitionLike | null>(null);
   const bufferRef = useRef("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingInterimRef = useRef("");
   const rafRef = useRef<number | null>(null);
   const wantListeningRef = useRef(false);
@@ -77,12 +78,16 @@ export function useSpeechRecognition(options: {
   }, []);
 
   const start = useCallback(() => {
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
     const Ctor = getRecognitionCtor();
     if (!Ctor) {
       setSupported(false);
-      return;
+      return false;
     }
-    if (recognitionRef.current) return;
+    if (recognitionRef.current) return true;
 
     const recognition = new Ctor();
     recognition.continuous = true;
@@ -117,20 +122,35 @@ export function useSpeechRecognition(options: {
         setError("Microphone access is blocked. Allow the mic and start the call again.");
         wantListeningRef.current = false;
         setListening(false);
+        if (restartTimerRef.current) {
+          clearTimeout(restartTimerRef.current);
+          restartTimerRef.current = null;
+        }
       } else if (event.error === "audio-capture") {
         setError("No microphone found.");
         wantListeningRef.current = false;
         setListening(false);
+        if (restartTimerRef.current) {
+          clearTimeout(restartTimerRef.current);
+          restartTimerRef.current = null;
+        }
       }
     };
 
     recognition.onend = () => {
       recognitionRef.current = null;
       if (wantListeningRef.current) {
-        try {
-          start();
-        } catch {
-          /* browser is still winding down; the next tick retries */
+        if (!restartTimerRef.current) {
+          restartTimerRef.current = setTimeout(() => {
+            restartTimerRef.current = null;
+            if (!wantListeningRef.current || recognitionRef.current) return;
+            if (!start() && wantListeningRef.current && !restartTimerRef.current) {
+              restartTimerRef.current = setTimeout(() => {
+                restartTimerRef.current = null;
+                if (wantListeningRef.current && !recognitionRef.current) start();
+              }, 250);
+            }
+          }, 150);
         }
       } else {
         setListening(false);
@@ -143,8 +163,11 @@ export function useSpeechRecognition(options: {
     try {
       recognition.start();
       setListening(true);
+      return true;
     } catch {
       recognitionRef.current = null;
+      setListening(false);
+      return false;
     }
   }, [flush, silenceMs]);
 
@@ -152,6 +175,8 @@ export function useSpeechRecognition(options: {
     wantListeningRef.current = false;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = null;
+    if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+    restartTimerRef.current = null;
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
     pendingInterimRef.current = "";
