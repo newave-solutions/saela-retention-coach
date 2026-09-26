@@ -14,7 +14,7 @@ export type SessionLite = {
   overall_score: number | null;
   scores: Record<string, number> | null;
   coaching: { summary?: string; missed?: string[]; didWell?: string[] } | null;
-  language_flags: unknown;
+  language_flags: Json;
   scenario: { customerName?: string; reasonLabel?: string; callTypeLabel?: string; difficulty?: string } | null;
   created_at: string;
 };
