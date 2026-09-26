@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowUp, Minus, Users } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
+import { Trend } from "@/components/Trend";
 
 import { useAuth } from "@/hooks/useAuth";
 import { getTeamOverview } from "@/lib/team.functions";
@@ -25,28 +26,6 @@ export const Route = createFileRoute("/team/")({
 });
 
 type SortKey = "name" | "calls" | "avg" | "rate" | "trend";
-
-export function Trend({ value }: { value: number | null }) {
-  if (value == null) return <span className="text-xs text-muted-foreground">—</span>;
-  if (value > 0)
-    return (
-      <span className="inline-flex items-center text-xs font-medium text-success">
-        <ArrowUp className="h-3 w-3" />+{value}
-      </span>
-    );
-  if (value < 0)
-    return (
-      <span className="inline-flex items-center text-xs font-medium text-destructive">
-        <ArrowDown className="h-3 w-3" />
-        {value}
-      </span>
-    );
-  return (
-    <span className="inline-flex items-center text-xs text-muted-foreground">
-      <Minus className="h-3 w-3" />0
-    </span>
-  );
-}
 
 function TeamPage() {
   const navigate = useNavigate();

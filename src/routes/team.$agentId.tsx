@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trend } from "./team.index";
+import { Trend } from "@/components/Trend";
 
 export const Route = createFileRoute("/team/$agentId")({
   head: () => ({

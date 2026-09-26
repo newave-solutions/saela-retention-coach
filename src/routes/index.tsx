@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { labelForDifficulty } from "@/lib/scenarios";
+import { useServerFn } from "@tanstack/react-start";
+import { getMyLeadRole } from "@/lib/team.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -164,6 +166,13 @@ function Dashboard() {
     await queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
+  const fetchLead = useServerFn(getMyLeadRole);
+  const { data: lead } = useQuery({
+    queryKey: ["lead-role", user?.id],
+    enabled: Boolean(user),
+    queryFn: () => fetchLead(),
+  });
+
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user?.id],
     enabled: Boolean(user),
@@ -220,6 +229,11 @@ function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-1">
+              {lead?.seat && (
+                <Button asChild variant="ghost" size="sm" className="hover:bg-white/10">
+                  <Link to="/team">Team ({lead.seat.toUpperCase()} lead)</Link>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
