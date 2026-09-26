@@ -177,6 +177,10 @@ function LiveCall() {
     if (recognition.error) toast.error(recognition.error);
   }, [recognition.error]);
 
+  useEffect(() => {
+    if (micOn && (!recognition.supported || recognition.error)) setMicOn(false);
+  }, [micOn, recognition.supported, recognition.error]);
+
   function toggleMic() {
     if (micOn) {
       recognition.stop();
