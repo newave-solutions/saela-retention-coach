@@ -7,7 +7,6 @@
 
 **Learning:** Complex route components (e.g., LiveCall, LiveServiceCall) are highly sensitive to re-renders from fast-updating local state like text inputs. Updating state on every keystroke in these large components causes performance bottlenecks.
 **Action:** Always extract fast-updating local state (timers, inputs) into isolated leaf components to maintain rendering performance in large route components.
-
 ## 2024-05-24 - High-Frequency Re-render from requestAnimationFrame
 
 **Learning:** The `useSpeechRecognition` hook updated an `interim` state variable inside a `requestAnimationFrame` callback. Returning this state from the hook caused massive complex route components to re-render 60 times per second during speech.

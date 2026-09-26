@@ -17,7 +17,6 @@ The sign-in page code already calls the managed Google helper, so the error most
 3. **Manager view of team results** — a CEM-only page showing each CES agent's scores, save rates and common weak spots (for example GEOC ownership or how terms are explained). This supports coaching and fits the two-level CES/CEM setup.
 
 ## Technical details
-
 - Run `supabase--configure_social_auth` with `["google"]` and `supabase--enable_email_auth`; don't edit `src/integrations/lovable` by hand.
 - `src/routes/auth.tsx`: save the sanitized `next` in sessionStorage before calling `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })`; after the session loads, read it, clear it, and navigate there. Reset `busy` in every branch and map error messages to friendly text.
 - Playwright check on `/auth`, plus console and network logs.
