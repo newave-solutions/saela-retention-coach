@@ -126,15 +126,26 @@ export function useSpeechRecognition(options: {
 
     recognition.onend = () => {
       recognitionRef.current = null;
-      if (wantListeningRef.current) {
-        try {
-          start();
-        } catch {
-          /* browser is still winding down; the next tick retries */
-        }
-      } else {
+      if (!wantListeningRef.current) {
         setListening(false);
+        return;
       }
+      let attempts = 0;
+      const retry = () => {
+        if (!wantListeningRef.current || recognitionRef.current) return;
+        start();
+        if (!recognitionRef.current && wantListeningRef.current) {
+          attempts += 1;
+          if (attempts >= 5) {
+            wantListeningRef.current = false;
+            setListening(false);
+            setError("The microphone stopped responding. Tap Talk to turn it back on.");
+            return;
+          }
+          setTimeout(retry, 250 * attempts);
+        }
+      };
+      retry();
     };
 
     recognitionRef.current = recognition;
