@@ -11,3 +11,6 @@
 
 **Learning:** The `useSpeechRecognition` hook updated an `interim` state variable inside a `requestAnimationFrame` callback. Returning this state from the hook caused massive complex route components to re-render 60 times per second during speech.
 **Action:** For extremely fast-updating UI (like 60fps animations or live transcription), bypass React's standard parent-down rendering. Use an external store (like `useSyncExternalStore` or a ref-based subscription) and isolate the text into a tiny leaf component (`InterimText`) that subscribes directly to the store.
+## 2024-05-24 - Memoizing complex UI nodes mapped from arrays
+**Learning:** When rendering large lists from arrays (like chat transcripts) in highly reactive components, putting the array `.map()` directly in the JSX causes React to re-evaluate the mapping function on every state update, even if the array itself hasn't changed. This is particularly expensive in complex components like `LiveCall` where fast-updating state (like mic status or thinking states) triggers constant re-renders.
+**Action:** Wrap array mapping logic in `useMemo` and render the resulting variable instead. Ensure dependencies correctly include the mapped array and any other external variables referenced inside the callback.
