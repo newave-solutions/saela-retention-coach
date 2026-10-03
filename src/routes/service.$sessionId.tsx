@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Mic, MicOff, PhoneOff, Send, Volume2 } from "lucide-react";
 
@@ -23,6 +23,36 @@ import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
+
+const TranscriptMessage = React.memo(function TranscriptMessage({
+  turn,
+  customerName,
+}: {
+  turn: TranscriptTurn;
+  customerName: string;
+}) {
+  return (
+    <div className={turn.speaker === "agent" ? "flex justify-end" : "flex justify-start"}>
+      <div
+        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+          turn.speaker === "agent"
+            ? "bg-primary text-primary-foreground"
+            : "bg-secondary text-foreground"
+        }`}
+      >
+        <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
+          {turn.speaker === "agent" ? "You" : customerName}
+        </p>
+        {turn.text}
+      </div>
+    </div>
+  );
+});
+
+// ⚡ Bolt Optimization:
+// Abstracting the individual transcript messages into a separate React.memo component
+// ensures that appending a new message to the chat or updating unconnected local state
+// (like timers or mic status) doesn't force React to re-render the entire history.
 
 export const Route = createFileRoute("/service/$sessionId")({
   head: () => ({
@@ -272,23 +302,11 @@ function LiveServiceCall() {
           style={{ maxHeight: "52vh" }}
         >
           {turns.map((turn, index) => (
-            <div
+            <TranscriptMessage
               key={`${turn.at}-${index}`}
-              className={turn.speaker === "agent" ? "flex justify-end" : "flex justify-start"}
-            >
-              <div
-                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                  turn.speaker === "agent"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-foreground"
-                }`}
-              >
-                <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
-                  {turn.speaker === "agent" ? "You" : (scenario?.customerName ?? "Customer")}
-                </p>
-                {turn.text}
-              </div>
-            </div>
+              turn={turn}
+              customerName={scenario?.customerName ?? "Customer"}
+            />
           ))}
           {thinking && <p className="text-xs text-muted-foreground">Customer is responding...</p>}
         </div>
