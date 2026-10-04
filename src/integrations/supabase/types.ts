@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_monthly_metrics: {
+        Row: {
+          adherence: number | null
+          agent_name: string
+          calls: number | null
+          cancel_requests: number | null
+          coupons: number | null
+          id: string
+          month: string
+          saved_value: number | null
+          saves: number | null
+          seat: string
+          total_minutes: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          adherence?: number | null
+          agent_name: string
+          calls?: number | null
+          cancel_requests?: number | null
+          coupons?: number | null
+          id?: string
+          month: string
+          saved_value?: number | null
+          saves?: number | null
+          seat: string
+          total_minutes?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          adherence?: number | null
+          agent_name?: string
+          calls?: number | null
+          cancel_requests?: number | null
+          coupons?: number | null
+          id?: string
+          month?: string
+          saved_value?: number | null
+          saves?: number | null
+          seat?: string
+          total_minutes?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       coaching_plans: {
         Row: {
           agent_id: string

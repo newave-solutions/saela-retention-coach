@@ -29,6 +29,13 @@
       "when": 1790391186183,
       "tag": "0003_team_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791120180417,
+      "tag": "0004_agent_monthly_metrics",
+      "breakpoints": true
     }
   ]
 }
