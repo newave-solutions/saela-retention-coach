@@ -121,7 +121,7 @@ const FAQ = [
   },
   {
     q: "Who can see my calls?",
-    a: "Your calls, transcripts and scores are tied to your own account and are private to you.",
+    a: "Your call reviews and scores are tied to your account. Authorized team leads can review coaching results.",
   },
 ];
 
