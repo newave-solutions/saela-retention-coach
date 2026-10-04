@@ -103,6 +103,9 @@ function TeamPage() {
               <h1 className="font-display text-xl font-semibold">Team lead view</h1>
               <p className="text-xs opacity-80">{seatName} · last 90 days</p>
             </div>
+            <Link to="/team/scorecard" className="ml-auto rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground">
+              Master scorecard
+            </Link>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-4">
             <Stat label="Agents" value={String(data.agents.length)} />
