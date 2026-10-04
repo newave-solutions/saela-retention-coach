@@ -1,5 +1,13 @@
 export type Source = "talkdesk" | "fieldroutes";
-export type Field = "agent" | "calls" | "minutes" | "adherence" | "cancel_requests" | "saves" | "coupons" | "saved_value";
+export type Field =
+  | "agent"
+  | "calls"
+  | "minutes"
+  | "adherence"
+  | "cancel_requests"
+  | "saves"
+  | "coupons"
+  | "saved_value";
 
 export const FIELDS: Record<Source, { key: Field; label: string; match: RegExp }[]> = {
   talkdesk: [
@@ -9,8 +17,16 @@ export const FIELDS: Record<Source, { key: Field; label: string; match: RegExp }
     { key: "adherence", label: "Schedule adherence %", match: /adherence/i },
   ],
   fieldroutes: [
-    { key: "agent", label: "Agent / employee", match: /agent|user|employee|rep\b|name|office ?staff/i },
-    { key: "cancel_requests", label: "Cancel requests (WTC)", match: /cancel|wtc|request|attempt/i },
+    {
+      key: "agent",
+      label: "Agent / employee",
+      match: /agent|user|employee|rep\b|name|office ?staff/i,
+    },
+    {
+      key: "cancel_requests",
+      label: "Cancel requests (WTC)",
+      match: /cancel|wtc|request|attempt/i,
+    },
     { key: "saves", label: "Saves", match: /save|retain/i },
     { key: "coupons", label: "Coupons / discounts $", match: /coupon|discount|credit|concession/i },
     { key: "saved_value", label: "Saved account value $", match: /value|revenue|contract/i },
@@ -25,14 +41,19 @@ export function parseCsv(text: string): string[][] {
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     if (q) {
-      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
-      else if (c === '"') q = false;
+      if (c === '"' && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (c === '"') q = false;
       else cell += c;
     } else if (c === '"') q = true;
-    else if (c === ",") { row.push(cell); cell = ""; }
-    else if (c === "\n" || c === "\r") {
+    else if (c === ",") {
+      row.push(cell);
+      cell = "";
+    } else if (c === "\n" || c === "\r") {
       if (c === "\r" && text[i + 1] === "\n") i++;
-      row.push(cell); cell = "";
+      row.push(cell);
+      cell = "";
       if (row.some((v) => v.trim())) rows.push(row);
       row = [];
     } else cell += c;
@@ -46,10 +67,16 @@ export function guessMapping(source: Source, headers: string[]): Partial<Record<
   const used = new Set<number>();
   const out: Partial<Record<Field, number>> = {};
   // match specific fields first so "agent" doesn't grab "Calls handled by agent"
-  const order = [...FIELDS[source].filter((f) => f.key !== "agent"), ...FIELDS[source].filter((f) => f.key === "agent")];
+  const order = [
+    ...FIELDS[source].filter((f) => f.key !== "agent"),
+    ...FIELDS[source].filter((f) => f.key === "agent"),
+  ];
   for (const f of order) {
     const idx = headers.findIndex((h, i) => !used.has(i) && f.match.test(h));
-    if (idx >= 0) { out[f.key] = idx; used.add(idx); }
+    if (idx >= 0) {
+      out[f.key] = idx;
+      used.add(idx);
+    }
   }
   return out;
 }
@@ -77,7 +104,12 @@ export type AgentRow = {
   saved_value?: number | null;
 };
 
-export function aggregate(source: Source, rows: string[][], map: Partial<Record<Field, number>>, minutesHeader: string): AgentRow[] {
+export function aggregate(
+  source: Source,
+  rows: string[][],
+  map: Partial<Record<Field, number>>,
+  minutesHeader: string,
+): AgentRow[] {
   const by = new Map<string, AgentRow & { _n: number; _adh: number[] }>();
   const secs = /sec/i.test(minutesHeader);
   for (const r of rows) {
@@ -109,52 +141,120 @@ export function aggregate(source: Source, rows: string[][], map: Partial<Record<
   return [...by.values()].map(({ _n, _adh, ...a }) => {
     if (source === "talkdesk") {
       if (map.calls == null) a.calls = _n; // one row per call
-      if (_adh.length) a.adherence = Math.round((_adh.reduce((s, v) => s + v, 0) / _adh.length) * 10) / 10;
+      if (_adh.length)
+        a.adherence = Math.round((_adh.reduce((s, v) => s + v, 0) / _adh.length) * 10) / 10;
       if (a.total_minutes != null) a.total_minutes = Math.round(a.total_minutes);
     }
     return a;
   });
 }
 
-export const TARGETS = { calls: 200, coupons: 3000, retention: 33, minAvg: 8, maxAvg: 14, adherence: 90 };
+export const TARGETS = {
+  calls: 200,
+  coupons: 3000,
+  retention: 33,
+  minAvg: 8,
+  maxAvg: 14,
+  adherence: 90,
+};
 
-export type Pillar = { key: string; label: string; weight: number; pts: number | null; value: string; pass: boolean | null };
+export type Pillar = {
+  key: string;
+  label: string;
+  weight: number;
+  pts: number | null;
+  value: string;
+  pass: boolean | null;
+};
 
-export function scoreAgent(m: AgentRow): { score: number | null; complete: boolean; pillars: Pillar[]; net: number | null } {
+export function scoreAgent(m: AgentRow): {
+  score: number | null;
+  complete: boolean;
+  pillars: Pillar[];
+  net: number | null;
+} {
   const T = TARGETS;
   const rate = m.cancel_requests && m.saves != null ? (m.saves / m.cancel_requests) * 100 : null;
   const avg = m.calls && m.total_minutes != null ? m.total_minutes / m.calls : null;
   const pillars: Pillar[] = [
-    { key: "retention", label: `Save % ≥ ${T.retention}%`, weight: 25,
+    {
+      key: "retention",
+      label: `Save % ≥ ${T.retention}%`,
+      weight: 25,
       pts: rate == null ? null : 25 * Math.min(1, rate / T.retention),
-      value: rate == null ? "—" : `${rate.toFixed(1)}%`, pass: rate == null ? null : rate >= T.retention },
-    { key: "coupons", label: `Coupons < $${T.coupons.toLocaleString()}`, weight: 25,
-      pts: m.coupons == null ? null : m.coupons <= T.coupons ? 25 : 25 * Math.max(0, 1 - (m.coupons - T.coupons) / T.coupons),
-      value: m.coupons == null ? "—" : `$${Math.round(m.coupons).toLocaleString()}`, pass: m.coupons == null ? null : m.coupons < T.coupons },
-    { key: "calls", label: `Calls ≥ ${T.calls}`, weight: 20,
+      value: rate == null ? "—" : `${rate.toFixed(1)}%`,
+      pass: rate == null ? null : rate >= T.retention,
+    },
+    {
+      key: "coupons",
+      label: `Coupons < $${T.coupons.toLocaleString()}`,
+      weight: 25,
+      pts:
+        m.coupons == null
+          ? null
+          : m.coupons <= T.coupons
+            ? 25
+            : 25 * Math.max(0, 1 - (m.coupons - T.coupons) / T.coupons),
+      value: m.coupons == null ? "—" : `$${Math.round(m.coupons).toLocaleString()}`,
+      pass: m.coupons == null ? null : m.coupons < T.coupons,
+    },
+    {
+      key: "calls",
+      label: `Calls ≥ ${T.calls}`,
+      weight: 20,
       pts: m.calls == null ? null : 20 * Math.min(1, m.calls / T.calls),
-      value: m.calls == null ? "—" : String(m.calls), pass: m.calls == null ? null : m.calls >= T.calls },
-    { key: "duration", label: `Avg call ${T.minAvg}–${T.maxAvg} min`, weight: 15,
-      pts: avg == null ? null : avg < T.minAvg ? 15 * (avg / T.minAvg) : avg > T.maxAvg ? 15 * Math.max(0, 1 - (avg - T.maxAvg) / T.maxAvg) : 15,
-      value: avg == null ? "—" : `${avg.toFixed(1)} min · ${Math.round(m.total_minutes!).toLocaleString()} total`,
-      pass: avg == null ? null : avg >= T.minAvg && avg <= T.maxAvg },
-    { key: "adherence", label: `Adherence ≥ ${T.adherence}%`, weight: 15,
+      value: m.calls == null ? "—" : String(m.calls),
+      pass: m.calls == null ? null : m.calls >= T.calls,
+    },
+    {
+      key: "duration",
+      label: `Avg call ${T.minAvg}–${T.maxAvg} min`,
+      weight: 15,
+      pts:
+        avg == null
+          ? null
+          : avg < T.minAvg
+            ? 15 * (avg / T.minAvg)
+            : avg > T.maxAvg
+              ? 15 * Math.max(0, 1 - (avg - T.maxAvg) / T.maxAvg)
+              : 15,
+      value:
+        avg == null
+          ? "—"
+          : `${avg.toFixed(1)} min · ${Math.round(m.total_minutes!).toLocaleString()} total`,
+      pass: avg == null ? null : avg >= T.minAvg && avg <= T.maxAvg,
+    },
+    {
+      key: "adherence",
+      label: `Adherence ≥ ${T.adherence}%`,
+      weight: 15,
       pts: m.adherence == null ? null : 15 * Math.min(1, m.adherence / T.adherence),
-      value: m.adherence == null ? "—" : `${m.adherence}%`, pass: m.adherence == null ? null : m.adherence >= T.adherence },
+      value: m.adherence == null ? "—" : `${m.adherence}%`,
+      pass: m.adherence == null ? null : m.adherence >= T.adherence,
+    },
   ];
   const have = pillars.filter((p) => p.pts != null);
   const w = have.reduce((s, p) => s + p.weight, 0);
   const score = w ? Math.round((have.reduce((s, p) => s + p.pts!, 0) / w) * 100) : null;
-  const net = m.saved_value != null || m.coupons != null ? (m.saved_value ?? 0) - (m.coupons ?? 0) : null;
+  const net =
+    m.saved_value != null || m.coupons != null ? (m.saved_value ?? 0) - (m.coupons ?? 0) : null;
   return { score, complete: have.length === pillars.length, pillars, net };
 }
 
 export function coachingNote(m: AgentRow, pillars: Pillar[]): string | null {
-  const p = Object.fromEntries(pillars.map((x) => [x.key, x.pass])) as Record<"retention" | "coupons" | "calls" | "duration" | "adherence", boolean | null>;
-  if (p.retention && p.coupons === false) return "Saves are coming with heavy discounts. Coach the 3-attempt rule and price-point discovery before any coupon.";
-  if (p.retention === false && p.duration === false) return "Low saves on short calls. Slow down: find the root cause before accepting the cancel.";
-  if (p.retention === false) return "Save rate under target. Practice GEOC and root-cause questions on retention calls.";
-  if (p.calls === false && p.adherence === false) return "Low volume and adherence. Review schedule and time in available status.";
-  if (p.duration === false) return "Call length is outside the target range. Review a few recordings for rushed or drawn-out calls.";
+  const p = Object.fromEntries(pillars.map((x) => [x.key, x.pass])) as Record<
+    "retention" | "coupons" | "calls" | "duration" | "adherence",
+    boolean | null
+  >;
+  if (p.retention && p.coupons === false)
+    return "Saves are coming with heavy discounts. Coach the 3-attempt rule and price-point discovery before any coupon.";
+  if (p.retention === false && p.duration === false)
+    return "Low saves on short calls. Slow down: find the root cause before accepting the cancel.";
+  if (p.retention === false)
+    return "Save rate under target. Practice GEOC and root-cause questions on retention calls.";
+  if (p.calls === false && p.adherence === false)
+    return "Low volume and adherence. Review schedule and time in available status.";
+  if (p.duration === false)
+    return "Call length is outside the target range. Review a few recordings for rushed or drawn-out calls.";
   return null;
 }

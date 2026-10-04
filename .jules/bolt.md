@@ -7,7 +7,13 @@
 
 **Learning:** Complex route components (e.g., LiveCall, LiveServiceCall) are highly sensitive to re-renders from fast-updating local state like text inputs. Updating state on every keystroke in these large components causes performance bottlenecks.
 **Action:** Always extract fast-updating local state (timers, inputs) into isolated leaf components to maintain rendering performance in large route components.
+
 ## 2024-05-24 - High-Frequency Re-render from requestAnimationFrame
 
 **Learning:** The `useSpeechRecognition` hook updated an `interim` state variable inside a `requestAnimationFrame` callback. Returning this state from the hook caused massive complex route components to re-render 60 times per second during speech.
 **Action:** For extremely fast-updating UI (like 60fps animations or live transcription), bypass React's standard parent-down rendering. Use an external store (like `useSyncExternalStore` or a ref-based subscription) and isolate the text into a tiny leaf component (`InterimText`) that subscribes directly to the store.
+
+## 2026-10-04 - Inline List Rendering in Complex Routes
+
+**Learning:** Rendering lists of components inline using `.map()` directly inside complex parent route components (like `LiveCall` and `LiveServiceCall`) forces all list items to re-render whenever the parent's fast-updating local state changes (e.g. text input strokes, mic toggling). Using `useMemo` on the mapped array only skips element creation, but React still performs expensive virtual DOM diffing.
+**Action:** Extract list items into separate child components wrapped in `React.memo` (`TranscriptTurnItem`) to genuinely prevent unchanged items from re-rendering during unrelated parent state updates.
