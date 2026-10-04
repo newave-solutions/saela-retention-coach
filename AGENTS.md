@@ -12,3 +12,4 @@
 <!-- LOVABLE:END -->
 
 - Keep conversation transcripts server-side for customer simulation and grading; live calls show audio activity and scorecards show evidence-based call moments instead, to encourage active listening.
+- Maintain one public, versioned grading guide linked from scorecards so scoring explanations stay available without disclosing private call content.

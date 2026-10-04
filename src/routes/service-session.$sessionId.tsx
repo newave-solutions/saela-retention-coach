@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
   ArrowLeft,
+  BookOpen,
   CheckCircle2,
   CircleSlash,
   Ear,
@@ -166,6 +167,14 @@ function ServiceScorecard() {
                 </div>
               </div>
             </section>
+
+            <Link
+              to="/grading-guide"
+              hash="practice"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              <BookOpen className="h-4 w-4" /> How this score is graded
+            </Link>
 
             {data.coaching?.callReview?.length ? (
               <CallReview review={data.coaching.callReview} />
