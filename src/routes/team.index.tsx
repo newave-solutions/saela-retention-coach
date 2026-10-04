@@ -15,9 +15,15 @@ export const Route = createFileRoute("/team/")({
   head: () => ({
     meta: [
       { title: "Team results — Saela Way Team Lead View" },
-      { name: "description", content: "Team lead view of agent practice scores, trends and coaching needs." },
+      {
+        name: "description",
+        content: "Team lead view of agent practice scores, trends and coaching needs.",
+      },
       { property: "og:title", content: "Team results — Saela Way Team Lead View" },
-      { property: "og:description", content: "See every agent's practice results and where to coach next." },
+      {
+        property: "og:description",
+        content: "See every agent's practice results and where to coach next.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -86,13 +92,19 @@ function TeamPage() {
   const team = summarize(data.sessions);
   const misses = recurringMisses(team.graded);
   const inactive = rows.filter((r) => (daysSince(r.stats.lastActive) ?? 99) >= 7);
-  const seatName = data.seat === "ces" ? "CES — Customer Experience Specialists" : "CEM — Customer Experience Managers";
+  const seatName =
+    data.seat === "ces"
+      ? "CES — Customer Experience Specialists"
+      : "CEM — Customer Experience Managers";
 
   return (
     <main className="min-h-screen bg-background">
       <header className="brand-surface">
         <div className="mx-auto max-w-6xl px-4 py-6">
-          <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100">
+          <Link
+            to="/"
+            className="mb-4 inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100"
+          >
             <ArrowLeft className="h-4 w-4" /> Dashboard
           </Link>
           <div className="flex items-center gap-3">
@@ -103,14 +115,20 @@ function TeamPage() {
               <h1 className="font-display text-xl font-semibold">Team lead view</h1>
               <p className="text-xs opacity-80">{seatName} · last 90 days</p>
             </div>
-            <Link to="/team/scorecard" className="ml-auto rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground">
+            <Link
+              to="/team/scorecard"
+              className="ml-auto rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground"
+            >
               Master scorecard
             </Link>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-4">
             <Stat label="Agents" value={String(data.agents.length)} />
             <Stat label="Calls graded" value={String(team.calls)} />
-            <Stat label={data.seat === "ces" ? "Resolution rate" : "Save rate"} value={team.rate != null ? `${team.rate}%` : "—"} />
+            <Stat
+              label={data.seat === "ces" ? "Resolution rate" : "Save rate"}
+              value={team.rate != null ? `${team.rate}%` : "—"}
+            />
             <Stat
               label="Avg score (30d vs prior)"
               value={team.avgNow != null ? String(team.avgNow) : "—"}
@@ -127,7 +145,9 @@ function TeamPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div>
-              <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">Skill averages</p>
+              <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
+                Skill averages
+              </p>
               {team.skills.length ? (
                 team.skills.map((s) => (
                   <div key={s.key} className="mb-2">
@@ -149,7 +169,9 @@ function TeamPage() {
             </div>
             {misses.length > 0 && (
               <div>
-                <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">Recurring misses</p>
+                <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
+                  Recurring misses
+                </p>
                 <ul className="space-y-1">
                   {misses.map(([label, n]) => (
                     <li key={label} className="flex justify-between">
@@ -162,7 +184,9 @@ function TeamPage() {
             )}
             {inactive.length > 0 && (
               <div>
-                <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">No practice in 7+ days</p>
+                <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
+                  No practice in 7+ days
+                </p>
                 <p>{inactive.map((r) => r.agent.display_name ?? "Agent").join(", ")}</p>
               </div>
             )}
@@ -178,7 +202,11 @@ function TeamPage() {
                 onClick={() => setSort(k)}
                 className={`rounded-full px-3 py-1 ring-1 ring-border ${sort === k ? "bg-primary text-primary-foreground" : "bg-card"}`}
               >
-                {{ avg: "Avg score", rate: "Rate", trend: "Trend", calls: "Calls", name: "Name" }[k]}
+                {
+                  { avg: "Avg score", rate: "Rate", trend: "Trend", calls: "Calls", name: "Name" }[
+                    k
+                  ]
+                }
               </button>
             ))}
           </div>
@@ -198,17 +226,28 @@ function TeamPage() {
                       className="grid grid-cols-2 items-center gap-3 bg-card px-4 py-3.5 transition-colors hover:bg-secondary sm:grid-cols-6"
                     >
                       <div className="col-span-2 min-w-0">
-                        <p className="truncate text-sm font-semibold">{agent.display_name ?? "Agent"}</p>
+                        <p className="truncate text-sm font-semibold">
+                          {agent.display_name ?? "Agent"}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {idle == null ? "Never practiced" : idle === 0 ? "Active today" : `Last active ${idle}d ago`}
+                          {idle == null
+                            ? "Never practiced"
+                            : idle === 0
+                              ? "Active today"
+                              : `Last active ${idle}d ago`}
                           {idle != null && idle >= 7 ? " · needs a nudge" : ""}
                         </p>
                       </div>
                       <Cell label="Calls" value={String(stats.calls)} />
-                      <Cell label="Avg" value={stats.avgScore != null ? String(stats.avgScore) : "—"} />
+                      <Cell
+                        label="Avg"
+                        value={stats.avgScore != null ? String(stats.avgScore) : "—"}
+                      />
                       <Cell label="Rate" value={stats.rate != null ? `${stats.rate}%` : "—"} />
                       <div>
-                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Focus</p>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                          Focus
+                        </p>
                         <p className="truncate text-xs">{stats.weakest?.label ?? "—"}</p>
                         <Trend value={stats.trend} />
                       </div>

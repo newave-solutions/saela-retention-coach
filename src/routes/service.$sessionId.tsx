@@ -23,6 +23,7 @@ import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
+import { TranscriptTurnItem } from "@/components/TranscriptTurnItem";
 
 export const Route = createFileRoute("/service/$sessionId")({
   head: () => ({
@@ -272,23 +273,11 @@ function LiveServiceCall() {
           style={{ maxHeight: "52vh" }}
         >
           {turns.map((turn, index) => (
-            <div
+            <TranscriptTurnItem
               key={`${turn.at}-${index}`}
-              className={turn.speaker === "agent" ? "flex justify-end" : "flex justify-start"}
-            >
-              <div
-                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                  turn.speaker === "agent"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-foreground"
-                }`}
-              >
-                <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
-                  {turn.speaker === "agent" ? "You" : (scenario?.customerName ?? "Customer")}
-                </p>
-                {turn.text}
-              </div>
-            </div>
+              turn={turn}
+              customerName={scenario?.customerName ?? "Customer"}
+            />
           ))}
           {thinking && <p className="text-xs text-muted-foreground">Customer is responding...</p>}
         </div>

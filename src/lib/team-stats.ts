@@ -29,7 +29,9 @@ export function summarize(sessions: SessionLite[]) {
     return t >= now - from * 864e5 && t < now - to * 864e5;
   };
   const avg = (list: SessionLite[]) =>
-    list.length ? Math.round(list.reduce((a, s) => a + (s.overall_score ?? 0), 0) / list.length) : null;
+    list.length
+      ? Math.round(list.reduce((a, s) => a + (s.overall_score ?? 0), 0) / list.length)
+      : null;
   const rate = (list: SessionLite[]) =>
     list.length
       ? Math.round(
@@ -93,7 +95,8 @@ export function recurringMisses(sessions: SessionLite[]) {
   ];
   for (const s of sessions) {
     const text = (s.coaching?.missed ?? []).join(" ");
-    for (const [re, label] of patterns) if (re.test(text)) counts.set(label, (counts.get(label) ?? 0) + 1);
+    for (const [re, label] of patterns)
+      if (re.test(text)) counts.set(label, (counts.get(label) ?? 0) + 1);
   }
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
 }

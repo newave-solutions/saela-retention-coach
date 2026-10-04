@@ -15,7 +15,12 @@ export type SessionLite = {
   scores: Record<string, number> | null;
   coaching: { summary?: string; missed?: string[]; didWell?: string[] } | null;
   language_flags: Json;
-  scenario: { customerName?: string; reasonLabel?: string; callTypeLabel?: string; difficulty?: string } | null;
+  scenario: {
+    customerName?: string;
+    reasonLabel?: string;
+    callTypeLabel?: string;
+    difficulty?: string;
+  } | null;
   created_at: string;
 };
 
@@ -168,7 +173,8 @@ Rules: 1-2 measurable goals using 0-100 skill averages from the data. Reality: 3
       }),
     });
     if (res.status === 429) throw new Error("AI is busy right now. Try again in a minute.");
-    if (res.status === 402) throw new Error("AI credits are used up. Add credits in Settings → Plans & credits.");
+    if (res.status === 402)
+      throw new Error("AI credits are used up. Add credits in Settings → Plans & credits.");
     if (!res.ok || !res.body) throw new Error(`AI request failed (${res.status}).`);
 
     const reader = res.body.getReader();

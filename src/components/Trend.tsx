@@ -21,4 +21,3 @@ export function Trend({ value }: { value: number | null }) {
     </span>
   );
 }
-
