@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Upload, CheckCircle2, XCircle, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle2, XCircle, FileSpreadsheet, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -332,6 +332,13 @@ function ScorecardPage() {
               Weights: save % 25 · coupons 25 · calls 20 · avg call length 15 · adherence 15.
               "Partial" means one source hasn't been uploaded yet; the score uses what's available.
             </p>
+            <Link
+              to="/grading-guide"
+              hash="master"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              <BookOpen className="h-4 w-4" /> How the master score is calculated
+            </Link>
           </CardContent>
         </Card>
       </div>
