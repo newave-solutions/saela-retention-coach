@@ -2,14 +2,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Mic, MicOff, PhoneOff, Send, Volume2 } from "lucide-react";
+import { Mic, MicOff, PhoneOff } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endServiceCall, getServiceCall, sendServiceTurn } from "@/lib/service-training.functions";
 import type { PublicServiceScenario } from "@/lib/service-scenarios";
-import type { TranscriptTurn } from "@/lib/scenarios";
 import {
   instructionsFor,
   settingsFor,
@@ -18,12 +17,10 @@ import {
   type Mood,
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
-import { TranscriptTurnItem } from "@/components/TranscriptTurnItem";
+import { CallAudioStage } from "@/components/CallAudioStage";
 
 export const Route = createFileRoute("/service/$sessionId")({
   head: () => ({
@@ -57,7 +54,6 @@ function LiveServiceCall() {
   const voice = useCustomerVoice();
 
   const [scenario, setScenario] = useState<PublicServiceScenario | null>(null);
-  const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [thinking, setThinking] = useState(false);
   const [ending, setEnding] = useState(false);
   const [micOn, setMicOn] = useState(false);
@@ -69,7 +65,6 @@ function LiveServiceCall() {
   micOnRef.current = micOn;
   const recognitionRef = useRef<{ start: () => void; stop: () => void } | null>(null);
   const endedRef = useRef(false);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!loading && !user) void navigate({ to: "/auth" });
@@ -117,7 +112,6 @@ function LiveServiceCall() {
       }
       try {
         const result = await send({ data: { sessionId, text } });
-        setTurns(result.transcript);
         setThinking(false);
         if (micOnRef.current) recognitionRef.current?.stop();
         await speakAs(result.reply, result.mood as Mood);
@@ -157,7 +151,6 @@ function LiveServiceCall() {
         }
         setScenario(data.scenario);
         scenarioRef.current = data.scenario;
-        setTurns(data.transcript);
         const opening = data.transcript[0];
         if (opening) void speakAs(opening.text, "neutral");
       } catch (error) {
@@ -169,10 +162,6 @@ function LiveServiceCall() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, user]);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [turns, thinking]);
 
   useEffect(() => {
     if (recognition.error) toast.error(recognition.error);
@@ -236,25 +225,8 @@ function LiveServiceCall() {
       </header>
 
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-5">
-        <div className="card-soft mb-4 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-          <div className="relative flex h-14 w-14 items-center justify-center">
-            <span
-              className={`absolute inset-0 rounded-full bg-accent/50 ${voice.speaking || recognition.listening ? "call-pulse" : "opacity-20"}`}
-            />
-            <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-accent/20 text-accent ring-1 ring-accent/40">
-              {voice.speaking ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-            </span>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">{state}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              <InterimText
-                subscribe={recognition.subscribeInterim}
-                getSnapshot={recognition.getInterim}
-                fallback="Listen for the details. Confirm them back."
-              />
-            </p>
-          </div>
+        <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-4">
+          <p className="text-sm font-medium" aria-live="polite">{state}</p>
           <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
             {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
             {micOn ? "Mute" : "Talk"}
@@ -267,20 +239,7 @@ function LiveServiceCall() {
           </p>
         )}
 
-        <div
-          ref={scrollRef}
-          className="card-soft flex-1 space-y-3 overflow-y-auto rounded-xl border border-border bg-card p-4"
-          style={{ maxHeight: "52vh" }}
-        >
-          {turns.map((turn, index) => (
-            <TranscriptTurnItem
-              key={`${turn.at}-${index}`}
-              turn={turn}
-              customerName={scenario?.customerName ?? "Customer"}
-            />
-          ))}
-          {thinking && <p className="text-xs text-muted-foreground">Customer is responding...</p>}
-        </div>
+        <CallAudioStage customerName={scenario?.customerName ?? "Customer"} speaking={voice.speaking} listening={recognition.listening} thinking={thinking} getAudioElement={voice.getAudioElement} />
 
         <CallInput
           onSend={(text) => {
