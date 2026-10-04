@@ -53,23 +53,23 @@ function ScorecardPage() {
 
   async function onFile(source: Source, file: File) {
     const rows = parseCsv(await file.text());
-    if (rows.length < 2) return toast.error("That file has no data rows.");
+    if (rows.length < 2 || !rows[0]) { toast.error("That file has no data rows."); return; }
     const headers = rows[0].map((h) => h.trim());
     setParsed({ source, fileName: file.name, headers, rows: rows.slice(1), map: guessMapping(source, headers) });
   }
 
   const preview = parsed
-    ? aggregate(parsed.source, parsed.rows, parsed.map, parsed.map.minutes != null ? parsed.headers[parsed.map.minutes] : "")
+    ? aggregate(parsed.source, parsed.rows, parsed.map, parsed.map.minutes != null ? (parsed.headers[parsed.map.minutes] ?? "") : "")
     : [];
 
   async function save() {
     if (!parsed || !seat || !user) return;
-    if (parsed.map.agent == null) return toast.error("Pick which column holds the agent name.");
+    if (parsed.map.agent == null) { toast.error("Pick which column holds the agent name."); return; }
     setSaving(true);
     const payload = preview.map((r) => ({ ...r, seat, month, updated_by: user.id, updated_at: new Date().toISOString() }));
     const { error } = await supabase.from("agent_monthly_metrics").upsert(payload, { onConflict: "seat,month,agent_name" });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`Saved ${payload.length} agents for ${month}.`);
     setParsed(null);
     void qc.invalidateQueries({ queryKey: ["metrics", seat, month] });
