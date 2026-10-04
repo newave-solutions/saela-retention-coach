@@ -59,8 +59,8 @@ function num(v: string | undefined): number | null {
   const s = v.trim();
   if (!s) return null;
   if (/^\d+:\d{1,2}(:\d{1,2})?$/.test(s)) {
-    const p = s.split(":").map(Number);
-    return p.length === 3 ? p[0] * 60 + p[1] + p[2] / 60 : p[0] + p[1] / 60;
+    const p = s.split(":").map(Number) as [number, number, number?];
+    return p[2] != null ? p[0] * 60 + p[1] + p[2] / 60 : p[0] + p[1] / 60;
   }
   const n = Number(s.replace(/[$,%\s]/g, "").replace(/^\((.*)\)$/, "-$1"));
   return Number.isFinite(n) ? n : null;
@@ -150,7 +150,7 @@ export function scoreAgent(m: AgentRow): { score: number | null; complete: boole
 }
 
 export function coachingNote(m: AgentRow, pillars: Pillar[]): string | null {
-  const p = Object.fromEntries(pillars.map((x) => [x.key, x.pass]));
+  const p = Object.fromEntries(pillars.map((x) => [x.key, x.pass])) as Record<"retention" | "coupons" | "calls" | "duration" | "adherence", boolean | null>;
   if (p.retention && p.coupons === false) return "Saves are coming with heavy discounts. Coach the 3-attempt rule and price-point discovery before any coupon.";
   if (p.retention === false && p.duration === false) return "Low saves on short calls. Slow down: find the root cause before accepting the cancel.";
   if (p.retention === false) return "Save rate under target. Practice GEOC and root-cause questions on retention calls.";
