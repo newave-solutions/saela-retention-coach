@@ -76,9 +76,7 @@ function Scorecard() {
     queryFn: async () => {
       const { data: row, error } = await supabase
         .from("training_sessions")
-        .select(
-          "id, scenario, status, outcome, overall_score, scores, coaching, duration_seconds",
-        )
+        .select("id, scenario, status, outcome, overall_score, scores, coaching, duration_seconds")
         .eq("id", sessionId)
         .single();
       if (error) throw error;
@@ -134,7 +132,9 @@ function Scorecard() {
               </div>
             </section>
 
-            {data.coaching?.callReview?.length ? <CallReview review={data.coaching.callReview} /> : null}
+            {data.coaching?.callReview?.length ? (
+              <CallReview review={data.coaching.callReview} />
+            ) : null}
 
             {normalizeScores(data.scores) && (
               <Card className="card-soft mt-4">

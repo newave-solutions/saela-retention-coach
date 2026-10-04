@@ -167,7 +167,9 @@ function ServiceScorecard() {
               </div>
             </section>
 
-            {data.coaching?.callReview?.length ? <CallReview review={data.coaching.callReview} /> : null}
+            {data.coaching?.callReview?.length ? (
+              <CallReview review={data.coaching.callReview} />
+            ) : null}
 
             {data.detail_checks?.length ? (
               <Card className="card-soft mt-4">

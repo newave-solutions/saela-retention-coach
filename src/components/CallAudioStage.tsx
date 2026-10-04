@@ -11,7 +11,13 @@ type Props = {
 
 const BAR_COUNT = 31;
 
-export function CallAudioStage({ customerName, speaking, listening, thinking, getAudioElement }: Props) {
+export function CallAudioStage({
+  customerName,
+  speaking,
+  listening,
+  thinking,
+  getAudioElement,
+}: Props) {
   const bars = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
@@ -25,14 +31,22 @@ export function CallAudioStage({ customerName, speaking, listening, thinking, ge
     const heights = new Uint8Array(128);
 
     if (listening && navigator.mediaDevices?.getUserMedia) {
-      void navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-        if (disposed) { stream.getTracks().forEach((track) => track.stop()); return; }
-        micStream = stream;
-        context = new AudioContext();
-        analyser = context.createAnalyser();
-        analyser.fftSize = 256;
-        context.createMediaStreamSource(stream).connect(analyser);
-      }).catch(() => { /* recognition reports microphone errors separately */ });
+      void navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          if (disposed) {
+            stream.getTracks().forEach((track) => track.stop());
+            return;
+          }
+          micStream = stream;
+          context = new AudioContext();
+          analyser = context.createAnalyser();
+          analyser.fftSize = 256;
+          context.createMediaStreamSource(stream).connect(analyser);
+        })
+        .catch(() => {
+          /* recognition reports microphone errors separately */
+        });
     }
 
     const draw = (time: number) => {
@@ -46,7 +60,9 @@ export function CallAudioStage({ customerName, speaking, listening, thinking, ge
             context.createMediaElementSource(element).connect(analyser);
             analyser.connect(context.destination);
             sourceElement = element;
-          } catch { /* browser speech remains a state animation */ }
+          } catch {
+            /* browser speech remains a state animation */
+          }
         }
       }
       if (analyser) analyser.getByteFrequencyData(heights);
@@ -66,24 +82,59 @@ export function CallAudioStage({ customerName, speaking, listening, thinking, ge
       cancelAnimationFrame(frame);
       micStream?.getTracks().forEach((track) => track.stop());
       if (context) void context.close();
-      currentBars.forEach((bar) => { if (bar) bar.style.height = "10px"; });
+      currentBars.forEach((bar) => {
+        if (bar) bar.style.height = "10px";
+      });
     };
   }, [listening, speaking, thinking, getAudioElement]);
 
-  const label = speaking ? `${customerName} is speaking` : thinking ? `${customerName} is thinking` : listening ? "Listening to you" : "The line is quiet";
+  const label = speaking
+    ? `${customerName} is speaking`
+    : thinking
+      ? `${customerName} is thinking`
+      : listening
+        ? "Listening to you"
+        : "The line is quiet";
   return (
-    <div className="flex min-h-[280px] flex-1 flex-col items-center justify-center gap-6 border-y border-border bg-card px-4 py-10 text-center sm:min-h-[380px]" aria-label={label}>
+    <div
+      className="flex min-h-[280px] flex-1 flex-col items-center justify-center gap-6 border-y border-border bg-card px-4 py-10 text-center sm:min-h-[380px]"
+      aria-label={label}
+    >
       <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-secondary text-primary">
-        {speaking ? <Volume2 className="h-6 w-6" /> : listening ? <Mic className="h-6 w-6" /> : <Headphones className="h-6 w-6" />}
+        {speaking ? (
+          <Volume2 className="h-6 w-6" />
+        ) : listening ? (
+          <Mic className="h-6 w-6" />
+        ) : (
+          <Headphones className="h-6 w-6" />
+        )}
       </div>
-      <div className="flex h-32 w-full max-w-md items-center justify-center gap-1.5 overflow-hidden" aria-hidden="true">
+      <div
+        className="flex h-32 w-full max-w-md items-center justify-center gap-1.5 overflow-hidden"
+        aria-hidden="true"
+      >
         {Array.from({ length: BAR_COUNT }, (_, index) => (
-          <span key={index} ref={(node) => { bars.current[index] = node; }} className="w-1.5 shrink-0 rounded-full bg-primary/75 transition-[background-color] duration-300" style={{ height: 10 }} />
+          <span
+            key={index}
+            ref={(node) => {
+              bars.current[index] = node;
+            }}
+            className="w-1.5 shrink-0 rounded-full bg-primary/75 transition-[background-color] duration-300"
+            style={{ height: 10 }}
+          />
         ))}
       </div>
       <div>
         <p className="font-display text-lg font-semibold">{label}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{speaking ? "Listen closely" : listening ? "Your microphone is active" : thinking ? "Waiting for a response" : "Use Talk when you’re ready"}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {speaking
+            ? "Listen closely"
+            : listening
+              ? "Your microphone is active"
+              : thinking
+                ? "Waiting for a response"
+                : "Use Talk when you’re ready"}
+        </p>
       </div>
     </div>
   );

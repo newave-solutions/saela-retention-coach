@@ -226,7 +226,9 @@ function LiveServiceCall() {
 
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-5">
         <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-4">
-          <p className="text-sm font-medium" aria-live="polite">{state}</p>
+          <p className="text-sm font-medium" aria-live="polite">
+            {state}
+          </p>
           <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
             {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
             {micOn ? "Mute" : "Talk"}
@@ -239,7 +241,13 @@ function LiveServiceCall() {
           </p>
         )}
 
-        <CallAudioStage customerName={scenario?.customerName ?? "Customer"} speaking={voice.speaking} listening={recognition.listening} thinking={thinking} getAudioElement={voice.getAudioElement} />
+        <CallAudioStage
+          customerName={scenario?.customerName ?? "Customer"}
+          speaking={voice.speaking}
+          listening={recognition.listening}
+          thinking={thinking}
+          getAudioElement={voice.getAudioElement}
+        />
 
         <CallInput
           onSend={(text) => {
