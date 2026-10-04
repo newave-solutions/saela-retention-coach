@@ -46,7 +46,7 @@ export function guessMapping(source: Source, headers: string[]): Partial<Record<
   const used = new Set<number>();
   const out: Partial<Record<Field, number>> = {};
   // match specific fields first so "agent" doesn't grab "Calls handled by agent"
-  const order = [...FIELDS[source]].sort((a) => (a.key === "agent" ? 1 : -1));
+  const order = [...FIELDS[source].filter((f) => f.key !== "agent"), ...FIELDS[source].filter((f) => f.key === "agent")];
   for (const f of order) {
     const idx = headers.findIndex((h, i) => !used.has(i) && f.match.test(h));
     if (idx >= 0) { out[f.key] = idx; used.add(idx); }

@@ -22,6 +22,7 @@ import { Route as ServiceNewRouteImport } from './routes/service.new'
 import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionId'
 import { Route as TeamIndexRouteImport } from './routes/team.index'
 import { Route as TeamAgentIdRouteImport } from './routes/team.$agentId'
+import { Route as TeamScorecardRouteImport } from './routes/team.scorecard'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
 const IndexRoute = IndexRouteImport.update({
@@ -90,6 +91,11 @@ const TeamAgentIdRoute = TeamAgentIdRouteImport.update({
   path: '/team/$agentId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamScorecardRoute = TeamScorecardRouteImport.update({
+  id: '/team/scorecard',
+  path: '/team/scorecard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/service/new': typeof ServiceNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/team/$agentId': typeof TeamAgentIdRoute
+  '/team/scorecard': typeof TeamScorecardRoute
   '/team/': typeof TeamIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/service/new': typeof ServiceNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/team/$agentId': typeof TeamAgentIdRoute
+  '/team/scorecard': typeof TeamScorecardRoute
   '/team': typeof TeamIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/service/new': typeof ServiceNewRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/team/$agentId': typeof TeamAgentIdRoute
+  '/team/scorecard': typeof TeamScorecardRoute
   '/team/': typeof TeamIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
 }
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/service/new'
     | '/session/$sessionId'
     | '/team/$agentId'
+    | '/team/scorecard'
     | '/team/'
     | '/.lovable/oauth/consent'
   fileRoutesByTo: FileRoutesByTo
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/service/new'
     | '/session/$sessionId'
     | '/team/$agentId'
+    | '/team/scorecard'
     | '/team'
     | '/.lovable/oauth/consent'
   id:
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/service/new'
     | '/session/$sessionId'
     | '/team/$agentId'
+    | '/team/scorecard'
     | '/team/'
     | '/.lovable/oauth/consent'
   fileRoutesById: FileRoutesById
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   ServiceNewRoute: typeof ServiceNewRoute
   SessionSessionIdRoute: typeof SessionSessionIdRoute
   TeamAgentIdRoute: typeof TeamAgentIdRoute
+  TeamScorecardRoute: typeof TeamScorecardRoute
   TeamIndexRoute: typeof TeamIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
 }
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamAgentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team/scorecard': {
+      id: '/team/scorecard'
+      path: '/team/scorecard'
+      fullPath: '/team/scorecard'
+      preLoaderRoute: typeof TeamScorecardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServiceNewRoute: ServiceNewRoute,
   SessionSessionIdRoute: SessionSessionIdRoute,
   TeamAgentIdRoute: TeamAgentIdRoute,
+  TeamScorecardRoute: TeamScorecardRoute,
   TeamIndexRoute: TeamIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
 }
