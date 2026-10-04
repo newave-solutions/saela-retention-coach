@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endCall, getCall, sendAgentTurn } from "@/lib/training.functions";
-import type { PublicScenario, TranscriptTurn } from "@/lib/scenarios";
+import type { PublicScenario } from "@/lib/scenarios";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
 import { CallAudioStage } from "@/components/CallAudioStage";

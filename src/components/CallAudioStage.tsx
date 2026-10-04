@@ -52,7 +52,7 @@ export function CallAudioStage({ customerName, speaking, listening, thinking, ge
       if (analyser) analyser.getByteFrequencyData(heights);
       bars.current.forEach((bar, index) => {
         if (!bar) return;
-        const sample = analyser ? heights[Math.min(heights.length - 1, index * 3)] / 255 : 0;
+        const sample = analyser ? (heights[Math.min(heights.length - 1, index * 3)] ?? 0) / 255 : 0;
         const fallback = speaking || thinking ? (Math.sin(time / 190 + index * 1.1) + 1) * 0.17 : 0;
         const center = 1 - Math.abs(index - (BAR_COUNT - 1) / 2) / ((BAR_COUNT - 1) / 2);
         bar.style.height = `${Math.round(10 + Math.min(1, sample * 2.4 + fallback) * (65 + 36 * center))}px`;
@@ -60,12 +60,13 @@ export function CallAudioStage({ customerName, speaking, listening, thinking, ge
       frame = requestAnimationFrame(draw);
     };
     frame = requestAnimationFrame(draw);
+    const currentBars = bars.current;
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
       micStream?.getTracks().forEach((track) => track.stop());
       if (context) void context.close();
-      bars.current.forEach((bar) => { if (bar) bar.style.height = "10px"; });
+      currentBars.forEach((bar) => { if (bar) bar.style.height = "10px"; });
     };
   }, [listening, speaking, thinking, getAudioElement]);
 

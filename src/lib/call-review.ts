@@ -25,13 +25,13 @@ export function normalizeCallReview(raw: unknown): CallReviewItem[] {
   for (const item of raw) {
     if (!item || typeof item !== "object") continue;
     const entry = item as Record<string, unknown>;
-    if (typeof entry.id !== "string" || !REVIEW_QUESTIONS.some((q) => q.id === entry.id)) continue;
-    const answer = entry.answer;
+    if (typeof entry['id'] !== "string" || !REVIEW_QUESTIONS.some((q) => q.id === entry['id'])) continue;
+    const answer = entry['answer'];
     if (answer !== "yes" && answer !== "partial" && answer !== "no" && answer !== "not_observed") continue;
-    byId.set(entry.id, {
-      id: entry.id,
+    byId.set(entry['id'], {
+      id: entry['id'],
       answer,
-      note: typeof entry.note === "string" ? entry.note.slice(0, 400) : "",
+      note: typeof entry['note'] === "string" ? entry['note'].slice(0, 400) : "",
     });
   }
   return REVIEW_QUESTIONS.map(({ id }) => byId.get(id) ?? { id, answer: "not_observed", note: "Not enough evidence from this call." });
