@@ -15,7 +15,7 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import type { TranscriptTurn } from "@/lib/scenarios";
+import { CallReview } from "@/components/CallReview";
 import {
   DETAIL_STATUS_LABELS,
   OPPORTUNITY_STATUS_LABELS,
@@ -70,7 +70,6 @@ type Row = {
   detail_checks: DetailCheck[] | null;
   opportunity_checks: OpportunityCheck[] | null;
   language_flags: LanguageFlag[] | null;
-  transcript: TranscriptTurn[] | null;
   duration_seconds: number | null;
 };
 
@@ -103,7 +102,7 @@ function ServiceScorecard() {
       const { data: row, error } = await supabase
         .from("training_sessions")
         .select(
-          "id, scenario, status, outcome, overall_score, scores, coaching, detail_checks, opportunity_checks, language_flags, transcript, duration_seconds",
+          "id, scenario, status, outcome, overall_score, scores, coaching, detail_checks, opportunity_checks, language_flags, duration_seconds",
         )
         .eq("id", sessionId)
         .single();
@@ -167,6 +166,10 @@ function ServiceScorecard() {
                 </div>
               </div>
             </section>
+
+            {data.coaching?.callReview?.length ? (
+              <CallReview review={data.coaching.callReview} />
+            ) : null}
 
             {data.detail_checks?.length ? (
               <Card className="card-soft mt-4">
@@ -366,24 +369,6 @@ function ServiceScorecard() {
                 </Card>
               </>
             )}
-
-            <Card className="card-soft mt-4">
-              <CardHeader>
-                <h2 className="text-base font-semibold leading-none">Transcript</h2>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(data.transcript ?? []).map((turn, index) => (
-                  <div key={`${turn.at}-${index}`} className="text-sm">
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {turn.speaker === "agent"
-                        ? "You"
-                        : (data.scenario?.customerName ?? "Customer")}
-                    </span>
-                    <p className="text-foreground/90">{turn.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
 
             <div className="mt-6">
               <Button asChild className="w-full">

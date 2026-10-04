@@ -5,7 +5,9 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://xfqisjocaxmrnvhjpnrq.supabase.co/auth/v1",
-    "accepted_audiences": ["authenticated"]
+    "accepted_audiences": [
+      "authenticated"
+    ]
   },
   "mcp": {
     "server": {
@@ -36,7 +38,11 @@
             "outcome": {
               "description": "Only return calls with this outcome.",
               "type": "string",
-              "enum": ["saved", "partial", "cancelled"]
+              "enum": [
+                "saved",
+                "partial",
+                "cancelled"
+              ]
             }
           }
         },
@@ -64,7 +70,9 @@
               "type": "boolean"
             }
           },
-          "required": ["sessionId"]
+          "required": [
+            "sessionId"
+          ]
         },
         "outputSchema": null
       },

@@ -10,3 +10,5 @@
 > the editor, so keep the branch in a working state.
 
 <!-- LOVABLE:END -->
+
+- Keep conversation transcripts server-side for customer simulation and grading; live calls show audio activity and scorecards show evidence-based call moments instead, to encourage active listening.
