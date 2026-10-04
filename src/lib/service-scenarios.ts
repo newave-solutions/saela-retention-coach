@@ -1,5 +1,6 @@
 // Client-safe model for the CES service-call training track.
 import type { Difficulty, Personality, TranscriptTurn, VoiceAssignment } from "./scenarios";
+import type { CallReviewItem } from "./call-review";
 
 export type { Difficulty, Personality, TranscriptTurn };
 
@@ -165,6 +166,7 @@ export type ServiceCoaching = {
   experienceImpact: string[];
   resignNotes: string[];
   salesNotes?: string[];
+  callReview?: CallReviewItem[];
 };
 
 export type ServiceOutcome = "resolved" | "partial" | "mishandled";
