@@ -12,3 +12,4 @@
 - [x] Live call console (voice in/out + transcript)
 - [x] Scorecard review route
 - [x] Double-check code logic end to end (typecheck clean, sign-in page renders, AI customer + grading verified live)
+- [x] Replace visible call transcripts with audio-reactive display and post-call transcript with call-moment checklist

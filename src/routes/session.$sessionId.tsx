@@ -12,8 +12,8 @@ import {
   type Coaching,
   type Outcome,
   type ScoreBreakdown,
-  type TranscriptTurn,
 } from "@/lib/scenarios";
+import { CallReview } from "@/components/CallReview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -32,6 +32,8 @@ export const Route = createFileRoute("/session/$sessionId")({
         property: "og:description",
         content: "Outcome, scores, the hidden motive, and coaching from your retention call.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Scorecard,
@@ -50,7 +52,6 @@ type Row = {
   overall_score: number | null;
   scores: ScoreBreakdown | null;
   coaching: Coaching | null;
-  transcript: TranscriptTurn[] | null;
   duration_seconds: number | null;
 };
 
@@ -76,7 +77,7 @@ function Scorecard() {
       const { data: row, error } = await supabase
         .from("training_sessions")
         .select(
-          "id, scenario, status, outcome, overall_score, scores, coaching, transcript, duration_seconds",
+          "id, scenario, status, outcome, overall_score, scores, coaching, duration_seconds",
         )
         .eq("id", sessionId)
         .single();
@@ -132,6 +133,8 @@ function Scorecard() {
                 </div>
               </div>
             </section>
+
+            {data.coaching?.callReview?.length ? <CallReview review={data.coaching.callReview} /> : null}
 
             {normalizeScores(data.scores) && (
               <Card className="card-soft mt-4">
@@ -193,24 +196,6 @@ function Scorecard() {
                 </Card>
               </>
             )}
-
-            <Card className="card-soft mt-4">
-              <CardHeader>
-                <h2 className="text-base font-semibold leading-none">Transcript</h2>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(data.transcript ?? []).map((turn, index) => (
-                  <div key={`${turn.at}-${index}`} className="text-sm">
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {turn.speaker === "agent"
-                        ? "You"
-                        : (data.scenario?.customerName ?? "Customer")}
-                    </span>
-                    <p className="text-foreground/90">{turn.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
 
             <div className="mt-6">
               <Button asChild className="w-full">
