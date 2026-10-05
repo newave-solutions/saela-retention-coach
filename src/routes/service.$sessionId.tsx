@@ -19,8 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
-import { CallInput } from "@/components/CallInput";
-import { CallAudioStage } from "@/components/CallAudioStage";
 import { AccountWorkspace } from "@/components/AccountWorkspace";
 
 export const Route = createFileRoute("/service/$sessionId")({
@@ -191,53 +189,30 @@ function LiveServiceCall() {
         : "Mic off";
 
   return (
-    <main className="flex min-h-screen flex-col bg-background">
-      <header className="brand-surface">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <div>
-            <h1 className="flex items-center gap-2 text-base font-semibold leading-tight">
-              {scenario?.customerName ?? "Connecting..."}
-              {scenario?.voice ? (
-                <Badge
-                  variant="outline"
-                  className="border-white/30 bg-white/10 text-[10px] font-normal text-inherit"
-                >
-                  {scenario.voice.accentLabel}
-                </Badge>
-              ) : null}
-            </h1>
-            <p className="text-xs opacity-80">
-              {scenario?.accountSummary ?? "Pulling up the account"}
-            </p>
-            {voice.degraded ? (
-              <p className="text-xs opacity-80">
-                Backup voice in use — realistic voice unavailable.
-              </p>
-            ) : null}
+    <main className="flex h-screen min-h-[620px] flex-col overflow-hidden bg-background">
+      <header className="brand-surface shrink-0 border-b border-sidebar-border">
+        <div className="mx-auto flex min-h-12 max-w-[1800px] flex-wrap items-center justify-between gap-2 px-3 py-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="text-sm font-semibold">Saela Customer Account</span>
+            <span className="hidden h-5 w-px bg-sidebar-border sm:block" />
+            <span className="truncate text-xs opacity-80">{scenario?.accountSummary ?? "Opening customer record…"}</span>
+            <Badge variant="outline" className="hidden border-sidebar-border text-[10px] text-inherit sm:inline-flex">Training</Badge>
           </div>
           <div className="flex items-center gap-2">
+            <span className="hidden text-xs opacity-80 sm:inline" aria-live="polite">{state}</span>
             <CallTimer />
+            <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic} disabled={ending || !recognition.supported}>
+              {micOn ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}{micOn ? "Mute" : "Talk"}
+            </Button>
             <Button variant="destructive" size="sm" onClick={() => finish()} disabled={ending}>
-              <PhoneOff className="mr-2 h-4 w-4" />
-              {ending ? "Wrapping up..." : "End call"}
+              <PhoneOff className="h-4 w-4" />{ending ? "Ending…" : "End call"}
             </Button>
           </div>
         </div>
       </header>
-
-      <div className="mx-auto grid w-full max-w-[1600px] flex-1 grid-cols-1 lg:min-h-0 lg:grid-cols-[360px_minmax(0,1fr)] lg:border-x lg:border-border">
-        <aside className="flex flex-col border-b border-border p-4 lg:min-h-0 lg:border-b-0 lg:border-r">
-          <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-4">
-            <p className="text-sm font-medium" aria-live="polite">{state}</p>
-            <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
-              {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}{micOn ? "Mute" : "Talk"}
-            </Button>
-          </div>
-          {!recognition.supported ? <p className="mb-3 border border-warning/40 bg-warning/10 p-3 text-xs text-warning">This browser can't hear you. Type your side of the call below instead.</p> : null}
-          <CallAudioStage customerName={scenario?.customerName ?? "Customer"} speaking={voice.speaking} listening={recognition.listening} thinking={thinking} />
-          <CallInput onSend={(text) => { if (!busyRef.current) void speak(text); }} disabled={ending} busy={thinking} />
-        </aside>
-        {scenario?.simulatedAccount ? <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} /> : <div className="flex min-h-[520px] items-center justify-center text-sm text-muted-foreground">Opening customer account…</div>}
+      {!recognition.supported ? <p className="shrink-0 border-b border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">Voice input is unavailable in this browser.</p> : null}
+      <div className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 border-x border-border">
+        {scenario?.simulatedAccount ? <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} /> : <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">Opening customer account…</div>}
       </div>
     </main>
   );
