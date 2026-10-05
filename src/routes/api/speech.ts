@@ -73,6 +73,13 @@ type SpeakOptions = {
 
 type SpeakResult = { ok: true; response: Response } | { ok: false; status: number; detail: string };
 
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof Error && error.name === "AbortError") ||
+    (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError")
+  );
+}
+
 function audioResponse(body: BodyInit, provider: ProviderName): Response {
   return new Response(body, {
     headers: {
@@ -239,7 +246,17 @@ export const Route = createFileRoute("/api/speech")({
 
         try {
           for (const provider of chain) {
-            const result = await ADAPTERS[provider](options);
+            let result: SpeakResult;
+            try {
+              result = await ADAPTERS[provider](options);
+            } catch (error) {
+              if (request.signal.aborted || isAbortError(error)) {
+                return new Response(null, { status: 499 });
+              }
+              const detail = error instanceof Error ? error.message : "Voice request failed.";
+              console.error(`${provider} TTS request failed: ${detail}`);
+              result = { ok: false, status: 502, detail };
+            }
             if (result.ok) return result.response;
             markUnhealthy(provider, result.status);
             lastStatus = result.status;
@@ -247,8 +264,12 @@ export const Route = createFileRoute("/api/speech")({
             console.error(`${provider} TTS failed [${result.status}]: ${result.detail}`);
           }
         } catch (error) {
-          if (request.signal.aborted) return new Response(null, { status: 499 });
-          throw error;
+          if (request.signal.aborted || isAbortError(error)) {
+            return new Response(null, { status: 499 });
+          }
+          const detail = error instanceof Error ? error.message : "Voice service failed.";
+          console.error(`Speech route failed: ${detail}`);
+          return new Response("The voice service is temporarily unavailable.", { status: 502 });
         }
 
         return new Response(lastDetail || "The voice service is unavailable.", {
