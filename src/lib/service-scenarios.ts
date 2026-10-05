@@ -1,6 +1,7 @@
 // Client-safe model for the CES service-call training track.
 import type { Difficulty, Personality, TranscriptTurn, VoiceAssignment } from "./scenarios";
 import type { CallReviewItem } from "./call-review";
+import type { SimulatedAccount } from "./account-workspace";
 
 export type { Difficulty, Personality, TranscriptTurn };
 
@@ -107,6 +108,7 @@ export type PublicServiceScenario = {
   personalityLabel: string;
   openingLine: string;
   voice?: VoiceAssignment;
+  simulatedAccount?: SimulatedAccount;
 };
 
 export type FullServiceScenario = PublicServiceScenario & {

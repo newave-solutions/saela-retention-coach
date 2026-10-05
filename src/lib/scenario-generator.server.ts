@@ -1254,6 +1254,7 @@ export function toPublicScenario(scenario: FullScenario) {
     personalityLabel: scenario.personalityLabel,
     openingLine: scenario.openingLine,
     ...(scenario.voice ? { voice: scenario.voice } : {}),
+    ...(scenario.simulatedAccount ? { simulatedAccount: scenario.simulatedAccount } : {}),
   };
 }
 
