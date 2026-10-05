@@ -36,7 +36,7 @@ export const Route = createFileRoute("/session/$sessionId")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Scorecard,
+  component: RetentionScorecard,
 });
 
 type Row = {
@@ -61,7 +61,7 @@ function toneFor(outcome: Outcome | null) {
   return "text-destructive-foreground";
 }
 
-function Scorecard() {
+function RetentionScorecard() {
   const { sessionId } = Route.useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
