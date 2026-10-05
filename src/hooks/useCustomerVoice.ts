@@ -166,6 +166,5 @@ export function useCustomerVoice() {
 
   useEffect(() => () => stop(), [stop]);
 
-  const getAudioElement = useCallback(() => audioRef.current, []);
-  return { say, stop, speaking, degraded, getAudioElement };
+  return { say, stop, speaking, degraded };
 }

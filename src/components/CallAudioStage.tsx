@@ -6,7 +6,6 @@ type Props = {
   speaking: boolean;
   listening: boolean;
   thinking: boolean;
-  getAudioElement: () => HTMLAudioElement | null;
 };
 
 const BAR_COUNT = 31;
@@ -16,7 +15,6 @@ export function CallAudioStage({
   speaking,
   listening,
   thinking,
-  getAudioElement,
 }: Props) {
   const bars = useRef<(HTMLSpanElement | null)[]>([]);
 
@@ -27,7 +25,6 @@ export function CallAudioStage({
     let micStream: MediaStream | null = null;
     let context: AudioContext | null = null;
     let analyser: AnalyserNode | null = null;
-    let sourceElement: HTMLAudioElement | null = null;
     const heights = new Uint8Array(128);
 
     if (listening && navigator.mediaDevices?.getUserMedia) {
@@ -50,21 +47,6 @@ export function CallAudioStage({
     }
 
     const draw = (time: number) => {
-      if (speaking && !sourceElement) {
-        const element = getAudioElement();
-        if (element) {
-          try {
-            context = new AudioContext();
-            analyser = context.createAnalyser();
-            analyser.fftSize = 256;
-            context.createMediaElementSource(element).connect(analyser);
-            analyser.connect(context.destination);
-            sourceElement = element;
-          } catch {
-            /* browser speech remains a state animation */
-          }
-        }
-      }
       if (analyser) analyser.getByteFrequencyData(heights);
       bars.current.forEach((bar, index) => {
         if (!bar) return;
@@ -86,7 +68,7 @@ export function CallAudioStage({
         if (bar) bar.style.height = "10px";
       });
     };
-  }, [listening, speaking, thinking, getAudioElement]);
+  }, [listening, speaking, thinking]);
 
   const label = speaking
     ? `${customerName} is speaking`

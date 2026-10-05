@@ -234,7 +234,7 @@ function LiveServiceCall() {
             </Button>
           </div>
           {!recognition.supported ? <p className="mb-3 border border-warning/40 bg-warning/10 p-3 text-xs text-warning">This browser can't hear you. Type your side of the call below instead.</p> : null}
-          <CallAudioStage customerName={scenario?.customerName ?? "Customer"} speaking={voice.speaking} listening={recognition.listening} thinking={thinking} getAudioElement={voice.getAudioElement} />
+          <CallAudioStage customerName={scenario?.customerName ?? "Customer"} speaking={voice.speaking} listening={recognition.listening} thinking={thinking} />
           <CallInput onSend={(text) => { if (!busyRef.current) void speak(text); }} disabled={ending} busy={thinking} />
         </aside>
         {scenario?.simulatedAccount ? <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} /> : <div className="flex min-h-[520px] items-center justify-center text-sm text-muted-foreground">Opening customer account…</div>}
