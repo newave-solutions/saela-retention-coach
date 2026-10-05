@@ -12,6 +12,7 @@ import type { PublicScenario } from "@/lib/scenarios";
 import { CallTimer } from "@/components/CallTimer";
 import { CallInput } from "@/components/CallInput";
 import { CallAudioStage } from "@/components/CallAudioStage";
+import { AccountWorkspace } from "@/components/AccountWorkspace";
 import {
   instructionsFor,
   settingsFor,
@@ -36,6 +37,8 @@ export const Route = createFileRoute("/call/$sessionId")({
         property: "og:description",
         content: "A live retention roleplay call with an adaptive customer.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: LiveCall,
@@ -193,7 +196,7 @@ function LiveCall() {
   return (
     <main className="flex min-h-screen flex-col bg-background">
       <header className="brand-surface">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div>
             <h1 className="flex items-center gap-2 text-base font-semibold leading-tight">
               {scenario?.customerName ?? "Connecting..."}
@@ -225,39 +228,19 @@ function LiveCall() {
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-5">
-        <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-4">
-          <p className="text-sm font-medium" aria-live="polite">
-            {state}
-          </p>
-          <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
-            {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
-            {micOn ? "Mute" : "Talk"}
-          </Button>
-        </div>
-
-        {!recognition.supported && (
-          <p className="mb-3 rounded-md border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
-            This browser can't hear you. Type your side of the call below instead.
-          </p>
-        )}
-
-        <CallAudioStage
-          customerName={scenario?.customerName ?? "Customer"}
-          speaking={voice.speaking}
-          listening={recognition.listening}
-          thinking={thinking}
-          getAudioElement={voice.getAudioElement}
-        />
-
-        <CallInput
-          onSend={(text) => {
-            if (busyRef.current) return;
-            void speak(text);
-          }}
-          disabled={ending}
-          busy={thinking}
-        />
+      <div className="mx-auto grid w-full max-w-[1600px] flex-1 grid-cols-1 lg:min-h-0 lg:grid-cols-[360px_minmax(0,1fr)] lg:border-x lg:border-border">
+        <aside className="flex flex-col border-b border-border p-4 lg:min-h-0 lg:border-b-0 lg:border-r">
+          <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-4">
+            <p className="text-sm font-medium" aria-live="polite">{state}</p>
+            <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
+              {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}{micOn ? "Mute" : "Talk"}
+            </Button>
+          </div>
+          {!recognition.supported ? <p className="mb-3 border border-warning/40 bg-warning/10 p-3 text-xs text-warning">This browser can't hear you. Type your side of the call below instead.</p> : null}
+          <CallAudioStage customerName={scenario?.customerName ?? "Customer"} speaking={voice.speaking} listening={recognition.listening} thinking={thinking} getAudioElement={voice.getAudioElement} />
+          <CallInput onSend={(text) => { if (!busyRef.current) void speak(text); }} disabled={ending} busy={thinking} />
+        </aside>
+        {scenario?.simulatedAccount ? <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} /> : <div className="flex min-h-[520px] items-center justify-center text-sm text-muted-foreground">Opening customer account…</div>}
       </div>
     </main>
   );
