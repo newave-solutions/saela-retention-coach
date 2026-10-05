@@ -14,4 +14,4 @@
 - [x] Double-check code logic end to end (typecheck clean, sign-in page renders, AI customer + grading verified live)
 - [x] Replace visible call transcripts with audio-reactive display and post-call transcript with call-moment checklist
 - [x] Publish a transparent grading guide for practice calls, team summaries, and the monthly master score
-- [ ] Define and build a realistic FieldRoutes-style account simulator integrated with CES and CEM practice calls
+- [x] Define and build a realistic FieldRoutes-style account simulator integrated with CES and CEM practice calls
