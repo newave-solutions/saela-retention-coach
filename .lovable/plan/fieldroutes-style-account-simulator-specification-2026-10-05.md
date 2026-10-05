@@ -68,14 +68,17 @@ Purpose: identity verification and contact/access accuracy.
 Purpose: source of truth for ongoing service and the highest-value practice area.
 
 **Subscription selector and status**
+
 - Support multiple subscriptions, with the selected plan's program, internal identifier, contract value, agreement state, and active toggle.
 - Show sales/source fields, recurring service configuration, scheduling options, visit timeline, invoice terms, billing account, and autopay profile.
 
 **Editable terms**
+
 - Service type, recurring frequency, agreement duration, custom date, routing region, preferred technician, preferred day/time, call-ahead, seasonal setting, initial and recurring production/charge prices.
 - Changes remain a draft until **Save**. This first version should make the pricing editor and its calculations correct before expanding into less important account controls.
 
 **Working initial and recurring pricing editor**
+
 - Both **Initial** and **Recurring** rows expand into editable line items rather than displaying summary amounts only.
 - Each line item includes: item/service, quantity, production price, customer charge price, discount type and amount, taxable/non-taxable toggle, and calculated subtotal.
 - Keep the tax setting available in the data model, but default this training version to non-taxable and do not add tax to displayed totals.
@@ -88,6 +91,7 @@ Purpose: source of truth for ongoing service and the highest-value practice area
 - The simulator records the exact offer entered so post-call coaching can compare it with what the agent explained aloud.
 
 **Account tags**
+
 - Searchable multi-select with visible removable chips and an audit trail.
 - Required tags:
   - `Subscription Saved from Cancel`

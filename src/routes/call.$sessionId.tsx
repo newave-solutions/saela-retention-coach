@@ -198,24 +198,50 @@ function LiveCall() {
           <div className="flex min-w-0 items-center gap-3">
             <span className="text-sm font-semibold">Saela Customer Account</span>
             <span className="hidden h-5 w-px bg-sidebar-border sm:block" />
-            <span className="truncate text-xs opacity-80">{scenario?.accountSummary ?? "Opening customer record…"}</span>
-            <Badge variant="outline" className="hidden border-sidebar-border text-[10px] text-inherit sm:inline-flex">Training</Badge>
+            <span className="truncate text-xs opacity-80">
+              {scenario?.accountSummary ?? "Opening customer record…"}
+            </span>
+            <Badge
+              variant="outline"
+              className="hidden border-sidebar-border text-[10px] text-inherit sm:inline-flex"
+            >
+              Training
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <span className="hidden text-xs opacity-80 sm:inline" aria-live="polite">{state}</span>
+            <span className="hidden text-xs opacity-80 sm:inline" aria-live="polite">
+              {state}
+            </span>
             <CallTimer />
-            <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic} disabled={ending || !recognition.supported}>
-              {micOn ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}{micOn ? "Mute" : "Talk"}
+            <Button
+              variant={micOn ? "secondary" : "default"}
+              size="sm"
+              onClick={toggleMic}
+              disabled={ending || !recognition.supported}
+            >
+              {micOn ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              {micOn ? "Mute" : "Talk"}
             </Button>
             <Button variant="destructive" size="sm" onClick={() => finish(null)} disabled={ending}>
-              <PhoneOff className="h-4 w-4" />{ending ? "Ending…" : "End call"}
+              <PhoneOff className="h-4 w-4" />
+              {ending ? "Ending…" : "End call"}
             </Button>
           </div>
         </div>
       </header>
-      {!recognition.supported ? <p className="shrink-0 border-b border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">Voice input is unavailable in this browser.</p> : null}
+      {!recognition.supported ? (
+        <p className="shrink-0 border-b border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+          Voice input is unavailable in this browser.
+        </p>
+      ) : null}
       <div className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 border-x border-border">
-        {scenario?.simulatedAccount ? <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} /> : <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">Opening customer account…</div>}
+        {scenario?.simulatedAccount ? (
+          <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} />
+        ) : (
+          <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+            Opening customer account…
+          </div>
+        )}
       </div>
     </main>
   );

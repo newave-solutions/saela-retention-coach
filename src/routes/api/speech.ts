@@ -76,7 +76,9 @@ type SpeakResult = { ok: true; response: Response } | { ok: false; status: numbe
 function isAbortError(error: unknown): boolean {
   return (
     (error instanceof Error && error.name === "AbortError") ||
-    (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError")
+    (typeof DOMException !== "undefined" &&
+      error instanceof DOMException &&
+      error.name === "AbortError")
   );
 }
 
