@@ -17,3 +17,8 @@
 
 **Learning:** Rendering lists of components inline using `.map()` directly inside complex parent route components (like `LiveCall` and `LiveServiceCall`) forces all list items to re-render whenever the parent's fast-updating local state changes (e.g. text input strokes, mic toggling). Using `useMemo` on the mapped array only skips element creation, but React still performs expensive virtual DOM diffing.
 **Action:** Extract list items into separate child components wrapped in `React.memo` (`TranscriptTurnItem`) to genuinely prevent unchanged items from re-rendering during unrelated parent state updates.
+
+## 2026-10-25 - Redundant Data Normalization Inside Loops
+
+**Learning:** Discovered an anti-pattern in `session.$sessionId.tsx` where a data normalization function `normalizeScores` was being executed repeatedly inline within a `.map()` block over scorecard keys during the render cycle.
+**Action:** When mapping over items and rendering components that depend on transformed data, always execute the transformation outside of the `.map()` loop (and preferably memoize it with `useMemo`), passing the transformed result into the render.
