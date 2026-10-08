@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ArrowLeft, BookOpen, Eye, PhoneCall } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -84,6 +84,8 @@ function RetentionScorecard() {
     },
   });
 
+  const scores = useMemo(() => normalizeScores(data?.scores), [data?.scores]);
+
   return (
     <main className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-3xl">
@@ -144,7 +146,7 @@ function RetentionScorecard() {
               <CallReview review={data.coaching.callReview} />
             ) : null}
 
-            {normalizeScores(data.scores) && (
+            {scores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
                   <h2 className="text-base font-semibold leading-none">
@@ -156,11 +158,9 @@ function RetentionScorecard() {
                     <div key={key}>
                       <div className="mb-1 flex items-center justify-between text-sm">
                         <span>{SCORE_LABELS[key]}</span>
-                        <span className="text-muted-foreground">
-                          {normalizeScores(data.scores)?.[key] ?? 0}
-                        </span>
+                        <span className="text-muted-foreground">{scores[key] ?? 0}</span>
                       </div>
-                      <Progress value={normalizeScores(data.scores)?.[key] ?? 0} />
+                      <Progress value={scores[key] ?? 0} />
                     </div>
                   ))}
                 </CardContent>
