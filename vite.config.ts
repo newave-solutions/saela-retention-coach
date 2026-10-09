@@ -7,6 +7,16 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
+// Deployment target resolution:
+//  - Lovable Cloud: Lovable injects VITE_SUPABASE_* and pins the Cloudflare nitro preset.
+//  - Vercel: nitro auto-detects the VERCEL env; VITE_SUPABASE_* fall back to SUPABASE_*
+//    so the browser bundle points at the same Supabase / Lovable Cloud backend.
+for (const key of ["URL", "PUBLISHABLE_KEY", "PROJECT_ID"]) {
+  const viteKey = `VITE_SUPABASE_${key}`;
+  const value = process.env[`SUPABASE_${key}`];
+  if (!process.env[viteKey] && value) process.env[viteKey] = value;
+}
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).

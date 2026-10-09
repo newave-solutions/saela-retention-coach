@@ -24,3 +24,13 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Deployment targets
+
+The same codebase deploys to Lovable Cloud or Vercel and talks to the same Supabase / Lovable Cloud backend.
+
+- **Lovable**: publish from the editor; Lovable injects the Supabase env vars and builds for Cloudflare.
+- **Vercel**: import the repo (`vercel.json` is included; Nitro auto-selects the Vercel preset). Set these env vars
+  to the values from `.env` / Lovable Cloud: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PROJECT_ID`
+  (mirrored into `VITE_SUPABASE_*` at build time if those are unset) and, server-side only,
+  `SUPABASE_SERVICE_ROLE_KEY`.
