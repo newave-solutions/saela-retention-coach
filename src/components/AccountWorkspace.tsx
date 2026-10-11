@@ -909,6 +909,107 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={Boolean(editingAppt)} onOpenChange={(open) => !open && setEditingAppt(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit appointment</DialogTitle>
+            <DialogDescription>Practice only — change the technician or date.</DialogDescription>
+          </DialogHeader>
+          {editingAppt ? (
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="appt-date">Date</Label>
+                <Input
+                  id="appt-date"
+                  type="date"
+                  className="mt-1"
+                  value={editingAppt.date}
+                  onChange={(e) => setEditingAppt({ ...editingAppt, date: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="appt-tech">Technician</Label>
+                <Select
+                  value={editingAppt.technician}
+                  onValueChange={(technician) => setEditingAppt({ ...editingAppt, technician })}
+                >
+                  <SelectTrigger id="appt-tech" className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from(new Set([editingAppt.technician, ...TECHNICIANS])).map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingAppt(null)}>
+              Cancel
+            </Button>
+            <Button onClick={() => void saveAppointment()} disabled={saving || !editingAppt?.date}>
+              <Save className="h-4 w-4" /> Save appointment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </div>
+    </div>
+  );
+}
+
+function FrSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-[2px] border border-border">
+      <h3 className="bg-fr-pane px-2 py-1 text-[12px] font-semibold text-fr-ink">{title}</h3>
+      <div className="p-2">{children}</div>
+    </section>
+  );
+}
+
+function FrRows({ rows }: { rows: Array<[string, React.ReactNode]> }) {
+  return (
+    <dl className="grid grid-cols-[120px_1fr] gap-x-3 gap-y-1 text-[12px]">
+      {rows.map(([k, v]) => (
+        <div key={k} className="contents">
+          <dt className="text-muted-foreground">{k}</dt>
+          <dd className="text-fr-ink">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function FrTable({ head, rows }: { head: string[]; rows: Array<Array<React.ReactNode>> }) {
+  return (
+    <div className="overflow-x-auto rounded-[2px] border border-border">
+      <table className="w-full text-[12px]">
+        <thead className="bg-fr-pane text-left text-fr-ink">
+          <tr>
+            {head.map((h) => (
+              <th key={h} className="px-2 py-1 font-semibold">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map((row, i) => (
+            <tr key={i}>
+              {row.map((cell, j) => (
+                <td key={j} className="px-2 py-1 text-fr-ink">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
