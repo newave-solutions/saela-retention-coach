@@ -701,23 +701,90 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
           </TabsContent>
 
           <TabsContent value="Appointments" className="mt-0">
-            <div className="divide-y divide-border border-y border-border">
-              {account.appointments.map((item) => (
-                <article key={item.id} className="grid gap-3 py-4 sm:grid-cols-[130px_1fr_auto]">
-                  <div>
-                    <p className="font-semibold">{item.date}</p>
-                    <Badge variant="outline" className="mt-1">
-                      {item.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="font-medium">{item.service}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.details}</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{item.technician}</p>
-                </article>
-              ))}
-            </div>
+            <FrTable
+              head={["Date", "Status", "Service", "Technician", "Details", ""]}
+              rows={account.appointments.map((item) => [
+                item.date,
+                <span key="s" className="capitalize">{item.status}</span>,
+                item.service,
+                item.technician,
+                <span key="d" className="text-muted-foreground">{item.details}</span>,
+                item.status === "scheduled" ? (
+                  <button
+                    key="e"
+                    type="button"
+                    className="font-semibold text-fr-link hover:underline"
+                    onClick={() =>
+                      setEditingAppt({ id: item.id, date: item.date, technician: item.technician })
+                    }
+                  >
+                    Edit
+                  </button>
+                ) : (
+                  ""
+                ),
+              ])}
+            />
+          </TabsContent>
+
+          <TabsContent value="Leads" className="mt-0">
+            <FrTable
+              head={["Created", "Lead", "Source", "Status", "Assigned"]}
+              rows={[
+                [account.customerSince, "Protection Program", "Door to door", "Won", "Sales rep"],
+                ["—", "Perimeter Plus Mosquito", "Referral", "Open", "Unassigned"],
+              ]}
+            />
+          </TabsContent>
+
+          <TabsContent value="Billing" className="mt-0 grid gap-3 md:grid-cols-2">
+            <FrSection title="Billing Information">
+              <FrRows
+                rows={[
+                  ["Billing name", account.customerName],
+                  ["Billing address", account.serviceAddress],
+                  ["Billing email", account.email],
+                  ["Autopay", "Credit card on file"],
+                ]}
+              />
+            </FrSection>
+            <FrSection title="Payment Method">
+              <FrRows
+                rows={[
+                  ["Card", "Visa •••• 4821"],
+                  ["Expires", "08/28"],
+                  ["Balance", money(account.balance)],
+                  ["Terms", "Due upon service"],
+                ]}
+              />
+            </FrSection>
+          </TabsContent>
+
+          <TabsContent value="Properties" className="mt-0">
+            <FrTable
+              head={["Property", "Type", "Sq ft", "Lot", "Notes"]}
+              rows={[[account.serviceAddress, "Single family", "2,140", "0.21 ac", "Side gate sticks"]]}
+            />
+          </TabsContent>
+
+          <TabsContent value="Conditions" className="mt-0">
+            <FrTable
+              head={["Date", "Condition", "Location", "Severity", "Reported by"]}
+              rows={[
+                [account.lastCompleted, "Spider webbing", "Eaves", "Moderate", "Tawny Butler"],
+                [account.lastCompleted, "Conducive moisture", "Downspouts", "Low", "Tawny Butler"],
+              ]}
+            />
+          </TabsContent>
+
+          <TabsContent value="Equipment" className="mt-0">
+            <FrTable
+              head={["Device", "Location", "Installed", "Last checked", "Status"]}
+              rows={[
+                ["Bait station #1", "Garage exterior", account.customerSince, account.lastCompleted, "Active"],
+                ["Bait station #2", "Back fence", account.customerSince, account.lastCompleted, "Active"],
+              ]}
+            />
           </TabsContent>
 
           <TabsContent value="Invoices" className="mt-0">
