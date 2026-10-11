@@ -118,8 +118,10 @@ async function speakViaElevenLabs(options: SpeakOptions): Promise<SpeakResult> {
     },
   );
 
-  if (upstream.ok && upstream.body)
-    return { ok: true, response: audioResponse(upstream.body, "elevenlabs") };
+  if (upstream.ok) {
+    const bytes = await upstream.arrayBuffer();
+    return { ok: true, response: audioResponse(new Uint8Array(bytes), "elevenlabs") };
+  }
 
   const detail = await upstream.text().catch(() => "");
   return { ok: false, status: upstream.status || 502, detail };
