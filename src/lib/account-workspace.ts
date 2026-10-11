@@ -153,7 +153,8 @@ export function validateSubscription(subscription: SubscriptionRecord): string[]
   if (!subscription.program.trim()) errors.push("Service type is required.");
   if (!subscription.effectiveDate) errors.push("Effective date is required.");
   if (subscription.agreementMonths < 1) errors.push("Agreement length must be at least one month.");
-  if (subscription.committedServices < 1) errors.push("At least one recurring service is required.");
+  if (subscription.committedServices < 1)
+    errors.push("At least one recurring service is required.");
   if (subscription.frequencyWeeks < 1) errors.push("Service frequency is required.");
   for (const line of [...subscription.initialLines, ...subscription.recurringLines]) {
     if (!line.item.trim()) errors.push("Every pricing line needs an item.");

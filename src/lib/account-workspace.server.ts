@@ -29,12 +29,17 @@ export function createSimulatedAccount(input: {
     reserviceCount: 2,
     lastCompleted: isoDay(-42),
     nextService: isoDay(35),
-    recentServiceNote: "Exterior perimeter serviced; customer reported intermittent spider activity.",
+    recentServiceNote:
+      "Exterior perimeter serviced; customer reported intermittent spider activity.",
     subscription: {
       id: `PP-${customerNumber}`,
       program: "Protection Program",
       active: !input.frozen,
-      agreementState: input.frozen ? "frozen" : input.outOfAgreement ? "out_of_agreement" : "in_agreement",
+      agreementState: input.frozen
+        ? "frozen"
+        : input.outOfAgreement
+          ? "out_of_agreement"
+          : "in_agreement",
       effectiveDate: isoDay(),
       agreementMonths: input.outOfAgreement ? 0 : 18,
       committedServices: input.outOfAgreement ? 4 : 6,
@@ -72,7 +77,11 @@ export function createSimulatedAccount(input: {
       tags: input.outOfAgreement ? [] : ["Existing agreement"],
     },
     previousSubscriptions: [
-      { id: `PP-${Number(customerNumber) - 84}`, program: "Protection Program", endedAt: isoDay(-365) },
+      {
+        id: `PP-${Number(customerNumber) - 84}`,
+        program: "Protection Program",
+        endedAt: isoDay(-365),
+      },
     ],
     documents: [
       {
@@ -110,8 +119,20 @@ export function createSimulatedAccount(input: {
       },
     ],
     invoices: [
-      { id: `inv-${customerNumber}-1`, date: isoDay(-42), service: "Protection Program", amount: 129.99, status: "paid" },
-      { id: `inv-${customerNumber}-2`, date: isoDay(35), service: "Protection Program", amount: 129.99, status: "projected" },
+      {
+        id: `inv-${customerNumber}-1`,
+        date: isoDay(-42),
+        service: "Protection Program",
+        amount: 129.99,
+        status: "paid",
+      },
+      {
+        id: `inv-${customerNumber}-2`,
+        date: isoDay(35),
+        service: "Protection Program",
+        amount: 129.99,
+        status: "projected",
+      },
     ],
     events: [],
   };
