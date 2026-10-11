@@ -191,8 +191,12 @@ async function speakViaGateway(options: SpeakOptions): Promise<SpeakResult> {
     signal: options.signal,
   });
 
-  if (upstream.ok && upstream.body)
-    return { ok: true, response: audioResponse(upstream.body, "gateway") };
+  if (upstream.ok) {
+    // Buffer inside this awaited call so a cancelled request rejects here (and is
+    // caught by the route) instead of erroring later in a detached stream.
+    const bytes = await upstream.arrayBuffer();
+    return { ok: true, response: audioResponse(new Uint8Array(bytes), "gateway") };
+  }
 
   const detail = await upstream.text().catch(() => "");
   return { ok: false, status: upstream.status || 502, detail };
