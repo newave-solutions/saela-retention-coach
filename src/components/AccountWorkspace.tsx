@@ -426,7 +426,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
                 <TabsTrigger
                   key={tab}
                   value={tab}
-                  className="h-10 min-w-24 rounded-none border-x border-transparent px-4 text-xs font-semibold data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                  className="h-9 rounded-none border-x border-transparent px-2.5 text-[12px] font-semibold data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
                 >
                   {tab}
                 </TabsTrigger>
