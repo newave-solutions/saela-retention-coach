@@ -319,7 +319,21 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-background text-[13px]">
+    <div className="flex min-h-0 flex-1 justify-center bg-muted p-0 sm:p-3">
+    <div className="flex min-h-0 w-full max-w-[1000px] flex-1 flex-col overflow-hidden rounded-[2px] bg-card text-[13px] shadow-md">
+      <div className="flex h-6 shrink-0 items-center justify-between bg-fr-title px-2 text-[12px] font-semibold text-fr-title-foreground">
+        <span className="truncate">
+          Customer #{account.customerNumber} — {account.customerName}
+        </span>
+        <button
+          type="button"
+          aria-label="Close customer card"
+          className="px-1 leading-none"
+          onClick={() => toast("The customer card stays open during the call.")}
+        >
+          ×
+        </button>
+      </div>
       <header className="shrink-0 border-b border-border bg-card">
         <div className="flex flex-wrap items-stretch justify-between">
           <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
@@ -379,45 +393,98 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
           </TabsList>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
-          <TabsContent value="Overview" className="mt-0 space-y-5">
-            <div className="border border-border">
-              <div className="bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground">
-                Customer Summary
+          <TabsContent value="Overview" className="mt-0">
+            <div className="grid gap-3 lg:grid-cols-[1fr_260px]">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                  {[
+                    ["Customer Since", account.customerSince],
+                    ["Last Completed", account.lastCompleted],
+                    ["Next Service", account.nextService],
+                    ["Balance", money(account.balance)],
+                  ].map(([label, value]) => (
+                    <div key={label} className="overflow-hidden rounded border border-border bg-card">
+                      <div className="h-1 bg-fr-link" />
+                      <div className="px-2 py-1.5">
+                        <p className="text-[11px] uppercase text-muted-foreground">{label}</p>
+                        <p className="text-[13px] text-fr-ink">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <FrSection title="Account Information">
+                  <FrRows
+                    rows={[
+                      ["Customer", account.customerName],
+                      ["Customer #", <span key="n" className="text-fr-link">{account.customerNumber}</span>],
+                      ["Phone", <span key="p" className="text-fr-link">{account.phone}</span>],
+                      ["Email", <span key="e" className="text-fr-link">{account.email}</span>],
+                      ["Status", <span key="s" className="capitalize">{account.status.replaceAll("_", " ")}</span>],
+                    ]}
+                  />
+                </FrSection>
+                <FrSection title="Billing Information">
+                  <FrRows
+                    rows={[
+                      ["Billing address", account.serviceAddress],
+                      ["Autopay", "Credit card on file"],
+                      ["Balance", money(account.balance)],
+                    ]}
+                  />
+                </FrSection>
+                <FrSection title="Property Information">
+                  <FrRows
+                    rows={[
+                      ["Service address", account.serviceAddress],
+                      ["Region", account.subscription.routingRegion],
+                      ["Last service note", account.recentServiceNote],
+                    ]}
+                  />
+                </FrSection>
               </div>
-              <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-                {[
-                  ["Customer since", account.customerSince],
-                  ["Completed services", account.completedServices],
-                  ["Agreement", account.subscription.agreementState.replaceAll("_", " ")],
-                  ["Next service", account.nextService],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="bg-card px-3 py-3">
-                    <p className="text-[10px] font-semibold uppercase text-muted-foreground">
-                      {label}
-                    </p>
-                    <p className="mt-1 font-semibold capitalize text-ring">{value}</p>
+              <aside className="space-y-3">
+                <FrSection title="Account Summary">
+                  <FrRows
+                    rows={[
+                      ["Program", account.subscription.program],
+                      ["Initial", money(pricingTotal(account.subscription.initialLines))],
+                      ["Recurring", money(pricingTotal(account.subscription.recurringLines))],
+                      ["Contract value", money(contractValue(account.subscription))],
+                      ["Agreement", <span key="a" className="capitalize">{account.subscription.agreementState.replaceAll("_", " ")}</span>],
+                      ["Completed", account.completedServices],
+                    ]}
+                  />
+                </FrSection>
+                <FrSection title="Actions">
+                  <div className="grid grid-cols-3 gap-1">
+                    {["Email", "SMS", "Add Task"].map((label) => (
+                      <Button
+                        key={label}
+                        size="sm"
+                        variant="outline"
+                        className="h-7 rounded-[2px] text-[11px]"
+                        onClick={() => toast.success(`${label} simulated. Nothing was sent.`)}
+                      >
+                        {label}
+                      </Button>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </FrSection>
+                <FrSection title="Access History">
+                  {account.events.length ? (
+                    <ul className="space-y-1 text-[11px] text-fr-ink">
+                      {account.events.slice(-5).reverse().map((e) => (
+                        <li key={e.id}>
+                          {new Date(e.at).toLocaleTimeString()} — {e.summary}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">Opened this call.</p>
+                  )}
+                </FrSection>
+              </aside>
             </div>
-            <section className="border border-border">
-              <h3 className="bg-muted px-3 py-2 text-xs font-semibold">Account at a glance</h3>
-              <div className="grid divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
-                <div className="p-3">
-                  <p className="text-xs text-muted-foreground">
-                    Last completed · {account.lastCompleted}
-                  </p>
-                  <p className="mt-1">{account.recentServiceNote}</p>
-                </div>
-                <div className="p-3">
-                  <p className="text-xs text-muted-foreground">Current subscription</p>
-                  <p className="mt-1 font-medium text-ring">
-                    {account.subscription.program} ·{" "}
-                    {money(pricingTotal(account.subscription.recurringLines))} recurring
-                  </p>
-                </div>
-              </div>
-            </section>
           </TabsContent>
 
           <TabsContent value="Info" className="mt-0">
