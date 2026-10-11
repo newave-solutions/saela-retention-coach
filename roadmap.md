@@ -16,3 +16,4 @@
 - [x] Publish a transparent grading guide for practice calls, team summaries, and the monthly master score
 - [x] Define and build a realistic FieldRoutes-style account simulator integrated with CES and CEM practice calls
 - [x] Remove the live waveform and typed-response panel; prioritize FieldRoutes-style account work during calls
+- [ ] Match the customer card to the uploaded classic FieldRoutes styling and screenshots; verify navigation and pricing remain usable
