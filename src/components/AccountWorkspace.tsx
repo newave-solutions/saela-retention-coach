@@ -103,9 +103,10 @@ function PricingEditor({
 
   return (
     <section className="border border-border bg-card">
-      <button
+      <Button
         type="button"
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        variant="ghost"
+        className="fr-pricing-heading flex w-full items-center justify-between text-left"
         onClick={() => setOpen(!open)}
       >
         <span className="font-semibold">{title}</span>
@@ -113,7 +114,7 @@ function PricingEditor({
           <strong>{money(pricingTotal(lines))}</strong>
           {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </span>
-      </button>
+      </Button>
       {open ? (
         <div className="border-t border-border p-4">
           <div className="hidden grid-cols-[minmax(180px,2fr)_70px_repeat(3,minmax(105px,1fr))_100px_42px] gap-2 pb-2 text-xs font-semibold uppercase text-muted-foreground lg:grid">
@@ -356,64 +357,25 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 justify-center bg-muted p-0 sm:p-3">
-      <div className="flex min-h-0 w-full max-w-[1000px] flex-1 flex-col overflow-hidden rounded-[2px] bg-card text-[13px] shadow-md">
-        <div className="flex h-6 shrink-0 items-center justify-between bg-fr-title px-2 text-[12px] font-semibold text-fr-title-foreground">
+    <div className="fr-desktop flex min-h-0 flex-1 justify-center p-0 sm:p-3">
+      <div className="fr-workspace flex min-h-0 w-full max-w-[1000px] flex-1 flex-col overflow-hidden rounded-[2px] border border-border bg-card">
+        <div className="fr-titlebar flex h-7 shrink-0 items-center justify-between bg-fr-title px-2 text-fr-title-foreground">
           <span className="truncate">
-            Customer #{account.customerNumber} — {account.customerName}
+            <span className="mr-2 text-[12px] italic">[{account.customerNumber}]</span>
+            <strong>{account.customerName}</strong>
+            <span className="ml-1 text-[12px] italic">1 {account.status === "active" ? "Active" : "Inactive"} Subscription</span>
           </span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label="Close customer card"
-            className="px-1 leading-none"
+            className="fr-title-close h-5 w-5 leading-none"
             onClick={() => toast("The customer card stays open during the call.")}
           >
             ×
-          </button>
+          </Button>
         </div>
-        <header className="shrink-0 border-b border-border bg-card">
-          <div className="flex flex-wrap items-stretch justify-between">
-            <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-primary text-sm font-bold text-primary-foreground">
-                {account.customerName
-                  .split(" ")
-                  .map((part) => part[0])
-                  .join("")
-                  .slice(0, 2)}
-              </div>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <h2 className="font-sans text-lg font-semibold leading-none">
-                    {account.customerName}
-                  </h2>
-                  <button type="button" className="text-xs font-semibold text-ring hover:underline">
-                    #{account.customerNumber}
-                  </button>
-                  <Badge
-                    variant={account.status === "active" ? "default" : "secondary"}
-                    className="h-5 rounded-sm capitalize"
-                  >
-                    {account.status.replaceAll("_", " ")}
-                  </Badge>
-                </div>
-                <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {account.serviceAddress}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 divide-x divide-border border-l border-border bg-muted/30">
-              <div className="min-w-28 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Phone</p>
-                <p className="mt-1 font-medium text-ring">{account.phone}</p>
-              </div>
-              <div className="min-w-28 px-4 py-3 text-right">
-                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Balance</p>
-                <p className="mt-1 font-semibold">{money(account.balance)}</p>
-              </div>
-            </div>
-          </div>
-        </header>
 
         <Tabs
           value={activeTab}
@@ -421,38 +383,41 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="overflow-x-auto border-b border-border bg-secondary">
-            <TabsList className="h-10 w-max rounded-none bg-transparent p-0">
+            <TabsList className="fr-tabs h-7 w-max rounded-none bg-transparent p-0">
               {TAB_LABELS.map((tab) => (
                 <TabsTrigger
                   key={tab}
                   value={tab}
-                  className="h-9 rounded-none border-x border-transparent px-2.5 text-[12px] font-semibold data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                  className="h-7 rounded-none border-x border-transparent px-2 text-[11px] font-normal data-[state=active]:text-fr-link data-[state=active]:shadow-none"
                 >
                   {tab}
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
+          <div className="fr-tab-body min-h-0 flex-1 overflow-y-auto p-2 sm:p-3">
             <TabsContent value="Overview" className="mt-0">
-              <div className="grid gap-3 lg:grid-cols-[1fr_260px]">
+              <div className="mb-4 flex flex-wrap items-baseline">
+                <h2 className="mr-6 text-xl font-normal text-fr-link">Account Overview</h2>
+                <span className="text-xs italic text-muted-foreground">{account.serviceAddress}</span>
+              </div>
+              <div className="fr-overview grid md:grid-cols-[minmax(0,1fr)_230px]">
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                  <div className="fr-overview-metrics grid grid-cols-2 sm:grid-cols-3">
                     {[
                       ["Customer Since", account.customerSince],
+                      ["Completed Services", `${account.completedServices} Subscription Services`],
+                      ["Contract Remaining", account.subscription.agreementState.replaceAll("_", " ")],
                       ["Last Completed", account.lastCompleted],
                       ["Next Service", account.nextService],
-                      ["Balance", money(account.balance)],
+                      ["Recent Service", account.recentServiceNote],
+                      ["Account Balance", money(account.balance)],
+                      ["Initial Charge", money(pricingTotal(account.subscription.initialLines))],
+                      ["Recurring Charge", money(pricingTotal(account.subscription.recurringLines))],
                     ].map(([label, value]) => (
-                      <div
-                        key={label}
-                        className="overflow-hidden rounded border border-border bg-card"
-                      >
-                        <div className="h-1 bg-fr-link" />
-                        <div className="px-2 py-1.5">
-                          <p className="text-[11px] uppercase text-muted-foreground">{label}</p>
-                          <p className="text-[13px] text-fr-ink">{value}</p>
-                        </div>
+                      <div key={label} className="fr-metric">
+                        <p className="text-[11px] text-muted-foreground">{label}</p>
+                        <p className="fr-metric-value text-fr-link">{value}</p>
                       </div>
                     ))}
                   </div>
@@ -560,40 +525,22 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
             </TabsContent>
 
             <TabsContent value="Info" className="mt-0">
-              <div className="grid gap-5 md:grid-cols-2">
-                <section>
-                  <h3 className="font-semibold">Contact</h3>
-                  <dl className="mt-3 space-y-3 text-sm">
-                    <div>
-                      <dt className="text-muted-foreground">Phone</dt>
-                      <dd>{account.phone}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Email</dt>
-                      <dd>{account.email}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Service address</dt>
-                      <dd>{account.serviceAddress}</dd>
-                    </div>
-                  </dl>
-                </section>
-                <section>
-                  <h3 className="font-semibold">Communication</h3>
-                  <p className="mt-3 text-sm">Text before arrival · 30-minute call ahead</p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Use these details to verify the caller before making account changes.
-                  </p>
-                </section>
+              <div className="fr-info-grid grid md:grid-cols-2">
+                <FrSection title="Account Information">
+                  <FrRows rows={[["Customer", account.customerName], ["Customer #", account.customerNumber], ["Phone", account.phone], ["Email", account.email], ["Service address", account.serviceAddress], ["Status", account.status.replaceAll("_", " ")]]} />
+                </FrSection>
+                <FrSection title="Communication Preferences">
+                  <FrRows rows={[["Arrival notice", "Text before arrival"], ["Call ahead", account.subscription.callAhead], ["Routing region", account.subscription.routingRegion]]} />
+                </FrSection>
               </div>
             </TabsContent>
 
-            <TabsContent value="Subscription" className="mt-0 space-y-5">
+            <TabsContent value="Subscription" className="fr-subscription mt-0 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="font-semibold">{account.subscription.program}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {account.subscription.id} · account-wide pricing and service terms
+                    {account.subscription.id} · {money(contractValue(account.subscription))} Contract Value (Including Initial Service)
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -614,7 +561,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
                   </Button>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="fr-field-grid grid sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <Label htmlFor="program">Service type</Label>
                   <Input
@@ -1007,7 +954,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
             </TabsContent>
           </div>
         </Tabs>
-        <div className="flex h-10 shrink-0 items-center justify-end gap-2 border-t border-border bg-fr-pane px-4">
+        <div className="fr-footer flex h-10 shrink-0 items-center justify-end border-t border-border bg-fr-pane px-3">
           <Button
             size="sm"
             className="h-7 rounded-[2px] text-[12px]"
@@ -1031,7 +978,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
         </div>
 
         <Dialog open={agreementOpen} onOpenChange={setAgreementOpen}>
-          <DialogContent>
+          <DialogContent className="fr-workspace fr-modal">
             <DialogHeader>
               <DialogTitle>New agreement</DialogTitle>
               <DialogDescription>
@@ -1085,7 +1032,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
         </Dialog>
 
         <Dialog open={agreementPreview} onOpenChange={setAgreementPreview}>
-          <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto">
+          <DialogContent className="fr-workspace fr-modal max-h-[88vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Residential Service Agreement</DialogTitle>
               <DialogDescription>
@@ -1171,7 +1118,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
         </Dialog>
 
         <Dialog open={Boolean(editingAppt)} onOpenChange={(open) => !open && setEditingAppt(null)}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="fr-workspace fr-modal max-w-md">
             <DialogHeader>
               <DialogTitle>Edit appointment</DialogTitle>
               <DialogDescription>Practice only — change the technician or date.</DialogDescription>
@@ -1228,8 +1175,8 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
 
 function FrSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-[2px] border border-border">
-      <h3 className="bg-fr-pane px-2 py-1 text-[12px] font-semibold text-fr-ink">{title}</h3>
+    <section className="fr-section">
+      <h3 className="fr-section-title px-2 py-1 text-[12px] font-semibold">{title}</h3>
       <div className="p-2">{children}</div>
     </section>
   );
@@ -1237,7 +1184,7 @@ function FrSection({ title, children }: { title: string; children: ReactNode }) 
 
 function FrRows({ rows }: { rows: Array<[string, ReactNode]> }) {
   return (
-    <dl className="grid grid-cols-[120px_1fr] gap-x-3 gap-y-1 text-[12px]">
+    <dl className="fr-rows grid grid-cols-[110px_minmax(0,1fr)] text-[12px]">
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="text-muted-foreground">{k}</dt>
