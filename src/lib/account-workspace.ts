@@ -58,7 +58,12 @@ export type AgreementTerms = {
 export type WorkspaceEvent = {
   id: string;
   at: number;
-  type: "tab_viewed" | "subscription_saved" | "agreement_generated" | "agreement_sent";
+  type:
+    | "tab_viewed"
+    | "subscription_saved"
+    | "agreement_generated"
+    | "agreement_sent"
+    | "appointment_updated";
   target: string;
   summary: string;
 };

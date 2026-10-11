@@ -13,7 +13,7 @@ type SaveWorkspaceInput = {
   sessionId: string;
   account: SimulatedAccount;
   event: {
-    type: "subscription_saved" | "agreement_generated" | "agreement_sent";
+    type: "subscription_saved" | "agreement_generated" | "agreement_sent" | "appointment_updated";
     target: string;
     summary: string;
   };
