@@ -1204,7 +1204,7 @@ function FrSelectField({ label, value, options, onChange, placeholder }: { label
   return (
     <div className="fr-sub-field">
       <Label htmlFor={id}>{label}</Label>
-      <Select value={value || undefined} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange}>
         <SelectTrigger id={id}><SelectValue placeholder={placeholder} /></SelectTrigger>
         <SelectContent>
           {options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
