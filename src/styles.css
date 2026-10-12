@@ -289,7 +289,45 @@
 .fr-workspace .fr-footer { background: var(--fr-pane); }
 .fr-footer button { margin-left: 6px; }
 .fr-modal { border-radius: 3px; background: var(--fr-surface); }
+.fr-subscription-head { position: sticky; top: 0; z-index: 5; }
+.fr-subscription-columns { border-bottom: 1px solid var(--fr-border); }
+.fr-subscription-columns > .fr-subsection { border-right: 1px solid var(--fr-border); }
+.fr-subscription-columns > .fr-subsection:last-child { border-right: 0; }
+.fr-subsection-title {
+  min-height: 27px;
+  padding: 6px 8px 4px;
+  border-bottom: 1px solid var(--fr-border);
+  color: var(--fr-link);
+  font-size: 13px;
+  font-weight: 600;
+}
+.fr-subsection-body { padding: 8px; }
+.fr-sub-field {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  margin-bottom: 6px;
+}
+.fr-sub-field label { padding-right: 7px; font-weight: 600; }
+.fr-sub-label { display: block; margin: 8px 0 4px; font-weight: 600; }
+.fr-workspace .fr-sub-notes { min-height: 61px; resize: vertical; border-radius: 0; font-size: 12px; }
+.fr-event-grid { margin-top: 12px; }
+.fr-event-grid .fr-sub-label { color: var(--fr-link); font-size: 12px; }
+.fr-event-grid table { table-layout: fixed; }
+.fr-subscription-bottom { border-bottom: 1px solid var(--fr-border); }
+.fr-subscription-bottom > *:first-child { border-right: 1px solid var(--fr-border); }
+.fr-invoices { min-width: 0; }
+.fr-invoices > .fr-pricing-heading,
+.fr-invoices > section { border-width: 0 0 1px; }
+.fr-invoice-totals { background: var(--fr-pane); }
+.fr-invoice-totals > div { padding: 6px 8px; border-right: 1px solid var(--fr-border); }
+.fr-invoice-totals > div:last-child { border-right: 0; }
+.fr-invoice-totals span { display: block; color: var(--fr-ink); font-size: 10px; text-transform: uppercase; }
+.fr-invoice-totals strong { display: block; margin-top: 2px; font-size: 13px; }
 @media (max-width: 640px) {
   .fr-subscription .fr-field-grid > div { grid-template-columns: 100px minmax(0,1fr); }
   .fr-workspace .fr-overview > aside { margin-top: 12px; }
+  .fr-subscription-columns > .fr-subsection,
+  .fr-subscription-bottom > *:first-child { border-right: 0; border-bottom: 1px solid var(--fr-border); }
+  .fr-sub-field { grid-template-columns: 105px minmax(0,1fr); }
 }

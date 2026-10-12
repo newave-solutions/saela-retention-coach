@@ -17,3 +17,4 @@
 - [x] Define and build a realistic FieldRoutes-style account simulator integrated with CES and CEM practice calls
 - [x] Remove the live waveform and typed-response panel; prioritize FieldRoutes-style account work during calls
 - [x] Match the customer card to the uploaded classic FieldRoutes styling and screenshots; verify navigation and pricing remain usable
+- [x] Rebuild the Subscription tab with FieldRoutes sales, recurring-service, scheduling, invoice, billing, and footer layouts
