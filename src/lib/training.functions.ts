@@ -43,6 +43,11 @@ export const startCall = createServerFn({ method: "POST" })
       personality: data.personality,
       excludeVoices,
     });
+    const { createSimulatedAccount } = await import("@/lib/account-workspace.server");
+    scenario.simulatedAccount = createSimulatedAccount({
+      customerName: scenario.customerName,
+      frozen: scenario.reason === "moved_moving",
+    });
 
     const opening: TranscriptTurn = {
       speaker: "customer",

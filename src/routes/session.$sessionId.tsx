@@ -1,7 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+<<<<<<< HEAD
 import { ArrowLeft, Eye, PhoneCall } from "lucide-react";
+=======
+import { ArrowLeft, BookOpen, Eye, PhoneCall } from "lucide-react";
+>>>>>>> origin/main
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,8 +16,8 @@ import {
   type Coaching,
   type Outcome,
   type ScoreBreakdown,
-  type TranscriptTurn,
 } from "@/lib/scenarios";
+import { CallReview } from "@/components/CallReview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -32,9 +36,11 @@ export const Route = createFileRoute("/session/$sessionId")({
         property: "og:description",
         content: "Outcome, scores, the hidden motive, and coaching from your retention call.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Scorecard,
+  component: RetentionScorecard,
 });
 
 type Row = {
@@ -50,7 +56,6 @@ type Row = {
   overall_score: number | null;
   scores: ScoreBreakdown | null;
   coaching: Coaching | null;
-  transcript: TranscriptTurn[] | null;
   duration_seconds: number | null;
 };
 
@@ -60,7 +65,7 @@ function toneFor(outcome: Outcome | null) {
   return "text-destructive-foreground";
 }
 
-function Scorecard() {
+function RetentionScorecard() {
   const { sessionId } = Route.useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -75,9 +80,7 @@ function Scorecard() {
     queryFn: async () => {
       const { data: row, error } = await supabase
         .from("training_sessions")
-        .select(
-          "id, scenario, status, outcome, overall_score, scores, coaching, transcript, duration_seconds",
-        )
+        .select("id, scenario, status, outcome, overall_score, scores, coaching, duration_seconds")
         .eq("id", sessionId)
         .single();
       if (error) throw error;
@@ -85,6 +88,7 @@ function Scorecard() {
     },
   });
 
+<<<<<<< HEAD
   // ⚡ Bolt Optimization: Memoize the normalizeScores result.
   // Previously, normalizeScores(data.scores) was called inside the render function and
   // repeatedly inside the Object.keys().map loop. By memoizing it, we prevent redundant
@@ -92,6 +96,12 @@ function Scorecard() {
   const normalizedScores = useMemo(() => {
     return data?.scores ? normalizeScores(data.scores) : null;
   }, [data?.scores]);
+=======
+  // ⚡ Bolt Optimization:
+  // Memoize normalizeScores calculation instead of computing it inline during the .map() loop over SCORE_LABELS.
+  // This avoids redundant object allocation and recalculation on every render.
+  const normalizedScores = useMemo(() => normalizeScores(data?.scores), [data?.scores]);
+>>>>>>> origin/main
 
   return (
     <main className="min-h-screen bg-background px-4 py-8">
@@ -141,6 +151,21 @@ function Scorecard() {
               </div>
             </section>
 
+<<<<<<< HEAD
+=======
+            <Link
+              to="/grading-guide"
+              hash="practice"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              <BookOpen className="h-4 w-4" /> How this score is graded
+            </Link>
+
+            {data.coaching?.callReview?.length ? (
+              <CallReview review={data.coaching.callReview} />
+            ) : null}
+
+>>>>>>> origin/main
             {normalizedScores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
@@ -199,24 +224,6 @@ function Scorecard() {
                 </Card>
               </>
             )}
-
-            <Card className="card-soft mt-4">
-              <CardHeader>
-                <h2 className="text-base font-semibold leading-none">Transcript</h2>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(data.transcript ?? []).map((turn, index) => (
-                  <div key={`${turn.at}-${index}`} className="text-sm">
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {turn.speaker === "agent"
-                        ? "You"
-                        : (data.scenario?.customerName ?? "Customer")}
-                    </span>
-                    <p className="text-foreground/90">{turn.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
 
             <div className="mt-6">
               <Button asChild className="w-full">

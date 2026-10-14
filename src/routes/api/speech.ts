@@ -73,6 +73,15 @@ type SpeakOptions = {
 
 type SpeakResult = { ok: true; response: Response } | { ok: false; status: number; detail: string };
 
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof Error && error.name === "AbortError") ||
+    (typeof DOMException !== "undefined" &&
+      error instanceof DOMException &&
+      error.name === "AbortError")
+  );
+}
+
 function audioResponse(body: BodyInit, provider: ProviderName): Response {
   return new Response(body, {
     headers: {
@@ -109,8 +118,10 @@ async function speakViaElevenLabs(options: SpeakOptions): Promise<SpeakResult> {
     },
   );
 
-  if (upstream.ok && upstream.body)
-    return { ok: true, response: audioResponse(upstream.body, "elevenlabs") };
+  if (upstream.ok) {
+    const bytes = await upstream.arrayBuffer();
+    return { ok: true, response: audioResponse(new Uint8Array(bytes), "elevenlabs") };
+  }
 
   const detail = await upstream.text().catch(() => "");
   return { ok: false, status: upstream.status || 502, detail };
@@ -182,8 +193,12 @@ async function speakViaGateway(options: SpeakOptions): Promise<SpeakResult> {
     signal: options.signal,
   });
 
-  if (upstream.ok && upstream.body)
-    return { ok: true, response: audioResponse(upstream.body, "gateway") };
+  if (upstream.ok) {
+    // Buffer inside this awaited call so a cancelled request rejects here (and is
+    // caught by the route) instead of erroring later in a detached stream.
+    const bytes = await upstream.arrayBuffer();
+    return { ok: true, response: audioResponse(new Uint8Array(bytes), "gateway") };
+  }
 
   const detail = await upstream.text().catch(() => "");
   return { ok: false, status: upstream.status || 502, detail };
@@ -215,6 +230,17 @@ export const Route = createFileRoute("/api/speech")({
             ? body.voice
             : DEFAULT_VOICE;
 
+        // Independent controller: cancelling upstream work must not hand the
+        // client's abort reason back to the server runtime as a thrown error.
+        const upstreamAbort = new AbortController();
+        if (request.signal.aborted) return new Response(null, { status: 499 });
+        request.signal.addEventListener(
+          "abort",
+          () => upstreamAbort.abort(new Error("client-closed")),
+          {
+            once: true,
+          },
+        );
         const options: SpeakOptions = {
           text,
           seed: elevenVoice,
@@ -223,7 +249,7 @@ export const Route = createFileRoute("/api/speech")({
           instructions:
             typeof body.instructions === "string" ? body.instructions.slice(0, 800) : undefined,
           settings: (body.settings ?? {}) as Record<string, unknown>,
-          signal: request.signal,
+          signal: upstreamAbort.signal,
         };
 
         // Requested service first, then the closest available stand-in.
@@ -239,7 +265,17 @@ export const Route = createFileRoute("/api/speech")({
 
         try {
           for (const provider of chain) {
-            const result = await ADAPTERS[provider](options);
+            let result: SpeakResult;
+            try {
+              result = await ADAPTERS[provider](options);
+            } catch (error) {
+              if (upstreamAbort.signal.aborted || request.signal.aborted || isAbortError(error)) {
+                return new Response(null, { status: 499 });
+              }
+              const detail = error instanceof Error ? error.message : "Voice request failed.";
+              console.error(`${provider} TTS request failed: ${detail}`);
+              result = { ok: false, status: 502, detail };
+            }
             if (result.ok) return result.response;
             markUnhealthy(provider, result.status);
             lastStatus = result.status;
@@ -247,8 +283,12 @@ export const Route = createFileRoute("/api/speech")({
             console.error(`${provider} TTS failed [${result.status}]: ${result.detail}`);
           }
         } catch (error) {
-          if (request.signal.aborted) return new Response(null, { status: 499 });
-          throw error;
+          if (upstreamAbort.signal.aborted || request.signal.aborted || isAbortError(error)) {
+            return new Response(null, { status: 499 });
+          }
+          const detail = error instanceof Error ? error.message : "Voice service failed.";
+          console.error(`Speech route failed: ${detail}`);
+          return new Response("The voice service is temporarily unavailable.", { status: 502 });
         }
 
         return new Response(lastDetail || "The voice service is unavailable.", {

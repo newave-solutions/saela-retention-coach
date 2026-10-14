@@ -210,6 +210,7 @@ export async function gradeServiceCall(
   scenario: FullServiceScenario,
   transcript: TranscriptTurn[],
 ): Promise<ServiceGradeResult> {
+  const { normalizeCallReview, REVIEW_QUESTIONS } = await import("./call-review");
   const dialogue = transcript
     .map((t, i) => `[${i}] ${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
     .join("\n");
@@ -279,8 +280,10 @@ Score 0-100 each:
 - salesTransfer: as described above
 - languageTone: wording that keeps the customer comfortable, explained plainly and not over-explained
 
+Also answer these call-moment questions based ONLY on the dialogue. Mark not_observed without evidence. A normal call ending isn't an abrupt hangup; an unresolved issue alone isn't proof of an angry exit. Use short evidence-based notes, no transcript quotes:
+${REVIEW_QUESTIONS.map((q) => `- ${q.id}: ${q.label}`).join("\n")}
 Return ONLY strict JSON:
-{"outcome":"resolved"|"partial"|"mishandled","overallScore":number,"scores":{"listening":number,"discovery":number,"accuracy":number,"valueBuilt":number,"clarity":number,"resignOffer":number,"salesTransfer":number,"languageTone":number},"detailChecks":[{"id":string,"status":"confirmed"|"captured"|"missed"|"wrong","note":string}],"opportunityChecks":[{"id":string,"status":"found"|"partial"|"missed","note":string}],"languageFlags":[{"phrase":string,"turn":number,"why":string,"rewrite":string,"severity":"low"|"medium"|"high"}],"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[],"experienceImpact":string[],"resignNotes":string[],"salesNotes":string[]}}
+{"outcome":"resolved"|"partial"|"mishandled","overallScore":number,"scores":{"listening":number,"discovery":number,"accuracy":number,"valueBuilt":number,"clarity":number,"resignOffer":number,"salesTransfer":number,"languageTone":number},"callReview":[{"id":string,"answer":"yes"|"partial"|"no"|"not_observed","note":string}],"detailChecks":[{"id":string,"status":"confirmed"|"captured"|"missed"|"wrong","note":string}],"opportunityChecks":[{"id":string,"status":"found"|"partial"|"missed","note":string}],"languageFlags":[{"phrase":string,"turn":number,"why":string,"rewrite":string,"severity":"low"|"medium"|"high"}],"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[],"experienceImpact":string[],"resignNotes":string[],"salesNotes":string[]}}
 didWell/missed/nextTime: 2-4 short specific items each, referencing real moments. experienceImpact: 1-3 items describing what the customer will actually experience because of what was missed.`;
 
   const raw = await callGateway({
@@ -300,6 +303,7 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
     outcome?: string;
     overallScore?: number;
     scores?: Partial<ServiceScoreBreakdown>;
+    callReview?: unknown;
     detailChecks?: { id?: string; status?: string; note?: string }[];
     opportunityChecks?: { id?: string; status?: string; note?: string }[];
     languageFlags?: {
@@ -408,6 +412,7 @@ didWell/missed/nextTime: 2-4 short specific items each, referencing real moments
     experienceImpact: parsed?.coaching?.experienceImpact ?? [],
     resignNotes: hasResign ? (parsed?.coaching?.resignNotes ?? []) : [],
     salesNotes: hasSalesOpp ? (parsed?.coaching?.salesNotes ?? []) : [],
+    callReview: normalizeCallReview(parsed?.callReview),
   };
 
   return {

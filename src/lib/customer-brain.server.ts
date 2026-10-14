@@ -211,6 +211,7 @@ export async function gradeCall(
   transcript: TranscriptTurn[],
   endedOutcome: Outcome | null,
 ): Promise<GradeResult> {
+  const { normalizeCallReview, REVIEW_QUESTIONS } = await import("./call-review");
   const dialogue = transcript
     .map((t) => `${t.speaker === "agent" ? "AGENT" : "CUSTOMER"}: ${t.text}`)
     .join("\n");
@@ -244,8 +245,10 @@ Empowerment context: Level 1 Own It (discovery, education, scheduling/payment op
 
 Penalize: jumping to discounts, defending the company, talking too much, script-reading, pressuring, focusing on the cancellation instead of the concern, over-promising, and cold transfers. Reward: curiosity first, two-layer discovery, a solution matched to the root cause, and clear commitments with an owner and a date.
 
-Score each 0-100. Return ONLY strict JSON:
-{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"helpPeople":number,"buildValue":number,"overCommunicate":number,"trustIntegrity":number,"ownOutcome":number},"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
+Score each 0-100. Also answer these call-moment questions based ONLY on evidence in the transcript, not the hidden scenario. Mark not_observed if the call provides no evidence. For customer hangup/angry exit distinguish a genuinely abrupt or angry departure from an ordinary cancellation or agent-ended call. Give a short, concrete note for every answer, without quoting the transcript:
+${REVIEW_QUESTIONS.map((q) => `- ${q.id}: ${q.label}`).join("\n")}
+Return ONLY strict JSON:
+{"outcome":"saved"|"partial"|"cancelled","overallScore":number,"scores":{"helpPeople":number,"buildValue":number,"overCommunicate":number,"trustIntegrity":number,"ownOutcome":number},"callReview":[{"id":string,"answer":"yes"|"partial"|"no"|"not_observed","note":string}],"coaching":{"summary":string,"didWell":string[],"missed":string[],"nextTime":string[]}}
 didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing real moments from the call and naming the playbook step or value involved.`;
 
   const raw = await callGateway({
@@ -265,6 +268,7 @@ didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing 
     outcome?: string;
     overallScore?: number;
     scores?: Partial<ScoreBreakdown>;
+    callReview?: unknown;
     coaching?: Partial<Coaching>;
   }>(raw);
 
@@ -301,6 +305,7 @@ didWell/missed/nextTime: 2-4 short, specific items each, quoting or referencing 
       missed: parsed?.coaching?.missed ?? [],
       nextTime: parsed?.coaching?.nextTime ?? [],
       hiddenMotive: scenario.hiddenMotive,
+      callReview: normalizeCallReview(parsed?.callReview),
     },
   };
 }

@@ -32,13 +32,38 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const NEXT_KEY = "saela.auth.next";
+
+function safePath(p: string | null | undefined): string | undefined {
+  return p && p.startsWith("/") && !p.startsWith("//") ? p : undefined;
+}
+
+function friendlyGoogleError(msg?: string): string {
+  const m = (msg ?? "").toLowerCase();
+  if (m.includes("popup") || m.includes("closed") || m.includes("cancel"))
+    return "Google sign-in was closed before finishing. Try again or use email below.";
+  if (m.includes("provider") || m.includes("unsupported"))
+    return "Google sign-in isn't available right now. Please use email below.";
+  if (m.includes("network") || m.includes("fetch"))
+    return "Couldn't reach Google. Check your connection or use email below.";
+  return "Google sign-in didn't go through. Try again or use email below.";
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const { next } = Route.useSearch();
   const { session, loading } = useAuth();
   const afterAuth = () => {
-    if (next) {
-      window.location.href = next;
+    let stored: string | undefined;
+    try {
+      stored = safePath(sessionStorage.getItem(NEXT_KEY));
+      sessionStorage.removeItem(NEXT_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    const dest = safePath(next) ?? stored;
+    if (dest) {
+      window.location.href = dest;
       return;
     }
     void navigate({ to: "/" });
@@ -87,24 +112,30 @@ function AuthPage() {
   async function google() {
     setBusy(true);
     try {
+      if (safePath(next)) sessionStorage.setItem(NEXT_KEY, next!);
+    } catch {
+      /* storage unavailable */
+    }
+    try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
 
       if (result.error) {
         setBusy(false);
-        toast.error(result.error.message || "Google sign-in didn't go through. Try email instead.");
+        console.error("Google sign-in error:", result.error);
+        toast.error(friendlyGoogleError(result.error.message));
         return;
       }
 
       if (result.redirected) return;
 
+      setBusy(false);
       afterAuth();
     } catch (err) {
       setBusy(false);
-      toast.error(
-        err instanceof Error ? err.message : "Google sign-in didn't go through. Try email instead.",
-      );
+      console.error("Google sign-in error:", err);
+      toast.error(friendlyGoogleError(err instanceof Error ? err.message : String(err)));
     }
   }
 
