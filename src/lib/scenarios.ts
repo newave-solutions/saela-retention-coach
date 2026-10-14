@@ -1,6 +1,4 @@
 // Shared, client-safe scenario model for the Saela Way retention simulator.
-import type { CallReviewItem } from "./call-review";
-import type { SimulatedAccount } from "./account-workspace";
 
 export const CANCEL_REASONS = [
   "competitor_switch",
@@ -91,7 +89,6 @@ export type PublicScenario = {
   personalityLabel: string;
   openingLine: string;
   voice?: VoiceAssignment;
-  simulatedAccount?: SimulatedAccount;
 };
 
 /** The full scenario, including the hidden motive. Server + post-call reveal only. */
@@ -165,7 +162,6 @@ export type Coaching = {
   missed: string[];
   nextTime: string[];
   hiddenMotive: string;
-  callReview?: CallReviewItem[];
 };
 
 export type Outcome = "saved" | "partial" | "cancelled";

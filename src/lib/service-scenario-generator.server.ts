@@ -814,6 +814,5 @@ export function toPublicServiceScenario(scenario: FullServiceScenario) {
     personalityLabel: scenario.personalityLabel,
     openingLine: scenario.openingLine,
     ...(scenario.voice ? { voice: scenario.voice } : {}),
-    ...(scenario.simulatedAccount ? { simulatedAccount: scenario.simulatedAccount } : {}),
   };
 }

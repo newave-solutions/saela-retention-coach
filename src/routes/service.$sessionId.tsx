@@ -1,14 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Mic, MicOff, PhoneOff } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Volume2 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useCustomerVoice } from "@/hooks/useCustomerVoice";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { endServiceCall, getServiceCall, sendServiceTurn } from "@/lib/service-training.functions";
 import type { PublicServiceScenario } from "@/lib/service-scenarios";
+import type { TranscriptTurn } from "@/lib/scenarios";
 import {
   instructionsFor,
   settingsFor,
@@ -17,9 +18,10 @@ import {
   type Mood,
 } from "@/lib/voice-direction";
 import { Button } from "@/components/ui/button";
+import { InterimText } from "@/components/InterimText";
 import { Badge } from "@/components/ui/badge";
 import { CallTimer } from "@/components/CallTimer";
-import { AccountWorkspace } from "@/components/AccountWorkspace";
+import { CallInput } from "@/components/CallInput";
 
 export const Route = createFileRoute("/service/$sessionId")({
   head: () => ({
@@ -53,6 +55,7 @@ function LiveServiceCall() {
   const voice = useCustomerVoice();
 
   const [scenario, setScenario] = useState<PublicServiceScenario | null>(null);
+  const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [thinking, setThinking] = useState(false);
   const [ending, setEnding] = useState(false);
   const [micOn, setMicOn] = useState(false);
@@ -64,6 +67,7 @@ function LiveServiceCall() {
   micOnRef.current = micOn;
   const recognitionRef = useRef<{ start: () => void; stop: () => void } | null>(null);
   const endedRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!loading && !user) void navigate({ to: "/auth" });
@@ -111,6 +115,7 @@ function LiveServiceCall() {
       }
       try {
         const result = await send({ data: { sessionId, text } });
+        setTurns(result.transcript);
         setThinking(false);
         if (micOnRef.current) recognitionRef.current?.stop();
         await speakAs(result.reply, result.mood as Mood);
@@ -150,6 +155,7 @@ function LiveServiceCall() {
         }
         setScenario(data.scenario);
         scenarioRef.current = data.scenario;
+        setTurns(data.transcript);
         const opening = data.transcript[0];
         if (opening) void speakAs(opening.text, "neutral");
       } catch (error) {
@@ -163,12 +169,18 @@ function LiveServiceCall() {
   }, [sessionId, user]);
 
   useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [turns, thinking]);
+
+  useEffect(() => {
     if (recognition.error) toast.error(recognition.error);
   }, [recognition.error]);
 
   useEffect(() => {
-    if (micOn && (!recognition.supported || recognition.error)) setMicOn(false);
-  }, [micOn, recognition.supported, recognition.error]);
+    if (!recognition.supported || recognition.error) {
+      setMicOn(false);
+    }
+  }, [recognition.error, recognition.supported]);
 
   function toggleMic() {
     if (micOn) {
@@ -176,8 +188,7 @@ function LiveServiceCall() {
       setMicOn(false);
       return;
     }
-    recognition.start();
-    setMicOn(true);
+    setMicOn(recognition.start());
   }
 
   const state = voice.speaking
@@ -188,57 +199,114 @@ function LiveServiceCall() {
         ? "Listening to you"
         : "Mic off";
 
+  // ⚡ Bolt Optimization: Memoize the transcript list to prevent rendering overhead
+  // when unrelated states (micOn, voice.speaking) trigger LiveServiceCall re-renders.
+  const chatBubbles = useMemo(() => {
+    return turns.map((turn, index) => (
+      <div
+        key={`${turn.at}-${index}`}
+        className={turn.speaker === "agent" ? "flex justify-end" : "flex justify-start"}
+      >
+        <div
+          className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+            turn.speaker === "agent"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-foreground"
+          }`}
+        >
+          <p className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
+            {turn.speaker === "agent" ? "You" : (scenario?.customerName ?? "Customer")}
+          </p>
+          {turn.text}
+        </div>
+      </div>
+    ));
+  }, [turns, scenario?.customerName]);
+
   return (
-    <main className="flex h-screen min-h-[620px] flex-col overflow-hidden bg-background">
-      <header className="brand-surface shrink-0 border-b border-sidebar-border">
-        <div className="mx-auto flex min-h-12 max-w-[1800px] flex-wrap items-center justify-between gap-2 px-3 py-2">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="text-sm font-semibold">Saela Customer Account</span>
-            <span className="hidden h-5 w-px bg-sidebar-border sm:block" />
-            <span className="truncate text-xs opacity-80">
-              {scenario?.accountSummary ?? "Opening customer record…"}
-            </span>
-            <Badge
-              variant="outline"
-              className="hidden border-sidebar-border text-[10px] text-inherit sm:inline-flex"
-            >
-              Training
-            </Badge>
+    <main className="flex min-h-screen flex-col bg-background">
+      <header className="brand-surface">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div>
+            <h1 className="flex items-center gap-2 text-base font-semibold leading-tight">
+              {scenario?.customerName ?? "Connecting..."}
+              {scenario?.voice ? (
+                <Badge
+                  variant="outline"
+                  className="border-white/30 bg-white/10 text-[10px] font-normal text-inherit"
+                >
+                  {scenario.voice.accentLabel}
+                </Badge>
+              ) : null}
+            </h1>
+            <p className="text-xs opacity-80">
+              {scenario?.accountSummary ?? "Pulling up the account"}
+            </p>
+            {voice.degraded ? (
+              <p className="text-xs opacity-80">
+                Backup voice in use — realistic voice unavailable.
+              </p>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
-            <span className="hidden text-xs opacity-80 sm:inline" aria-live="polite">
-              {state}
-            </span>
             <CallTimer />
-            <Button
-              variant={micOn ? "secondary" : "default"}
-              size="sm"
-              onClick={toggleMic}
-              disabled={ending || !recognition.supported}
-            >
-              {micOn ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              {micOn ? "Mute" : "Talk"}
-            </Button>
             <Button variant="destructive" size="sm" onClick={() => finish()} disabled={ending}>
-              <PhoneOff className="h-4 w-4" />
-              {ending ? "Ending…" : "End call"}
+              <PhoneOff className="mr-2 h-4 w-4" />
+              {ending ? "Wrapping up..." : "End call"}
             </Button>
           </div>
         </div>
       </header>
-      {!recognition.supported ? (
-        <p className="shrink-0 border-b border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
-          Voice input is unavailable in this browser.
-        </p>
-      ) : null}
-      <div className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 border-x border-border">
-        {scenario?.simulatedAccount ? (
-          <AccountWorkspace sessionId={sessionId} initialAccount={scenario.simulatedAccount} />
-        ) : (
-          <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-            Opening customer account…
+
+      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-5">
+        <div className="card-soft mb-4 flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+          <div className="relative flex h-14 w-14 items-center justify-center">
+            <span
+              className={`absolute inset-0 rounded-full bg-accent/50 ${voice.speaking || recognition.listening ? "call-pulse" : "opacity-20"}`}
+            />
+            <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-accent/20 text-accent ring-1 ring-accent/40">
+              {voice.speaking ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+            </span>
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">{state}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              <InterimText
+                subscribe={recognition.subscribeInterim}
+                getSnapshot={recognition.getInterim}
+                fallback="Listen for the details. Confirm them back."
+              />
+            </p>
+          </div>
+          <Button variant={micOn ? "secondary" : "default"} size="sm" onClick={toggleMic}>
+            {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
+            {micOn ? "Mute" : "Talk"}
+          </Button>
+        </div>
+
+        {!recognition.supported && (
+          <p className="mb-3 rounded-md border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
+            This browser can't hear you. Type your side of the call below instead.
+          </p>
         )}
+
+        <div
+          ref={scrollRef}
+          className="card-soft flex-1 space-y-3 overflow-y-auto rounded-xl border border-border bg-card p-4"
+          style={{ maxHeight: "52vh" }}
+        >
+          {chatBubbles}
+          {thinking && <p className="text-xs text-muted-foreground">Customer is responding...</p>}
+        </div>
+
+        <CallInput
+          onSend={(text) => {
+            if (busyRef.current) return;
+            void speak(text);
+          }}
+          disabled={ending}
+          busy={thinking}
+        />
       </div>
     </main>
   );
