@@ -61,33 +61,6 @@ function outcomeLabel(outcome: Outcome | null) {
 
 /* ----------------------------- Microsoft Teams ---------------------------- */
 
-export const listTeamsChannels = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async () => {
-    const headers = gatewayHeaders("MICROSOFT_TEAMS_API_KEY");
-    const teamsRes = await fetch(`${GATEWAY}/microsoft_teams/me/joinedTeams`, { headers });
-    const teams = await readOrThrow(teamsRes, "Teams list");
-
-    const items: { teamId: string; teamName: string; channelId: string; channelName: string }[] =
-      [];
-    for (const team of (teams.value ?? []).slice(0, 10)) {
-      const chRes = await fetch(`${GATEWAY}/microsoft_teams/teams/${team.id}/channels`, {
-        headers,
-      });
-      if (!chRes.ok) continue;
-      const channels = await chRes.json();
-      for (const channel of channels.value ?? []) {
-        items.push({
-          teamId: team.id,
-          teamName: team.displayName,
-          channelId: channel.id,
-          channelName: channel.displayName,
-        });
-      }
-    }
-    return { items };
-  });
-
 export const postSessionToTeams = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { sessionId: string; teamId: string; channelId: string }) => {
