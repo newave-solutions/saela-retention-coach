@@ -1,11 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-<<<<<<< HEAD
-import { ArrowLeft, Eye, PhoneCall } from "lucide-react";
-=======
 import { ArrowLeft, BookOpen, Eye, PhoneCall } from "lucide-react";
->>>>>>> origin/main
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -88,20 +84,10 @@ function RetentionScorecard() {
     },
   });
 
-<<<<<<< HEAD
-  // ⚡ Bolt Optimization: Memoize the normalizeScores result.
-  // Previously, normalizeScores(data.scores) was called inside the render function and
-  // repeatedly inside the Object.keys().map loop. By memoizing it, we prevent redundant
-  // object allocations and calculations on every render and for every map iteration.
-  const normalizedScores = useMemo(() => {
-    return data?.scores ? normalizeScores(data.scores) : null;
-  }, [data?.scores]);
-=======
   // ⚡ Bolt Optimization:
   // Memoize normalizeScores calculation instead of computing it inline during the .map() loop over SCORE_LABELS.
   // This avoids redundant object allocation and recalculation on every render.
   const normalizedScores = useMemo(() => normalizeScores(data?.scores), [data?.scores]);
->>>>>>> origin/main
 
   return (
     <main className="min-h-screen bg-background px-4 py-8">
@@ -151,8 +137,6 @@ function RetentionScorecard() {
               </div>
             </section>
 
-<<<<<<< HEAD
-=======
             <Link
               to="/grading-guide"
               hash="practice"
@@ -165,7 +149,6 @@ function RetentionScorecard() {
               <CallReview review={data.coaching.callReview} />
             ) : null}
 
->>>>>>> origin/main
             {normalizedScores && (
               <Card className="card-soft mt-4">
                 <CardHeader>

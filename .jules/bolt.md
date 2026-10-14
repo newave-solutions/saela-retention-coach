@@ -12,13 +12,6 @@
 
 **Learning:** The `useSpeechRecognition` hook updated an `interim` state variable inside a `requestAnimationFrame` callback. Returning this state from the hook caused massive complex route components to re-render 60 times per second during speech.
 **Action:** For extremely fast-updating UI (like 60fps animations or live transcription), bypass React's standard parent-down rendering. Use an external store (like `useSyncExternalStore` or a ref-based subscription) and isolate the text into a tiny leaf component (`InterimText`) that subscribes directly to the store.
-<<<<<<< HEAD
-## 2023-10-27 - Render-Loop Object Allocation Bottleneck
-
-**Learning:** When complex data structures (like API responses or raw score metrics) require normalization before display, calling the normalization function directly within a `.map()` loop during render forces the application to re-allocate new objects and perform the exact same computation redundantly for every single iteration, severely compounding render overhead.
-
-**Action:** Always scan `.map()` functions for inline transformations. Extract heavy or allocating transformations completely outside the loop and wrap them in a `useMemo` hook, then access the pre-computed, memoized dictionary inside the JSX loop.
-=======
 
 ## 2026-10-04 - Inline List Rendering in Complex Routes
 
@@ -27,4 +20,3 @@
 ## 2023-10-25 - [Redundant Computation in Loops]
 **Learning:** Calling complex object normalization/transformation functions (`normalizeScores`) inside of `.map()` or rendering loops can cause many redundant allocations and calculations when they can easily be memoized once.
 **Action:** Extract normalizations and memoize them outside loops using `useMemo()` in React to compute them just once per meaningful prop/state change.
->>>>>>> origin/main
