@@ -1,0 +1,61 @@
+--- src/routes/team.index.tsx
++++ src/routes/team.index.tsx
+@@ -50,12 +50,16 @@
+     retry: false,
+   });
+
+-  const rows = useMemo(() => {
++  const agentsWithStats = useMemo(() => {
+     if (!data) return [];
+-    const list = data.agents.map((a) => {
++    return data.agents.map((a) => {
+       const mine = data.sessions.filter((s) => s.user_id === a.id);
+       return { agent: a, stats: summarize(mine) };
+     });
++  }, [data]);
++
++  const rows = useMemo(() => {
++    const list = [...agentsWithStats];
+     const val = (r: (typeof list)[number]) =>
+       sort === "name"
+         ? (r.agent.display_name ?? "")
+@@ -71,10 +75,26 @@
+       const b = val(y);
+       return typeof a === "string" ? a.localeCompare(b as string) : (b as number) - a;
+     });
+-  }, [data, sort]);
++  }, [agentsWithStats, sort]);
++
++  // ⚡ Bolt Optimization:
++  // Memoize team stats and recurring misses to avoid expensive object allocations
++  // and array operations on every render, especially when the sort order changes.
++  const teamStats = useMemo(() => {
++    if (!data) return null;
++    const teamSummary = summarize(data.sessions);
++    return {
++      team: teamSummary,
++      misses: recurringMisses(teamSummary.graded),
++    };
++  }, [data]);
++
++  const team = teamStats?.team;
++  const misses = teamStats?.misses ?? [];
++  const inactive = useMemo(() => rows.filter((r) => (daysSince(r.stats.lastActive) ?? 99) >= 7), [rows]);
+
+   if (loading || isLoading) return <div className="min-h-screen bg-background" />;
+-  if (error || !data)
++  if (error || !data || !team)
+     return (
+       <main className="flex min-h-screen items-center justify-center bg-background px-4">
+         <div className="text-center">
+@@ -88,10 +108,6 @@
+         </div>
+       </main>
+     );
+-
+-  const team = summarize(data.sessions);
+-  const misses = recurringMisses(team.graded);
+-  const inactive = rows.filter((r) => (daysSince(r.stats.lastActive) ?? 99) >= 7);
+   const seatName =
+     data.seat === "ces"
+       ? "CES — Customer Experience Specialists"
