@@ -238,7 +238,6 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
   const [saving, setSaving] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [agreementPreview, setAgreementPreview] = useState(false);
-  const [newNote, setNewNote] = useState("");
   const [subscriptionUi, setSubscriptionUi] = useState({
     salesRep: "V-Ikaika Morningstar_3467",
     salesRep2: "",
@@ -268,6 +267,22 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
 
   const updateSubscription = (patch: Partial<SubscriptionRecord>) =>
     setAccount((current) => ({ ...current, subscription: { ...current.subscription, ...patch } }));
+  const handleAddNote = (noteText: string) => {
+    setAccount((current) => ({
+      ...current,
+      notes: [
+        {
+          id: crypto.randomUUID(),
+          category: "Practice note",
+          createdAt: new Date().toISOString().slice(0, 10),
+          body: noteText,
+        },
+        ...current.notes,
+      ],
+    }));
+    toast.success("Practice note added locally.");
+  };
+
   const persist = async (
     next: SimulatedAccount,
     event: {
@@ -382,7 +397,9 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
           <span className="truncate">
             <span className="mr-2 text-[12px] italic">[{account.customerNumber}]</span>
             <strong>{account.customerName}</strong>
-            <span className="ml-1 text-[12px] italic">1 {account.status === "active" ? "Active" : "Inactive"} Subscription</span>
+            <span className="ml-1 text-[12px] italic">
+              1 {account.status === "active" ? "Active" : "Inactive"} Subscription
+            </span>
           </span>
           <Button
             type="button"
@@ -418,7 +435,9 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
             <TabsContent value="Overview" className="mt-0">
               <div className="mb-4 flex flex-wrap items-baseline">
                 <h2 className="mr-6 text-xl font-normal text-fr-link">Account Overview</h2>
-                <span className="text-xs italic text-muted-foreground">{account.serviceAddress}</span>
+                <span className="text-xs italic text-muted-foreground">
+                  {account.serviceAddress}
+                </span>
               </div>
               <div className="fr-overview grid md:grid-cols-[minmax(0,1fr)_230px]">
                 <div className="space-y-3">
@@ -426,13 +445,19 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
                     {[
                       ["Customer Since", account.customerSince],
                       ["Completed Services", `${account.completedServices} Subscription Services`],
-                      ["Contract Remaining", account.subscription.agreementState.replaceAll("_", " ")],
+                      [
+                        "Contract Remaining",
+                        account.subscription.agreementState.replaceAll("_", " "),
+                      ],
                       ["Last Completed", account.lastCompleted],
                       ["Next Service", account.nextService],
                       ["Recent Service", account.recentServiceNote],
                       ["Account Balance", money(account.balance)],
                       ["Initial Charge", money(pricingTotal(account.subscription.initialLines))],
-                      ["Recurring Charge", money(pricingTotal(account.subscription.recurringLines))],
+                      [
+                        "Recurring Charge",
+                        money(pricingTotal(account.subscription.recurringLines)),
+                      ],
                     ].map(([label, value]) => (
                       <div key={label} className="fr-metric">
                         <p className="text-[11px] text-muted-foreground">{label}</p>
@@ -546,10 +571,25 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
             <TabsContent value="Info" className="mt-0">
               <div className="fr-info-grid grid md:grid-cols-2">
                 <FrSection title="Account Information">
-                  <FrRows rows={[["Customer", account.customerName], ["Customer #", account.customerNumber], ["Phone", account.phone], ["Email", account.email], ["Service address", account.serviceAddress], ["Status", account.status.replaceAll("_", " ")]]} />
+                  <FrRows
+                    rows={[
+                      ["Customer", account.customerName],
+                      ["Customer #", account.customerNumber],
+                      ["Phone", account.phone],
+                      ["Email", account.email],
+                      ["Service address", account.serviceAddress],
+                      ["Status", account.status.replaceAll("_", " ")],
+                    ]}
+                  />
                 </FrSection>
                 <FrSection title="Communication Preferences">
-                  <FrRows rows={[["Arrival notice", "Text before arrival"], ["Call ahead", account.subscription.callAhead], ["Routing region", account.subscription.routingRegion]]} />
+                  <FrRows
+                    rows={[
+                      ["Arrival notice", "Text before arrival"],
+                      ["Call ahead", account.subscription.callAhead],
+                      ["Routing region", account.subscription.routingRegion],
+                    ]}
+                  />
                 </FrSection>
               </div>
             </TabsContent>
@@ -557,14 +597,19 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
             <TabsContent value="Subscription" className="fr-subscription mt-0">
               <div className="fr-subscription-head flex flex-wrap items-center justify-between border-b border-border bg-card px-2 py-2">
                 <div>
-                  <h3 className="text-[15.84px] font-normal text-fr-link">{account.subscription.program}</h3>
+                  <h3 className="text-[15.84px] font-normal text-fr-link">
+                    {account.subscription.program}
+                  </h3>
                   <p className="text-[12px] text-muted-foreground">
-                    {account.subscription.id} · {money(contractValue(account.subscription))} Contract Value (Including Initial Service)
+                    {account.subscription.id} · {money(contractValue(account.subscription))}{" "}
+                    Contract Value (Including Initial Service)
                   </p>
                 </div>
                 <div className="flex items-center">
                   {dirty ? (
-                    <Badge variant="secondary" className="mr-2">Unsaved changes</Badge>
+                    <Badge variant="secondary" className="mr-2">
+                      Unsaved changes
+                    </Badge>
                   ) : (
                     <Badge variant="outline" className="mr-2">
                       <Check className="mr-1 h-3 w-3" />
@@ -575,35 +620,165 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
               </div>
               <div className="fr-subscription-columns grid lg:grid-cols-3">
                 <FrSubscriptionSection title="Sales Information">
-                  <FrSelectField label="Sales Rep" value={subscriptionUi.salesRep} options={["V-Ikaika Morningstar_3467", "Unassigned"]} onChange={(salesRep) => setSubscriptionUi((v) => ({ ...v, salesRep }))} />
-                  <FrSelectField label="Sales Rep 2" value={subscriptionUi.salesRep2} placeholder="Select Sales Rep" options={["Unassigned", "Maya Robinson"]} onChange={(salesRep2) => setSubscriptionUi((v) => ({ ...v, salesRep2 }))} />
-                  <FrSelectField label="Sales Rep 3" value={subscriptionUi.salesRep3} placeholder="Select Sales Rep" options={["Unassigned", "Jordan Lee"]} onChange={(salesRep3) => setSubscriptionUi((v) => ({ ...v, salesRep3 }))} />
-                  <FrSelectField label="Acquisition" value={subscriptionUi.acquisition} options={["Door to Door", "Inbound", "Referral"]} onChange={(acquisition) => setSubscriptionUi((v) => ({ ...v, acquisition }))} />
-                  <FrSelectField label="Sub-Source" value={subscriptionUi.subSource} placeholder="Select Sub-Source" options={["Existing Customer", "Web Lead"]} onChange={(subSource) => setSubscriptionUi((v) => ({ ...v, subSource }))} />
-                  <FrInputField label="Sold Date and Time" value={subscriptionUi.soldAt} onChange={(soldAt) => setSubscriptionUi((v) => ({ ...v, soldAt }))} />
-                  <FrSelectField label="Contract Length" value={`${account.subscription.agreementMonths} months`} options={["12 months", "18 months", "24 months"]} onChange={(value) => updateSubscription({ agreementMonths: numberValue(value) })} />
-                  <FrInputField label="Expiration Date" type="date" value={subscriptionUi.expirationDate} onChange={(expirationDate) => setSubscriptionUi((v) => ({ ...v, expirationDate }))} />
-                  <FrInputField label="PO No." value={subscriptionUi.poNumber} onChange={(poNumber) => setSubscriptionUi((v) => ({ ...v, poNumber }))} />
-                  <Label htmlFor="subscription-notes" className="fr-sub-label">Subscription Notes</Label>
-                  <Textarea id="subscription-notes" className="fr-sub-notes" placeholder="Enter Subscription Specific Notes here..." value={subscriptionUi.notes} onChange={(event) => setSubscriptionUi((v) => ({ ...v, notes: event.target.value }))} />
+                  <FrSelectField
+                    label="Sales Rep"
+                    value={subscriptionUi.salesRep}
+                    options={["V-Ikaika Morningstar_3467", "Unassigned"]}
+                    onChange={(salesRep) => setSubscriptionUi((v) => ({ ...v, salesRep }))}
+                  />
+                  <FrSelectField
+                    label="Sales Rep 2"
+                    value={subscriptionUi.salesRep2}
+                    placeholder="Select Sales Rep"
+                    options={["Unassigned", "Maya Robinson"]}
+                    onChange={(salesRep2) => setSubscriptionUi((v) => ({ ...v, salesRep2 }))}
+                  />
+                  <FrSelectField
+                    label="Sales Rep 3"
+                    value={subscriptionUi.salesRep3}
+                    placeholder="Select Sales Rep"
+                    options={["Unassigned", "Jordan Lee"]}
+                    onChange={(salesRep3) => setSubscriptionUi((v) => ({ ...v, salesRep3 }))}
+                  />
+                  <FrSelectField
+                    label="Acquisition"
+                    value={subscriptionUi.acquisition}
+                    options={["Door to Door", "Inbound", "Referral"]}
+                    onChange={(acquisition) => setSubscriptionUi((v) => ({ ...v, acquisition }))}
+                  />
+                  <FrSelectField
+                    label="Sub-Source"
+                    value={subscriptionUi.subSource}
+                    placeholder="Select Sub-Source"
+                    options={["Existing Customer", "Web Lead"]}
+                    onChange={(subSource) => setSubscriptionUi((v) => ({ ...v, subSource }))}
+                  />
+                  <FrInputField
+                    label="Sold Date and Time"
+                    value={subscriptionUi.soldAt}
+                    onChange={(soldAt) => setSubscriptionUi((v) => ({ ...v, soldAt }))}
+                  />
+                  <FrSelectField
+                    label="Contract Length"
+                    value={`${account.subscription.agreementMonths} months`}
+                    options={["12 months", "18 months", "24 months"]}
+                    onChange={(value) =>
+                      updateSubscription({ agreementMonths: numberValue(value) })
+                    }
+                  />
+                  <FrInputField
+                    label="Expiration Date"
+                    type="date"
+                    value={subscriptionUi.expirationDate}
+                    onChange={(expirationDate) =>
+                      setSubscriptionUi((v) => ({ ...v, expirationDate }))
+                    }
+                  />
+                  <FrInputField
+                    label="PO No."
+                    value={subscriptionUi.poNumber}
+                    onChange={(poNumber) => setSubscriptionUi((v) => ({ ...v, poNumber }))}
+                  />
+                  <Label htmlFor="subscription-notes" className="fr-sub-label">
+                    Subscription Notes
+                  </Label>
+                  <Textarea
+                    id="subscription-notes"
+                    className="fr-sub-notes"
+                    placeholder="Enter Subscription Specific Notes here..."
+                    value={subscriptionUi.notes}
+                    onChange={(event) =>
+                      setSubscriptionUi((v) => ({ ...v, notes: event.target.value }))
+                    }
+                  />
                 </FrSubscriptionSection>
 
                 <FrSubscriptionSection title="Recurring Services">
-                  <FrSelectField label="Service Type" value={account.subscription.program} options={["Protection Program", "Perimeter Plus Mosquito", "Rodent Yard Guard"]} onChange={(program) => updateSubscription({ program })} />
-                  <FrSelectField label="Frequency" value={`Every ${account.subscription.frequencyWeeks} Weeks`} options={["Every 8 Weeks", "Every 10 Weeks", "Every 12 Weeks"]} onChange={(value) => updateSubscription({ frequencyWeeks: numberValue(value) })} />
-                  <FrSelectField label="Duration" value={subscriptionUi.duration} options={["Standard Duration", "Extended Duration"]} onChange={(duration) => setSubscriptionUi((v) => ({ ...v, duration }))} />
-                  <FrSelectField label="Call Ahead" value={account.subscription.callAhead} options={["No call ahead", "15 minutes", "30 minutes", "60 minutes"]} onChange={(callAhead) => updateSubscription({ callAhead })} />
-                  <FrSelectField label="Seasonal" value={subscriptionUi.seasonal} options={["Year-Round Service", "Seasonal Service"]} onChange={(seasonal) => setSubscriptionUi((v) => ({ ...v, seasonal }))} />
-                  <FrInputField label="Effective Date" type="date" value={account.subscription.effectiveDate} onChange={(effectiveDate) => updateSubscription({ effectiveDate })} />
-                  <FrInputField label="Yearly Increase %" type="number" value={String(account.subscription.yearlyIncreasePercent)} onChange={(value) => updateSubscription({ yearlyIncreasePercent: numberValue(value) })} />
-                  <FrInputField label="Recurring Services" type="number" value={String(account.subscription.committedServices)} onChange={(value) => updateSubscription({ committedServices: numberValue(value) })} />
+                  <FrSelectField
+                    label="Service Type"
+                    value={account.subscription.program}
+                    options={["Protection Program", "Perimeter Plus Mosquito", "Rodent Yard Guard"]}
+                    onChange={(program) => updateSubscription({ program })}
+                  />
+                  <FrSelectField
+                    label="Frequency"
+                    value={`Every ${account.subscription.frequencyWeeks} Weeks`}
+                    options={["Every 8 Weeks", "Every 10 Weeks", "Every 12 Weeks"]}
+                    onChange={(value) => updateSubscription({ frequencyWeeks: numberValue(value) })}
+                  />
+                  <FrSelectField
+                    label="Duration"
+                    value={subscriptionUi.duration}
+                    options={["Standard Duration", "Extended Duration"]}
+                    onChange={(duration) => setSubscriptionUi((v) => ({ ...v, duration }))}
+                  />
+                  <FrSelectField
+                    label="Call Ahead"
+                    value={account.subscription.callAhead}
+                    options={["No call ahead", "15 minutes", "30 minutes", "60 minutes"]}
+                    onChange={(callAhead) => updateSubscription({ callAhead })}
+                  />
+                  <FrSelectField
+                    label="Seasonal"
+                    value={subscriptionUi.seasonal}
+                    options={["Year-Round Service", "Seasonal Service"]}
+                    onChange={(seasonal) => setSubscriptionUi((v) => ({ ...v, seasonal }))}
+                  />
+                  <FrInputField
+                    label="Effective Date"
+                    type="date"
+                    value={account.subscription.effectiveDate}
+                    onChange={(effectiveDate) => updateSubscription({ effectiveDate })}
+                  />
+                  <FrInputField
+                    label="Yearly Increase %"
+                    type="number"
+                    value={String(account.subscription.yearlyIncreasePercent)}
+                    onChange={(value) =>
+                      updateSubscription({ yearlyIncreasePercent: numberValue(value) })
+                    }
+                  />
+                  <FrInputField
+                    label="Recurring Services"
+                    type="number"
+                    value={String(account.subscription.committedServices)}
+                    onChange={(value) =>
+                      updateSubscription({ committedServices: numberValue(value) })
+                    }
+                  />
                 </FrSubscriptionSection>
 
                 <FrSubscriptionSection title="Scheduling Options">
-                  <FrSelectField label="Initial Followup" value={subscriptionUi.initialFollowup} options={["14 Days", "21 Days", "28 Days"]} onChange={(initialFollowup) => setSubscriptionUi((v) => ({ ...v, initialFollowup }))} />
-                  <FrInputField label="Custom Date" type="date" value={subscriptionUi.customDate} onChange={(customDate) => setSubscriptionUi((v) => ({ ...v, customDate }))} />
-                  <FrSelectField label="Routing Region" value={subscriptionUi.routingRegion} options={["No Region Assigned", "Denver South", "Denver North"]} onChange={(routingRegion) => setSubscriptionUi((v) => ({ ...v, routingRegion }))} />
-                  <FrSelectField label="Preferred Tech" value={subscriptionUi.preferredTech} options={["Jarrett Barclay", "Tawny Butler", "Any qualified technician"]} onChange={(preferredTech) => setSubscriptionUi((v) => ({ ...v, preferredTech }))} />
+                  <FrSelectField
+                    label="Initial Followup"
+                    value={subscriptionUi.initialFollowup}
+                    options={["14 Days", "21 Days", "28 Days"]}
+                    onChange={(initialFollowup) =>
+                      setSubscriptionUi((v) => ({ ...v, initialFollowup }))
+                    }
+                  />
+                  <FrInputField
+                    label="Custom Date"
+                    type="date"
+                    value={subscriptionUi.customDate}
+                    onChange={(customDate) => setSubscriptionUi((v) => ({ ...v, customDate }))}
+                  />
+                  <FrSelectField
+                    label="Routing Region"
+                    value={subscriptionUi.routingRegion}
+                    options={["No Region Assigned", "Denver South", "Denver North"]}
+                    onChange={(routingRegion) =>
+                      setSubscriptionUi((v) => ({ ...v, routingRegion }))
+                    }
+                  />
+                  <FrSelectField
+                    label="Preferred Tech"
+                    value={subscriptionUi.preferredTech}
+                    options={["Jarrett Barclay", "Tawny Butler", "Any qualified technician"]}
+                    onChange={(preferredTech) =>
+                      setSubscriptionUi((v) => ({ ...v, preferredTech }))
+                    }
+                  />
                   <div className="fr-event-grid">
                     <p className="fr-sub-label">Event Schedule</p>
                     <FrTable
@@ -611,7 +786,9 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
                       rows={account.appointments.map((item, index) => [
                         index === 0 ? "Initial" : "Recurring",
                         item.date,
-                        <span key={item.id} className="capitalize">{item.status}</span>,
+                        <span key={item.id} className="capitalize">
+                          {item.status}
+                        </span>,
                       ])}
                     />
                   </div>
@@ -619,17 +796,47 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
               </div>
               <div className="fr-subscription-bottom grid lg:grid-cols-[250px_minmax(0,1fr)]">
                 <FrSubscriptionSection title="Billing Options">
-                  <FrInputField label="Billing Account" value={subscriptionUi.billingAccount} onChange={(billingAccount) => setSubscriptionUi((v) => ({ ...v, billingAccount }))} />
-                  <FrSelectField label="Auto-pay Profile" value={subscriptionUi.autopayProfile} options={["Primary card •••• 4821", "No Auto-pay Profile"]} onChange={(autopayProfile) => setSubscriptionUi((v) => ({ ...v, autopayProfile }))} />
+                  <FrInputField
+                    label="Billing Account"
+                    value={subscriptionUi.billingAccount}
+                    onChange={(billingAccount) =>
+                      setSubscriptionUi((v) => ({ ...v, billingAccount }))
+                    }
+                  />
+                  <FrSelectField
+                    label="Auto-pay Profile"
+                    value={subscriptionUi.autopayProfile}
+                    options={["Primary card •••• 4821", "No Auto-pay Profile"]}
+                    onChange={(autopayProfile) =>
+                      setSubscriptionUi((v) => ({ ...v, autopayProfile }))
+                    }
+                  />
                 </FrSubscriptionSection>
                 <section className="fr-invoices">
                   <h3 className="fr-subsection-title">Invoices</h3>
-                  <PricingEditor title="Initial" lines={account.subscription.initialLines} onChange={(initialLines) => updateSubscription({ initialLines })} />
-                  <PricingEditor title="Recurring" lines={account.subscription.recurringLines} onChange={(recurringLines) => updateSubscription({ recurringLines })} />
+                  <PricingEditor
+                    title="Initial"
+                    lines={account.subscription.initialLines}
+                    onChange={(initialLines) => updateSubscription({ initialLines })}
+                  />
+                  <PricingEditor
+                    title="Recurring"
+                    lines={account.subscription.recurringLines}
+                    onChange={(recurringLines) => updateSubscription({ recurringLines })}
+                  />
                   <div className="fr-invoice-totals grid grid-cols-3">
-                    <div><span>Initial Subtotal</span><strong>{money(pricingTotal(account.subscription.initialLines))}</strong></div>
-                    <div><span>Recurring Subtotal</span><strong>{money(pricingTotal(account.subscription.recurringLines))}</strong></div>
-                    <div><span>Contract Value</span><strong>{money(contractValue(account.subscription))}</strong></div>
+                    <div>
+                      <span>Initial Subtotal</span>
+                      <strong>{money(pricingTotal(account.subscription.initialLines))}</strong>
+                    </div>
+                    <div>
+                      <span>Recurring Subtotal</span>
+                      <strong>{money(pricingTotal(account.subscription.recurringLines))}</strong>
+                    </div>
+                    <div>
+                      <span>Contract Value</span>
+                      <strong>{money(contractValue(account.subscription))}</strong>
+                    </div>
                   </div>
                 </section>
               </div>
@@ -666,35 +873,7 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
               </div>
               <div className="border-t border-border pt-4">
                 <Label htmlFor="note">Add practice note</Label>
-                <Textarea
-                  id="note"
-                  className="mt-2"
-                  value={newNote}
-                  onChange={(event) => setNewNote(event.target.value)}
-                />
-                <Button
-                  className="mt-2"
-                  size="sm"
-                  disabled={!newNote.trim()}
-                  onClick={() => {
-                    setAccount((current) => ({
-                      ...current,
-                      notes: [
-                        {
-                          id: crypto.randomUUID(),
-                          category: "Practice note",
-                          createdAt: new Date().toISOString().slice(0, 10),
-                          body: newNote.trim(),
-                        },
-                        ...current.notes,
-                      ],
-                    }));
-                    setNewNote("");
-                    toast.success("Practice note added locally.");
-                  }}
-                >
-                  Add note
-                </Button>
+                <PracticeNoteInput onAddNote={handleAddNote} />
               </div>
             </TabsContent>
 
@@ -907,8 +1086,22 @@ export function AccountWorkspace({ sessionId, initialAccount }: Props) {
         <div className="fr-footer flex h-10 shrink-0 items-center justify-end border-t border-border bg-fr-pane px-3">
           {activeTab === "Subscription" ? (
             <>
-              <Button size="sm" variant="outline" className="h-7 rounded-[2px] text-[12px]" onClick={() => toast.success("Scheduling opened in simulation only.")}>Schedule</Button>
-              <Button size="sm" variant="outline" className="h-7 rounded-[2px] text-[12px]" onClick={() => toast.success("Transfer simulated. No account was transferred.")}>Transfer</Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 rounded-[2px] text-[12px]"
+                onClick={() => toast.success("Scheduling opened in simulation only.")}
+              >
+                Schedule
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 rounded-[2px] text-[12px]"
+                onClick={() => toast.success("Transfer simulated. No account was transferred.")}
+              >
+                Transfer
+              </Button>
             </>
           ) : null}
           <Button
@@ -1189,7 +1382,45 @@ function FrSubscriptionSection({ title, children }: { title: string; children: R
   );
 }
 
-function FrInputField({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
+// ⚡ Bolt: Extracted PracticeNoteInput to prevent the massive AccountWorkspace
+// component from re-rendering on every keystroke. This significantly improves typing performance.
+function PracticeNoteInput({ onAddNote }: { onAddNote: (noteText: string) => void }) {
+  const [newNote, setNewNote] = useState("");
+
+  return (
+    <>
+      <Textarea
+        id="note"
+        className="mt-2"
+        value={newNote}
+        onChange={(event) => setNewNote(event.target.value)}
+      />
+      <Button
+        className="mt-2"
+        size="sm"
+        disabled={!newNote.trim()}
+        onClick={() => {
+          onAddNote(newNote.trim());
+          setNewNote("");
+        }}
+      >
+        Add note
+      </Button>
+    </>
+  );
+}
+
+function FrInputField({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
   const id = `fr-${label.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`;
   return (
     <div className="fr-sub-field">
@@ -1199,15 +1430,33 @@ function FrInputField({ label, value, onChange, type = "text" }: { label: string
   );
 }
 
-function FrSelectField({ label, value, options, onChange, placeholder }: { label: string; value: string; options: string[]; onChange: (value: string) => void; placeholder?: string }) {
+function FrSelectField({
+  label,
+  value,
+  options,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
   const id = `fr-${label.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`;
   return (
     <div className="fr-sub-field">
       <Label htmlFor={id}>{label}</Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger id={id}><SelectValue placeholder={placeholder} /></SelectTrigger>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
         <SelectContent>
-          {options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
