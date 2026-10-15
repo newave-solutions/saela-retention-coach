@@ -17,6 +17,8 @@
 
 **Learning:** Rendering lists of components inline using `.map()` directly inside complex parent route components (like `LiveCall` and `LiveServiceCall`) forces all list items to re-render whenever the parent's fast-updating local state changes (e.g. text input strokes, mic toggling). Using `useMemo` on the mapped array only skips element creation, but React still performs expensive virtual DOM diffing.
 **Action:** Extract list items into separate child components wrapped in `React.memo` (`TranscriptTurnItem`) to genuinely prevent unchanged items from re-rendering during unrelated parent state updates.
+
 ## 2023-10-25 - [Redundant Computation in Loops]
+
 **Learning:** Calling complex object normalization/transformation functions (`normalizeScores`) inside of `.map()` or rendering loops can cause many redundant allocations and calculations when they can easily be memoized once.
 **Action:** Extract normalizations and memoize them outside loops using `useMemo()` in React to compute them just once per meaningful prop/state change.
