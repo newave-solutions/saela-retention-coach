@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ArrowLeft, Upload, CheckCircle2, XCircle, FileSpreadsheet, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
@@ -134,6 +134,18 @@ function ScorecardPage() {
     void qc.invalidateQueries({ queryKey: ["metrics", seat, month] });
   }
 
+  // ⚡ Bolt Optimization:
+  // Memoize the scored metrics array using useMemo. This avoids redundant
+  // mapping, scoring computation (scoreAgent), and array sorting
+  // on every render when unrelated component state (like `month`) changes.
+  const scored = useMemo(
+    () =>
+      metrics
+        .map((m) => ({ m, s: scoreAgent(m) }))
+        .sort((a, b) => (b.s.score ?? -1) - (a.s.score ?? -1)),
+    [metrics],
+  );
+
   if (isLoading || !user) return <div className="min-h-screen bg-background" />;
   if (!seat)
     return (
@@ -146,10 +158,6 @@ function ScorecardPage() {
         </div>
       </main>
     );
-
-  const scored = metrics
-    .map((m) => ({ m, s: scoreAgent(m) }))
-    .sort((a, b) => (b.s.score ?? -1) - (a.s.score ?? -1));
 
   return (
     <main className="min-h-screen bg-background">

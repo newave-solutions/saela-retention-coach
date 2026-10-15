@@ -20,3 +20,7 @@
 ## 2023-10-25 - [Redundant Computation in Loops]
 **Learning:** Calling complex object normalization/transformation functions (`normalizeScores`) inside of `.map()` or rendering loops can cause many redundant allocations and calculations when they can easily be memoized once.
 **Action:** Extract normalizations and memoize them outside loops using `useMemo()` in React to compute them just once per meaningful prop/state change.
+## 2024-05-24 - Inline Array Mapping and Object Creation
+
+**Learning:** Calling `.map` or `.sort` directly inside a component's render function (like `scoreAgent` in `LiveScorecard`) recreates arrays and executes heavy computation on every local state change, causing lag during typing or switching filters.
+**Action:** Always wrap heavy synchronous calculations or mappings that don't depend on fast-updating state in `useMemo`.
