@@ -84,10 +84,7 @@ function RetentionScorecard() {
     },
   });
 
-  // ⚡ Bolt Optimization:
-  // Memoize normalizeScores calculation instead of computing it inline during the .map() loop over SCORE_LABELS.
-  // This avoids redundant object allocation and recalculation on every render.
-  const normalizedScores = useMemo(() => normalizeScores(data?.scores), [data?.scores]);
+  const scores = useMemo(() => normalizeScores(data?.scores), [data?.scores]);
 
   return (
     <main className="min-h-screen bg-background px-4 py-8">
@@ -149,7 +146,7 @@ function RetentionScorecard() {
               <CallReview review={data.coaching.callReview} />
             ) : null}
 
-            {normalizedScores && (
+            {scores && (
               <Card className="card-soft mt-4">
                 <CardHeader>
                   <h2 className="text-base font-semibold leading-none">
@@ -161,9 +158,9 @@ function RetentionScorecard() {
                     <div key={key}>
                       <div className="mb-1 flex items-center justify-between text-sm">
                         <span>{SCORE_LABELS[key]}</span>
-                        <span className="text-muted-foreground">{normalizedScores[key] ?? 0}</span>
+                        <span className="text-muted-foreground">{scores[key] ?? 0}</span>
                       </div>
-                      <Progress value={normalizedScores[key] ?? 0} />
+                      <Progress value={scores[key] ?? 0} />
                     </div>
                   ))}
                 </CardContent>
