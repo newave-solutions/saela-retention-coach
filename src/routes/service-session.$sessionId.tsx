@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -112,7 +112,8 @@ function ServiceScorecard() {
     },
   });
 
-  const scores = normalizeServiceScores(data?.scores);
+  // Memoize normalizeServiceScores calculation to avoid redundant computation on every render.
+  const scores = useMemo(() => normalizeServiceScores(data?.scores), [data?.scores]);
   const hasResign =
     (data?.coaching?.resignNotes?.length ?? 0) > 0 || (scores?.resignOffer ?? 0) > 0;
   const hasSales =
