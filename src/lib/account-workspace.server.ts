@@ -6,6 +6,130 @@ function isoDay(offsetDays = 0): string {
   return date.toISOString().slice(0, 10);
 }
 
+function createSubscription(
+  customerNumber: string,
+  input: { outOfAgreement?: boolean; frozen?: boolean },
+) {
+  return {
+    id: `PP-${customerNumber}`,
+    program: "Protection Program",
+    active: !input.frozen,
+    agreementState: input.frozen
+      ? "frozen"
+      : input.outOfAgreement
+        ? "out_of_agreement"
+        : ("in_agreement" as const),
+    effectiveDate: isoDay(),
+    agreementMonths: input.outOfAgreement ? 0 : 18,
+    committedServices: input.outOfAgreement ? 4 : 6,
+    frequencyWeeks: 12,
+    yearlyIncreasePercent: 5,
+    routingRegion: "Denver South",
+    preferredTechnician: "Any qualified technician",
+    preferredDay: "Any day",
+    preferredTime: "Any time",
+    callAhead: "30 minutes",
+    initialLines: [
+      {
+        id: "initial-pp",
+        item: "Protection Program — Initial",
+        quantity: 1,
+        productionPrice: 129.99,
+        chargePrice: 129.99,
+        discountType: "none" as const,
+        discountAmount: 0,
+        taxable: false,
+      },
+    ],
+    recurringLines: [
+      {
+        id: "recurring-pp",
+        item: "Protection Program — Recurring",
+        quantity: 1,
+        productionPrice: 114.99,
+        chargePrice: 129.99,
+        discountType: "none" as const,
+        discountAmount: 0,
+        taxable: false,
+      },
+    ],
+    tags: input.outOfAgreement ? [] : ["Existing agreement"],
+  };
+}
+
+function createPreviousSubscriptions(customerNumber: string) {
+  return [
+    {
+      id: `PP-${Number(customerNumber) - 84}`,
+      program: "Protection Program",
+      endedAt: isoDay(-365),
+    },
+  ];
+}
+
+function createDocuments(customerNumber: string) {
+  return [
+    {
+      id: `agreement-${customerNumber}-prior`,
+      title: "Protection Program Agreement",
+      createdAt: isoDay(-760),
+      status: "prior" as const,
+      subscriptionId: `PP-${customerNumber}`,
+    },
+  ];
+}
+
+function createNotes(customerNumber: string) {
+  return [
+    {
+      id: `note-${customerNumber}`,
+      category: "General Notes",
+      createdAt: isoDay(-18),
+      body: "Customer requested text contact before arrival. Side gate sticks after rain.",
+    },
+  ];
+}
+
+function createAppointments(customerNumber: string) {
+  return [
+    {
+      id: `appt-${customerNumber}-1`,
+      service: "Protection Program",
+      date: isoDay(-42),
+      status: "serviced" as const,
+      technician: "Tawny Butler",
+      details: "Exterior foundations, eaves, foliage, lawn, yard. Spiders and ants noted.",
+    },
+    {
+      id: `appt-${customerNumber}-2`,
+      service: "Protection Program",
+      date: isoDay(35),
+      status: "scheduled" as const,
+      technician: "Unassigned",
+      details: "Regular recurring service; 30-minute call ahead.",
+    },
+  ];
+}
+
+function createInvoices(customerNumber: string) {
+  return [
+    {
+      id: `inv-${customerNumber}-1`,
+      date: isoDay(-42),
+      service: "Protection Program",
+      amount: 129.99,
+      status: "paid" as const,
+    },
+    {
+      id: `inv-${customerNumber}-2`,
+      date: isoDay(35),
+      service: "Protection Program",
+      amount: 129.99,
+      status: "projected" as const,
+    },
+  ];
+}
+
 export function createSimulatedAccount(input: {
   customerName: string;
   outOfAgreement?: boolean;
@@ -31,109 +155,12 @@ export function createSimulatedAccount(input: {
     nextService: isoDay(35),
     recentServiceNote:
       "Exterior perimeter serviced; customer reported intermittent spider activity.",
-    subscription: {
-      id: `PP-${customerNumber}`,
-      program: "Protection Program",
-      active: !input.frozen,
-      agreementState: input.frozen
-        ? "frozen"
-        : input.outOfAgreement
-          ? "out_of_agreement"
-          : "in_agreement",
-      effectiveDate: isoDay(),
-      agreementMonths: input.outOfAgreement ? 0 : 18,
-      committedServices: input.outOfAgreement ? 4 : 6,
-      frequencyWeeks: 12,
-      yearlyIncreasePercent: 5,
-      routingRegion: "Denver South",
-      preferredTechnician: "Any qualified technician",
-      preferredDay: "Any day",
-      preferredTime: "Any time",
-      callAhead: "30 minutes",
-      initialLines: [
-        {
-          id: "initial-pp",
-          item: "Protection Program — Initial",
-          quantity: 1,
-          productionPrice: 129.99,
-          chargePrice: 129.99,
-          discountType: "none",
-          discountAmount: 0,
-          taxable: false,
-        },
-      ],
-      recurringLines: [
-        {
-          id: "recurring-pp",
-          item: "Protection Program — Recurring",
-          quantity: 1,
-          productionPrice: 114.99,
-          chargePrice: 129.99,
-          discountType: "none",
-          discountAmount: 0,
-          taxable: false,
-        },
-      ],
-      tags: input.outOfAgreement ? [] : ["Existing agreement"],
-    },
-    previousSubscriptions: [
-      {
-        id: `PP-${Number(customerNumber) - 84}`,
-        program: "Protection Program",
-        endedAt: isoDay(-365),
-      },
-    ],
-    documents: [
-      {
-        id: `agreement-${customerNumber}-prior`,
-        title: "Protection Program Agreement",
-        createdAt: isoDay(-760),
-        status: "prior",
-        subscriptionId: `PP-${customerNumber}`,
-      },
-    ],
-    notes: [
-      {
-        id: `note-${customerNumber}`,
-        category: "General Notes",
-        createdAt: isoDay(-18),
-        body: "Customer requested text contact before arrival. Side gate sticks after rain.",
-      },
-    ],
-    appointments: [
-      {
-        id: `appt-${customerNumber}-1`,
-        service: "Protection Program",
-        date: isoDay(-42),
-        status: "serviced",
-        technician: "Tawny Butler",
-        details: "Exterior foundations, eaves, foliage, lawn, yard. Spiders and ants noted.",
-      },
-      {
-        id: `appt-${customerNumber}-2`,
-        service: "Protection Program",
-        date: isoDay(35),
-        status: "scheduled",
-        technician: "Unassigned",
-        details: "Regular recurring service; 30-minute call ahead.",
-      },
-    ],
-    invoices: [
-      {
-        id: `inv-${customerNumber}-1`,
-        date: isoDay(-42),
-        service: "Protection Program",
-        amount: 129.99,
-        status: "paid",
-      },
-      {
-        id: `inv-${customerNumber}-2`,
-        date: isoDay(35),
-        service: "Protection Program",
-        amount: 129.99,
-        status: "projected",
-      },
-    ],
+    subscription: createSubscription(customerNumber, input),
+    previousSubscriptions: createPreviousSubscriptions(customerNumber),
+    documents: createDocuments(customerNumber),
+    notes: createNotes(customerNumber),
+    appointments: createAppointments(customerNumber),
+    invoices: createInvoices(customerNumber),
     events: [],
   };
 }
