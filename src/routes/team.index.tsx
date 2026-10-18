@@ -52,10 +52,26 @@ function TeamPage() {
 
   const rows = useMemo(() => {
     if (!data) return [];
+
+    // Group sessions by user_id to optimize filtering
+    const sessionsByAgent = new Map<string, typeof data.sessions>();
+    for (const session of data.sessions) {
+      const agentId = session.user_id;
+      if (!agentId) continue;
+
+      let agentSessions = sessionsByAgent.get(agentId);
+      if (!agentSessions) {
+        agentSessions = [];
+        sessionsByAgent.set(agentId, agentSessions);
+      }
+      agentSessions.push(session);
+    }
+
     const list = data.agents.map((a) => {
-      const mine = data.sessions.filter((s) => s.user_id === a.id);
+      const mine = sessionsByAgent.get(a.id) ?? [];
       return { agent: a, stats: summarize(mine) };
     });
+
     const val = (r: (typeof list)[number]) =>
       sort === "name"
         ? (r.agent.display_name ?? "")
