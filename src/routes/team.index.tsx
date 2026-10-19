@@ -52,8 +52,17 @@ function TeamPage() {
 
   const rows = useMemo(() => {
     if (!data) return [];
+
+    // Group sessions by user_id to replace O(n^2) nested filter loop with O(n) map lookup
+    const sessionsByAgent = new Map<string, typeof data.sessions>();
+    for (const s of data.sessions) {
+      const arr = sessionsByAgent.get(s.user_id);
+      if (arr) arr.push(s);
+      else sessionsByAgent.set(s.user_id, [s]);
+    }
+
     const list = data.agents.map((a) => {
-      const mine = data.sessions.filter((s) => s.user_id === a.id);
+      const mine = sessionsByAgent.get(a.id) ?? [];
       return { agent: a, stats: summarize(mine) };
     });
     const val = (r: (typeof list)[number]) =>
