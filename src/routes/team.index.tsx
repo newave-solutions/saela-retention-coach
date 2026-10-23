@@ -52,8 +52,20 @@ function TeamPage() {
 
   const rows = useMemo(() => {
     if (!data) return [];
+
+    // ⚡ Bolt Optimization: Replace O(n²) nested array.filter() inside array.map() with O(n) Map lookup
+    // Pre-grouping the relational data in a Map significantly improves frontend render times
+    // for large data collections, turning O(n*m) complexity into O(n+m).
+    const sessionsByAgent = new Map<string, typeof data.sessions>();
+    for (const session of data.sessions) {
+      if (!sessionsByAgent.has(session.user_id)) {
+        sessionsByAgent.set(session.user_id, []);
+      }
+      sessionsByAgent.get(session.user_id)!.push(session);
+    }
+
     const list = data.agents.map((a) => {
-      const mine = data.sessions.filter((s) => s.user_id === a.id);
+      const mine = sessionsByAgent.get(a.id) || [];
       return { agent: a, stats: summarize(mine) };
     });
     const val = (r: (typeof list)[number]) =>
