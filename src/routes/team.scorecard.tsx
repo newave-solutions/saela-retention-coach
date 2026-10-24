@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ArrowLeft, Upload, CheckCircle2, XCircle, FileSpreadsheet, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
@@ -98,14 +98,19 @@ function ScorecardPage() {
     });
   }
 
-  const preview = parsed
-    ? aggregate(
-        parsed.source,
-        parsed.rows,
-        parsed.map,
-        parsed.map.minutes != null ? (parsed.headers[parsed.map.minutes] ?? "") : "",
-      )
-    : [];
+  // ⚡ Bolt Optimization:
+  // Memoize `preview` calculation (which aggregates potentially thousands of CSV rows)
+  // to avoid redundant O(N) recalculations on every render when user interacts with UI.
+  const preview = useMemo(() => {
+    return parsed
+      ? aggregate(
+          parsed.source,
+          parsed.rows,
+          parsed.map,
+          parsed.map.minutes != null ? (parsed.headers[parsed.map.minutes] ?? "") : "",
+        )
+      : [];
+  }, [parsed]);
 
   async function save() {
     if (!parsed || !seat || !user) return;
@@ -134,6 +139,15 @@ function ScorecardPage() {
     void qc.invalidateQueries({ queryKey: ["metrics", seat, month] });
   }
 
+  // ⚡ Bolt Optimization:
+  // Memoize `scored` calculation (which loops over metrics, maps them with scoreAgent(), and sorts them)
+  // to avoid redundant calculations and re-sorting during unrelated renders (e.g. typing or toggling month).
+  const scored = useMemo(() => {
+    return metrics
+      .map((m) => ({ m, s: scoreAgent(m) }))
+      .sort((a, b) => (b.s.score ?? -1) - (a.s.score ?? -1));
+  }, [metrics]);
+
   if (isLoading || !user) return <div className="min-h-screen bg-background" />;
   if (!seat)
     return (
@@ -146,10 +160,6 @@ function ScorecardPage() {
         </div>
       </main>
     );
-
-  const scored = metrics
-    .map((m) => ({ m, s: scoreAgent(m) }))
-    .sort((a, b) => (b.s.score ?? -1) - (a.s.score ?? -1));
 
   return (
     <main className="min-h-screen bg-background">
