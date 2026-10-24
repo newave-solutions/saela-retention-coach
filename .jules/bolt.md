@@ -20,3 +20,6 @@
 ## 2023-10-25 - [Redundant Computation in Loops]
 **Learning:** Calling complex object normalization/transformation functions (`normalizeScores`) inside of `.map()` or rendering loops can cause many redundant allocations and calculations when they can easily be memoized once.
 **Action:** Extract normalizations and memoize them outside loops using `useMemo()` in React to compute them just once per meaningful prop/state change.
+## 2023-10-25 - [Memoizing Expensive Calculations in Scorecard]
+**Learning:** When building tables from large imported CSV files (`preview`) or sorting computed arrays (`scored`), recalculating them on every single React render due to unrelated interactions creates severe lag.
+**Action:** Use `useMemo` on computationally heavy local data transformations that only need to rerun when their specific inputs (like the uploaded file `parsed` or the backend `metrics`) change.
