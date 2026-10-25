@@ -52,8 +52,18 @@ function TeamPage() {
 
   const rows = useMemo(() => {
     if (!data) return [];
+
+    // Bolt: Pre-group sessions by user_id to replace O(n²) .filter() inside .map() with O(n) lookups
+    const sessionsByUserId = new Map<string, typeof data.sessions>();
+    for (const session of data.sessions) {
+      if (!sessionsByUserId.has(session.user_id)) {
+        sessionsByUserId.set(session.user_id, []);
+      }
+      sessionsByUserId.get(session.user_id)!.push(session);
+    }
+
     const list = data.agents.map((a) => {
-      const mine = data.sessions.filter((s) => s.user_id === a.id);
+      const mine = sessionsByUserId.get(a.id) ?? [];
       return { agent: a, stats: summarize(mine) };
     });
     const val = (r: (typeof list)[number]) =>
