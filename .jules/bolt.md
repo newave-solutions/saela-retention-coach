@@ -20,3 +20,7 @@
 ## 2023-10-25 - [Redundant Computation in Loops]
 **Learning:** Calling complex object normalization/transformation functions (`normalizeScores`) inside of `.map()` or rendering loops can cause many redundant allocations and calculations when they can easily be memoized once.
 **Action:** Extract normalizations and memoize them outside loops using `useMemo()` in React to compute them just once per meaningful prop/state change.
+
+## 2023-11-20 - [O(n^2) Relational List Rendering Bottlenecks]
+**Learning:** Nested array functions like `array.filter` inside `array.map` for matching parent and child relations create O(n^2) bottlenecks on the frontend and drastically slow down render times.
+**Action:** Extract relations into a `Map` prior to matching loops to transform complexity to O(n) hash map lookups.
